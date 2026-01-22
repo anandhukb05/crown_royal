@@ -1,0 +1,32 @@
+
+<div class="modal fade" id="editVitalModal{{ v.id }}">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'vital_edit' v.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Vital</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-2">
+            <input class="form-control" name="temperature" value="{{ v.temperature }}" placeholder="Temperature">
+            <input class="form-control" name="weight" value="{{ v.weight }}" placeholder="Weight">
+            <input class="form-control" name="height" value="{{ v.height }}" placeholder="Height">
+            <input class="form-control" name="sugar" value="{{ v.sugar }}" placeholder="Sugar">
+            <input class="form-control" name="systolic" value="{{ v.systolic }}" placeholder="Systolic">
+            <input class="form-control" name="diastolic" value="{{ v.diastolic }}" placeholder="Diastolic">
+            <input class="form-control" name="pulse" value="{{ v.pulse }}" placeholder="Pulse">
+            <input class="form-control" name="spo2" value="{{ v.spo2 }}" placeholder="SpO₂">
+            <input class="form-control" name="respiratory" value="{{ v.respiratory }}" placeholder="Respiratory">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

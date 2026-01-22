@@ -1,0 +1,25 @@
+
+<div class="modal fade" id="editNoteModal{{ n.id }}">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="{% url 'note_edit' n.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Vital</h5>
+          <button class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="row g-2">
+            <input type="textarea" class="form-control" name="notes" value="{{ n.notes }}" placeholder="Note" row=5></textarea>
+            
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary">Update</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

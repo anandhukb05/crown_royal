@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+
+ {% block style %}
+        body {
+            background-color: #f4f6f9;
+        }
+        .form-container {
+            max-width: 800px;
+            background: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .form-title {
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 576px) {
+            .form-container {
+                padding: 15px;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+
+
+<div class="container my-4">
+    <div class="form-container mx-auto">
+        <h4 class="form-title">Patient Registration</h4>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-3">
+
+                <!-- Name -->
+                <div class="col-md-6">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-6">
+                    <label class="form-label">Gender</label>
+                    <select name="gender" class="form-select" required>
+                        <option value="">Select</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Age -->
+                <div class="col-md-4">
+                    <label class="form-label">Age</label>
+                    <input type="number" name="age" class="form-control" min="1" max="120" required>
+                </div>
+
+                <!-- Aadhaar -->
+                <div class="col-md-8">
+                    <label class="form-label">Aadhaar Number</label>
+                    <input type="text" name="aadhaar_id" class="form-control" maxlength="12" required>
+                </div>
+
+                <!-- Phone -->
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    <input type="tel" name="phno" class="form-control" required>
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" required>
+                </div>
+
+                <!-- Country -->
+                <div class="col-md-6">
+                    <label class="form-label">Country</label>
+                    <select id="country" name="country" class="form-select" required>
+                        <option value="">select country</option>
+                    </select>
+                </div>
+
+                <!-- State -->
+                <div class="col-md-6">
+                    <label class="form-label">State</label>
+                    <select id="state" name="state" class="form-select" required>
+                        <option value="">select state</option>
+                    </select>
+                </div>
+
+                <!-- Address -->
+                <div class="col-8">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <!-- Pincode + Photo -->
+                <div class="col-4">
+                    <label class="form-label">Pincode</label>
+                    <input type="text" name="pincode" class="form-control mb-2" required>
+
+                    <label class="form-label">Photo</label>
+                    <input type="file" name="image_file" class="form-control">
+                </div>
+
+                <!-- Submit -->
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary px-5 mt-3">
+                        Submit
+                    </button>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+var user_country_code = "IN";
+
+(() => {
+    const country_list = country_and_states.country;
+    const state_list = country_and_states.states;
+
+    const id_state_option = document.getElementById("state");
+    const id_country_option = document.getElementById("country");
+
+    const create_country_selection = () => {
+        let option = '<option value="">select country</option>';
+        for (const country_code in country_list) {
+            let selected = (country_code == user_country_code) ? ' selected' : '';
+            option += `<option value="${country_code}" ${selected}>${country_list[country_code]}</option>`;
+        }
+        id_country_option.innerHTML = option;
+    };
+
+    const create_states_selection = () => {
+        let selected_country_code = id_country_option.value;
+        let state_names = state_list[selected_country_code];
+
+        if (!state_names) {
+            id_state_option.innerHTML = '<option value="">select state</option>';
+            return;
+        }
+
+        let option = '<option value="">select state</option>';
+        state_names.forEach(state => {
+            option += `<option value="${state.name}">${state.name}</option>`;
+        });
+        id_state_option.innerHTML = option;
+    };
+
+    id_country_option.addEventListener('change', create_states_selection);
+
+    create_country_selection();
+    create_states_selection();
+})();
+</script>
+
+{% endblock %}

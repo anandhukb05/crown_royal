@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Patient Details</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+body { background:#f4f6f9; }
+.top-bar{
+    background:#1e9bd7;color:#fff;padding:12px 15px;
+    display:flex;justify-content:space-between;align-items:center;
+}
+.card-custom{border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);}
+.profile-img{width:55px;height:55px;border-radius:50%;background:#ccc;}
+.nav-pills .nav-link{border-radius:12px;}
+.nav-pills .nav-link.active{background:#e3f2fd;color:#1e9bd7;font-weight:600;}
+.no-data{text-align:center;padding:60px;color:#6c757d;}
+.fab{
+    position:fixed;bottom:20px;right:20px;
+    width:55px;height:55px;border-radius:50%;
+    background:#28a745;color:#fff;font-size:26px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;
+}
+.modal input,.modal textarea,.modal select{
+    border-radius:10px;
+}
+
+.tab-content-box {
+    display: none;
+}
+
+.tab-content-box.active {
+    display: block;
+}
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="top-bar">
+    <a class="nav-link" href="{% url 'patient_view' %}"><i class="bi bi-arrow-left"></i></a>
+    <span>Patient Details</span>
+    <span>Edit</span>
+</div>
+
+<div class="container mt-3">
+
+<!-- PATIENT CARD -->
+<div class="card card-custom p-3 mb-3">
+    <div class="d-flex align-items-center justify-content-between flex-wrap">
+
+        <!-- Left: Profile + Basic Info -->
+        <div class="d-flex align-items-center">
+            <div class="profile-img"></div>
+
+            <div class="ms-3">
+                
+                <div class="fw-semibold">{{profile.name}}</div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <small class="text-muted">
+                        {{profile.patient_id}} / {{profile.gender}} / {{profile.age}}
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Contact Info -->
+        <div class="text-end mt-2 mt-md-0">
+            <small class="d-block text-muted">
+                📧 {{profile.email}}
+            </small>
+            <small class="d-block text-muted">
+                📞 {{profile.phno}}
+            </small>
+        </div>
+
+    </div>
+</div>
+
+
+<!-- TABS -->
+<ul class="nav nav-pills mb-3" id="tabs">
+    <li class="nav-item">
+        <button class="nav-link" data-tab="vital">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-vital">Vital Signs</a>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="notes">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-notes">Clinical Notes</a>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="procedure">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-procedure">Procedure</a>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="prescription">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-prescription">Prescription</a>
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-tab="invoice">
+            <a class="nav-link" data-bs-toggle="tab" href="#tab-invoice">Invoice</a>
+        </button>
+    </li>
+</ul>
+
+
+
+<div class="card card-custom p-3">
+
+    <!-- Vital -->
+
+    <div class="tab-content-box" id="tab-vital">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Date</th>
+                        <th>Temp</th>
+                        <th class="d-none d-md-table-cell">Weight</th>
+                        <th class="d-none d-md-table-cell">Height</th>
+                        <th>Sugar</th>
+                        <th>BP</th>
+                        <th class="d-none d-lg-table-cell">Pulse</th>
+                        <th class="d-none d-lg-table-cell">SpO₂</th>
+                        <th class="d-none d-lg-table-cell">Resp</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for v in vitals %}
+                        <tr>
+                            <td>{{ v.created_at|date:"d M Y" }}</td>
+                            <td>{{ v.temperature }}</td>
+                            <td class="d-none d-md-table-cell">{{ v.weight }}</td>
+                            <td class="d-none d-md-table-cell">{{ v.height }}</td>
+                            <td>{{ v.sugar }}</td>
+                            <td>{{ v.systolic }}/{{ v.diastolic }}</td>
+                            <td class="d-none d-lg-table-cell">{{ v.pulse }}</td>
+                            <td class="d-none d-lg-table-cell">{{ v.spo2 }}</td>
+                            <td class="d-none d-lg-table-cell">{{ v.respiratory }}</td>
+
+                            <td>
+                            <!-- Edit -->
+                            <button class="btn btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editVitalModal{{ v.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                </svg>
+                            </button>
+
+                            <!-- Delete -->
+                            <button class="btn btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteVitalModal{{ v.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </button>
+                            </td>
+                        </tr>
+
+                        {% include "vitals/edit_modal.html" %}
+                        {% include "vitals/delete_modal.html" %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Notes -->
+    <div class="tab-content-box" id="tab-notes">
+
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th class="col-sm-2">Date</th>
+                    <th class="col-sm-2">Time</th>
+                    <th class="d-none d-md-table-cell col-sm-8">Notes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for n in notes %}
+                    <tr>
+                        <td>{{ n.created_at|date:"d M Y" }}</td>
+                        <td>{{ n.created_at|time:"H:i:s" }}</td>
+                        <td>{{ n.notes }}</td>
+                        <td>
+                        <!-- Edit -->
+                        <button class="btn btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editNoteModal{{ n.id }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                            </svg>
+                        </button>
+
+                        <!-- Delete -->
+                        <button class="btn btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#deleteNoteModal{{ n.id }}"
+                            >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                        </button>
+                        </td>
+                    </tr>
+                    {% include "notes/edit.html" %}
+                    {% include "notes/delete.html" %}
+                  
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Procedure -->
+    <div class="tab-content-box" id="tab-procedure">
+        <h6>Procedure</h6>
+        <p>Procedure details...</p>
+    </div>
+
+    <!-- Prescription -->
+    <div class="tab-content-box" id="tab-prescription">
+        <h6>Prescription</h6>
+        <p>Medicines list...</p>
+    </div>
+
+    <div class="tab-content-box" id="tab-invoice">
+        <h6>Bill</h6>
+        <p>Medicines list...</p>
+    </div>
+
+</div>
+
+
+
+<!-- FLOATING BUTTON -->
+<div class="fab" id="addBtn">+</div>
+
+<!-- ================= VITAL SIGNS FORM ================= -->
+<div class="modal fade" id="vitalModal">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content p-3">
+<h5>Vital Signs</h5>
+
+<form id="vitalForm" name="vital_form" method="post" action="{% url 'vital' profile.patient_id %}">
+       {% csrf_token %}
+<div class="row g-2">
+<input class="form-control" placeholder="Temperature (°F)" name="temperature">
+<input class="form-control" placeholder="Weight (kg)" name="weight">
+<input class="form-control" placeholder="Height (cm)" name="height">
+<input class="form-control" placeholder="Sugar" name="sugar">
+<input class="form-control" placeholder="Systolic" name="systolic">
+<input class="form-control" placeholder="Diastolic" name="diastolic">
+<input class="form-control" placeholder="Pulse" name="pulse">
+<input class="form-control" placeholder="SpO2" name="spo2">
+<input class="form-control" placeholder="Respiratory" name="respiratory">
+</div>
+
+<div class="d-flex justify-content-end mt-3">
+<button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
+<button class="btn btn-success">Submit</button>
+</div>
+</form>
+
+</div>
+</div>
+</div>
+
+<!-- ================= CLINICAL NOTES ================= -->
+<div class="modal fade" id="notesModal">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content p-3">
+<h5>Clinical Notes</h5>
+
+<form id="notesForm" name="clinical_notes_form" method="post" action="{% url 'clinical_note' profile.patient_id %}">
+     {% csrf_token %}
+<textarea class="form-control" rows="5" placeholder="Enter clinical notes" name="note"></textarea>
+
+<div class="text-end mt-3">
+<button class="btn btn-success">Save</button>
+</div>
+</form>
+
+</div>
+</div>
+</div>
+
+<!-- ================= PROCEDURE ================= -->
+<div class="modal fade" id="procedureModal">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content p-3">
+<h5>Procedure</h5>
+
+<form id="procedureForm" name="procedure_form">
+
+    <!-- Added Date -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Added Date</label>
+        <input type="date" class="form-control" name="added_date" value="2025-11-17" readonly>
+    </div>
+
+    <!-- Procedure -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Procedure</label>
+        <select name="department" class="form-control" required name="procedure_id">
+            <option value="">Select Procedure</option>
+                {% for p in procedures_list %}
+                    <option value="{{ p.id }}">{{ p.prodecure }}</option>
+                {% endfor %}
+        </select>
+    </div>
+
+    <!-- Quantity & Price -->
+    <div class="row g-2 mb-2">
+        <div class="col-6">
+            <label class="form-label small text-muted">Quantity</label>
+            <input type="number" class="form-control" name="quantity" value="1" min="1">
+        </div>
+
+        <div class="col-6">
+            <label class="form-label small text-muted">Price</label>
+            <input type="number" class="form-control" name="price" placeholder="Price">
+        </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Notes</label>
+        <textarea class="form-control" rows="3" name="notes" placeholder="Notes"></textarea>
+    </div>
+
+    <!-- Discount Type & Discount -->
+    <div class="row g-2 mb-2">
+        <div class="col-6">
+            <label class="form-label small text-muted">Discount Type</label>
+            <select class="form-select" name="discount_type">
+                <option value="amount">₹</option>
+                <option value="percentage">%</option>
+            </select>
+        </div>
+
+        <div class="col-6">
+            <label class="form-label small text-muted">Discount</label>
+            <input type="number" class="form-control" name="discount" value="0">
+        </div>
+    </div>
+
+    <!-- Total -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Total</label>
+        <input type="number" class="form-control" name="total" value="0" readonly>
+    </div>
+
+    <!-- Status -->
+    <div class="mb-3">
+        <label class="form-label small text-muted">Status</label>
+        <select class="form-select" name="status">
+            <option value="planned">Planned</option>
+            <option value="completed">Completed</option>
+        </select>
+    </div>
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+            ❌ Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+            ✔ Submit
+        </button>
+    </div>
+
+</form>
+
+
+</div>
+</div>
+</div>
+
+<!-- ================= PRESCRIPTION ================= -->
+<div class="modal fade" id="prescriptionModal">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content p-3">
+<h5>Prescription</h5>
+
+<form id="prescriptionForm" name="prescription_form">
+
+    <!-- Added Date -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Added Date</label>
+        <input type="date" class="form-control" name="added_date" value="2025-11-17" readonly>
+    </div>
+
+    <!-- Next Review -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Next Review</label>
+        <input type="date" class="form-control" name="next_review" value="2025-11-17">
+    </div>
+
+    <!-- Prescription Template -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Prescription Template</label>
+        <select class="form-select" name="template_id">
+            <option value="">Select Template</option>
+        </select>
+    </div>
+
+    <!-- Medicine -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Medicine</label>
+        <select class="form-select" name="medicine_id">
+            <option value="">Select Medicine</option>
+        </select>
+    </div>
+
+    <!-- Strength -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">Strength</label>
+        <input type="text" class="form-control" name="strength">
+    </div>
+
+    <!-- Units & Duration -->
+    <div class="row g-2 mb-2">
+        <div class="col-6">
+            <label class="form-label small text-muted">Units</label>
+            <select class="form-select" name="units">
+                <option value="">Select units</option>
+            </select>
+        </div>
+        <div class="col-6">
+            <label class="form-label small text-muted">Duration (Days)</label>
+            <input type="number" class="form-control" name="duration">
+        </div>
+    </div>
+
+    <!-- Morning / Noon / Night -->
+    <div class="row g-2 mb-2">
+        <div class="col-4">
+            <label class="form-label small text-muted">Morning</label>
+            <input type="number" class="form-control" name="morning" value="1">
+        </div>
+        <div class="col-4">
+            <label class="form-label small text-muted">Noon</label>
+            <input type="number" class="form-control" name="noon" value="1">
+        </div>
+        <div class="col-4">
+            <label class="form-label small text-muted">Night</label>
+            <input type="number" class="form-control" name="night" value="1">
+        </div>
+    </div>
+
+    <!-- After Food -->
+    <div class="mb-2">
+        <label class="form-label small text-muted">After Food</label>
+        <select class="form-select" name="after_food">
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+        </select>
+    </div>
+
+    <!-- Usage -->
+    <div class="mb-3">
+        <label class="form-label small text-muted">Usage</label>
+        <textarea class="form-control" rows="2" name="usage" placeholder="Select usage"></textarea>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="d-flex justify-content-between">
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+            ❌ Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+            ➕ Add Prescription
+        </button>
+    </div>
+
+</form>
+
+
+</div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+let activeTab = "vital"; // default
+
+document.addEventListener("DOMContentLoaded", function () {
+
+    // 1️⃣ Decide active tab on load
+    if (window.location.hash === "#tab-notes") {
+        activeTab = "notes";
+    }
+
+    // 2️⃣ Activate correct tab + content
+    function activateTab(tabName) {
+        activeTab = tabName;
+
+        // nav buttons
+        document.querySelectorAll('#tabs .nav-link').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.tab === tabName);
+        });
+
+        // tab contents
+        document.querySelectorAll('.tab-content-box').forEach(box => {
+            box.classList.toggle('active', box.id === "tab-" + tabName);
+        });
+    }
+
+    // initial activation
+    activateTab(activeTab);
+
+    // 3️⃣ Handle tab click
+    document.querySelectorAll('#tabs .nav-link').forEach(btn => {
+        btn.addEventListener('click', function () {
+            activateTab(this.dataset.tab);
+        });
+    });
+
+    // 4️⃣ Add button → open modal of active tab
+    document.getElementById("addBtn").addEventListener('click', function () {
+        const modals = {
+            vital: "vitalModal",
+            notes: "notesModal",
+            procedure: "procedureModal",
+            prescription: "prescriptionModal"
+        };
+
+        const modalId = modals[activeTab];
+        if (modalId) {
+            new bootstrap.Modal(document.getElementById(modalId)).show();
+        }
+    });
+
+});
+</script>
+
+
+
+</body>
+</html>
