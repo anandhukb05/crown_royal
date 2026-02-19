@@ -12,6 +12,9 @@ urlpatterns = [
     path("clinical/note/<int:patient_id>/", clinical_note, name="clinical_note"),
     path("clinical/note/edit/<int:pk>/", notes_edit, name="note_edit"),
     path("clinical/note/delete/<int:pk>/", notes_delete, name="note_delete"),
-    path("procedure/<int:patient_id>/", add_procedure, name="add_procedure")
+    path("procedure/<int:patient_id>/", add_procedure, name="add_procedure"),
+    path("procedure/edit/<int:pk>/", patient_procedure_edit, name="patient_procedure_edit"),
+    path("procedure/delete/<int:pk>/", patient_procedure_delete, name="patient_procedure_delete"),
+    path("invoice/bill/<int:patient_id>/", patient_bill, name="patient_bill")
 
 ]

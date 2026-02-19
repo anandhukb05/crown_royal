@@ -84,6 +84,7 @@
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="{% url 'create_patient' %}">Register</a></li>
                     <li><a class="dropdown-item" href="#">Appointment</a></li>
+                    <li><a class="dropdown-item" href="{% url 'procedure_panel' %}">Services</a></li>
                 </ul>
             </li>
         </ul>
@@ -106,6 +107,7 @@
             <h5 class="mb-3">Manage</h5>
             <a href="{% url 'create_patient' %}" class="btn btn-primary w-100 mb-2">Register</a>
             <a href="#" class="btn btn-outline-primary w-100">Appointment</a>
+            <a href="{% url 'procedure_panel' %}" class="btn btn-primary w-100 mb-2">Services</a>
         </div>
     </div>
 </div>

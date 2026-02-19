@@ -232,8 +232,61 @@ body { background:#f4f6f9; }
 
     <!-- Procedure -->
     <div class="tab-content-box" id="tab-procedure">
-        <h6>Procedure</h6>
-        <p>Procedure details...</p>
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary">
+                <tr>
+                    <th class="col-sm-2">Procedure</th>
+                    <th class="col-sm-2">Price</th>
+                    <th class="col-sm-2">Quantity</th>
+                    <th class="col-sm-2">Discount Type</th>
+                    <th class="col-sm-2">Discount</th>
+                    <th class="d-none d-md-table-cell col-sm-8">Notes</th>
+                    <th class="col-sm-2">Date</th> 
+                    <th class="col-sm-2">Time</th> 
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in procedures %}
+                    <tr>
+                        <td>{{ p.procedure.prodecure }}</td>
+                        <td>{{ p.price }}</td>
+                        <td>{{ p.quantity }}</td>
+                        <td>{{ p.discount_type }}</td>
+                        <td>{{ p.discount }}</td>
+                        <td>{{ p.notes }}</td>
+
+                        <td>{{ p.created_at|date:"d M Y" }}</td>
+                        <td>{{ p.created_at|time:"H:i:s" }}</td>
+                    
+                        <!-- Edit -->
+                        <td>
+                            <button class="btn btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#editProcedureModal{{ p.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                </svg>
+                            </button>
+
+                            <!-- Delete -->
+                            <button class="btn btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteProcedureModal{{ p.id }}"
+                                >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                    </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% include "procedure/edit.html" %}
+                    {% include "procedure/delete.html" %}
+                  
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
     <!-- Prescription -->
@@ -244,7 +297,7 @@ body { background:#f4f6f9; }
 
     <div class="tab-content-box" id="tab-invoice">
         <h6>Bill</h6>
-        <p>Medicines list...</p>
+        <a class="nav-link" href="{% url 'patient_bill' profile.patient_id%}">Generate Bill</a>
     </div>
 
 </div>
@@ -309,22 +362,25 @@ body { background:#f4f6f9; }
 <div class="modal-content p-3">
 <h5>Procedure</h5>
 
-<form id="procedureForm" name="procedure_form">
-
+<form id="procedureForm" name="procedure_form"  method="post" action="{% url 'add_procedure' profile.patient_id %}">
+    {% csrf_token %}
     <!-- Added Date -->
     <div class="mb-2">
         <label class="form-label small text-muted">Added Date</label>
-        <input type="date" class="form-control" name="added_date" value="2025-11-17" readonly>
+        <input type="date" class="form-control" name="added_date" id="added_date">
+
     </div>
 
     <!-- Procedure -->
     <div class="mb-2">
         <label class="form-label small text-muted">Procedure</label>
-        <select name="department" class="form-control" required name="procedure_id">
+        <select class="form-control" required name="procedure_id" id="procedureSelect">
             <option value="">Select Procedure</option>
+            {% if procedures_list %}
                 {% for p in procedures_list %}
-                    <option value="{{ p.id }}">{{ p.prodecure }}</option>
+                    <option value="{{ p.id }}" data-price="{{ p.price }}">{{ p.prodecure }}</option>
                 {% endfor %}
+            {% endif %}
         </select>
     </div>
 
@@ -332,12 +388,12 @@ body { background:#f4f6f9; }
     <div class="row g-2 mb-2">
         <div class="col-6">
             <label class="form-label small text-muted">Quantity</label>
-            <input type="number" class="form-control" name="quantity" value="1" min="1">
+            <input type="number" class="form-control" name="quantity" value="1" min="1" id="ProcedureQuantity">
         </div>
 
         <div class="col-6">
             <label class="form-label small text-muted">Price</label>
-            <input type="number" class="form-control" name="price" placeholder="Price">
+            <input type="number" class="form-control" name="price" placeholder="Price" id="ProcedurePrice">
         </div>
     </div>
 
@@ -351,7 +407,7 @@ body { background:#f4f6f9; }
     <div class="row g-2 mb-2">
         <div class="col-6">
             <label class="form-label small text-muted">Discount Type</label>
-            <select class="form-select" name="discount_type">
+            <select class="form-select" name="discount_type" id="discount_type">
                 <option value="amount">₹</option>
                 <option value="percentage">%</option>
             </select>
@@ -359,14 +415,14 @@ body { background:#f4f6f9; }
 
         <div class="col-6">
             <label class="form-label small text-muted">Discount</label>
-            <input type="number" class="form-control" name="discount" value="0">
+            <input type="number" class="form-control" name="discount" value="0" id="ProcedureDiscount">
         </div>
     </div>
 
     <!-- Total -->
     <div class="mb-2">
         <label class="form-label small text-muted">Total</label>
-        <input type="number" class="form-control" name="total" value="0" readonly>
+        <input type="number" class="form-control" name="total" value="0" readonly id="ProcedureTotal">
     </div>
 
     <!-- Status -->
@@ -432,22 +488,33 @@ body { background:#f4f6f9; }
     </div>
 
     <!-- Strength -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Strength</label>
-        <input type="text" class="form-control" name="strength">
+    <div class="row g-2 mb-2">
+        <div class="col-6">
+            <label class="form-label small text-muted">Strength</label>
+            <input type="text" class="form-control" name="strength">
+        </div>
+        <div class="col-6">
+            <label class="form-label small text-muted">Unit</label>
+            <select class="form-select" name="duration">
+                <option value="">Select units</option>
+            </select>
+        </div>
     </div>
 
     <!-- Units & Duration -->
     <div class="row g-2 mb-2">
         <div class="col-6">
             <label class="form-label small text-muted">Units</label>
-            <select class="form-select" name="units">
-                <option value="">Select units</option>
-            </select>
+            <input type="number" class="form-control" name="duration">
+            
         </div>
         <div class="col-6">
-            <label class="form-label small text-muted">Duration (Days)</label>
-            <input type="number" class="form-control" name="duration">
+            <label class="form-label small text-muted">Period</label>
+            <select class="form-select" name="duration_period">
+                <option value="Day">Day</option>
+                <option value="Week">Week</option>
+                <option value="Month">Month</option>
+            </select>
         </div>
     </div>
 
@@ -512,6 +579,10 @@ document.addEventListener("DOMContentLoaded", function () {
         activeTab = "notes";
     }
 
+    if (window.location.hash === "#tab-procedure") {
+        activeTab = "procedure";
+    }
+
     // 2️⃣ Activate correct tab + content
     function activateTab(tabName) {
         activeTab = tabName;
@@ -553,9 +624,58 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 });
+
+document.getElementById('procedureSelect').addEventListener('change', function () {
+const selectedOption = this.options[this.selectedIndex];
+const price = selectedOption.getAttribute('data-price');
+
+
+document.getElementById('ProcedurePrice').value = price ? price : '';
+});
+
+
+function calculateTotal() {
+    let quantity = parseFloat(document.getElementById("ProcedureQuantity").value);
+    let price = parseFloat(document.getElementById("ProcedurePrice").value);
+    let discount = parseFloat(document.getElementById("ProcedureDiscount").value);
+    let discountType = document.getElementById("discount_type").value;
+
+    // Defaults if empty
+    quantity = isNaN(quantity) ? 0 : quantity;
+    price = isNaN(price) ? 0 : price;
+    discount = isNaN(discount) ? 0 : discount;
+
+    let base = quantity * price;
+    let discountAmount = 0;
+
+    if (discount > 0) {
+        if (discountType === "percentage") {
+            discountAmount = (base * discount) / 100;
+        } else {
+            discountAmount = discount;
+        }
+    }
+
+    let total = base - discountAmount;
+
+    // Safety
+    if (total < 0) total = 0;
+
+    document.getElementById("ProcedureTotal").value = total.toFixed(2);
+}
+
+// Events
+["ProcedureQuantity","ProcedurePrice","ProcedureDiscount"].forEach(id => {
+    document.getElementById(id).addEventListener("input", calculateTotal);
+});
+document.getElementById("discount_type").addEventListener("change", calculateTotal);
+document.getElementById("procedureSelect").addEventListener("change", calculateTotal);
+
+document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById("added_date").value = today;
+});
 </script>
-
-
 
 </body>
 </html>

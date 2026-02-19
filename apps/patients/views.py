@@ -74,11 +74,9 @@ def patient_profile(request, pk):
     profile = PatientProfile.objects.get(patient_id=pk)
     vital = Vital.objects.filter(patient_id=profile).order_by('-created_at')
     notes = ClinicalNotes.objects.filter(patient_id=profile).order_by('-created_at')
-    procedures = PatientProcedure.objects.all()
+    procedures = PatientProcedure.objects.filter(patient_id=profile).order_by('-created_at')
+
     procedures_list = Procedures.objects.all()
-    print("--- procedures_list ---", procedures_list)
-    for i in procedures_list:
-        print("----", i.prodecure, i.price)
     return render(
             request,
             "profile_view.html",
@@ -86,7 +84,7 @@ def patient_profile(request, pk):
                 'profile': profile,
                 'vitals': vital,
                 'notes': notes,
-                'produres': procedures,
+                'procedures': procedures,
                 'procedures_list': procedures_list
             })
 
@@ -180,16 +178,16 @@ def notes_delete(request, pk):
     notes.delete()
     return redirect(f"{reverse('patient_profile', kwargs={'pk': notes.patient_id})}#tab-notes")
 
+
 def add_procedure(request, patient_id):
     patient = get_object_or_404(PatientProfile, patient_id=patient_id)
-    procedures = PatientProcedure.objects.all()
 
     if request.method == 'POST':
         PatientProcedure.objects.create(
             patient=patient,
             added_date=timezone.now(),
             procedure=get_object_or_404(
-                Procedures, id=request.POST.get('procedure')
+                Procedures, id=request.POST.get('procedure_id')
             ),
             quantity=int(request.POST.get('quantity', 0)),
             price=float(request.POST.get('price', 0)),
@@ -199,4 +197,31 @@ def add_procedure(request, patient_id):
             status=request.POST.get('status')
         )
 
-    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-notes")
+    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-procedure")
+
+
+def patient_procedure_edit(request, pk):
+    procedure = get_object_or_404(PatientProcedure, pk=pk)
+
+    if request.method == "POST":
+        fields = [
+            "procedure", "notes", "quantity", "price", "discount", "discount_type", "status"
+        ]
+        for field in fields:
+            setattr(procedure, field, request.POST.get(field) or None)
+
+        procedure.save()
+        return redirect(f"{reverse('patient_profile', kwargs={'pk': procedure.patient_id})}#tab-procedure")
+
+def patient_procedure_delete(request, pk):
+    procedure = get_object_or_404(PatientProcedure, pk=pk)
+    procedure.delete()
+    # return redirect(f"{reverse('patient_profile', kwargs={'pk': procedure.patient_id})}#tab-procedure")
+    return redirect(
+    reverse('patient_profile', kwargs={'pk': procedure.patient.patient_id}) + '#tab-procedure'
+)
+
+
+def patient_bill(request, patient_id):
+
+    return render(request, "bill.html")
