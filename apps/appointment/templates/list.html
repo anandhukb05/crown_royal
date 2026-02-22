@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">
+                Appointment Schedule
+            </h4>
+
+            <a href="{% url 'appointment_add' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> New Appointment
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+                <tr>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th width="220">Actions</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                {% for a in appointments %}
+                <tr>
+                    <td>
+                        <strong>{{ a.patient_name }}</strong><br>
+                        <small class="text-muted">{{ a.patient_phone }}</small>
+                    </td>
+
+                    <td>{{ a.doctor }}</td>
+
+                    <td>{{ a.appointment_date }}</td>
+                    <td>{{ a.appointment_time }}</td>
+
+                    <td>
+                        {% if a.status == "waiting" %}
+                            <span class="badge bg-warning text-dark">
+                                Waiting
+                            </span>
+                        {% else %}
+                            <span class="badge bg-success">
+                                Confirmed
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="{% url 'appointment_reschedule' a.id %}"
+                           class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-calendar-event"></i>
+                        </a>
+
+                        {% if a.status == "waiting" %}
+                        <a href="{% url 'appointment_confirm' a.id %}"
+                           class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-check-circle"></i>
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'appointment_delete' a.id %}"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Delete appointment?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No appointments yet
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -66,8 +66,16 @@
 <div class="card shadow-sm border-0">
 <div class="card-header bg-white fw-semibold">Quick Actions</div>
 <div class="card-body d-grid gap-2">
-<button class="btn btn-primary"><i class="bi bi-plus-circle"></i> New Appointment</button>
-<button class="btn btn-outline-secondary"><i class="bi bi-person-plus"></i> Add Patient</button>
+
+<a href="{% url 'appointment_add' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> New Appointment
+</a>
+
+
+<a href="{% url 'create_patient' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-person-plus"></i> Add Patient
+</a>
+
 <button class="btn btn-outline-success"><i class="bi bi-receipt"></i> Generate Bill</button>
 <button class="btn btn-outline-dark"><i class="bi bi-file-earmark-text"></i> Reports</button>
 </div>

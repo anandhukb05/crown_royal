@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row justify-content-center">
+<div class="col-lg-6">
+
+<div class="card">
+<div class="card-body">
+
+<h4 class="mb-3">Book Dental Appointment</h4>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">Patient Name</label>
+        {{ form.patient_name }}
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Phone</label>
+        {{ form.patient_phone }}
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Doctor</label>
+        {% comment %} {{ form.doctor }} {% endcomment %}
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <label class="form-label">Date</label>
+            {{ form.appointment_date }}
+        </div>
+        <div class="col">
+            <label class="form-label">Time</label>
+            {{ form.appointment_time }}
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <label class="form-label">Reason</label>
+        {{ form.reason }}
+    </div>
+
+    <button class="btn btn-primary w-100 mt-4">
+        <i class="bi bi-save"></i> Save Appointment
+    </button>
+
+</form>
+
+</div>
+</div>
+
+</div>
+</div>
+
+{% endblock %}

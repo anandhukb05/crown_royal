@@ -1,5 +1,5 @@
 from django import forms
-from .models import Procedures, Medicine
+from .models import Procedures, Medicine, Doctor
 
 
 class ProcedureForm(forms.ModelForm):
@@ -36,3 +36,10 @@ class MedicineForm(forms.ModelForm):
             raise forms.ValidationError("Medicine already exists.")
 
         return value
+
+
+# forms.py
+class DoctorForm(forms.ModelForm):
+    class Meta:
+        model = Doctor
+        fields = "__all__"
