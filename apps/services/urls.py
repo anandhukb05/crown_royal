@@ -21,5 +21,4 @@ urlpatterns = [
     path("doctor/delete/<int:pk>/", views.doctor_delete, name="doctor_delete"),
 
 
-
 ]

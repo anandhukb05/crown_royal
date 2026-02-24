@@ -23,8 +23,8 @@ class Medicine(models.Model):
 class Doctor(models.Model):
     name = models.CharField(max_length=120)
     specialization = models.CharField(max_length=120)
-    phone = models.CharField(max_length=20)
-    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(blank=True, unique=True)
     photo = models.ImageField(upload_to="doctors/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

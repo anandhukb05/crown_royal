@@ -2,7 +2,6 @@ from django.db import models
 from apps.services.models import Procedures
 # Create your models here.
 
-# models.py
 
 class PatientProfile(models.Model):
     patient_id = models.BigAutoField(primary_key=True)
