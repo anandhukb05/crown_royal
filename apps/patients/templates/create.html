@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block title %}Register{% endblock %}
 
 
@@ -121,6 +121,8 @@
         </form>
     </div>
 </div>
+    
+<script src="{% static 'js/patients/country-states.js' %}"></script>
 
 <script>
 var user_country_code = "IN";
