@@ -40,8 +40,9 @@ INSTALLED_APPS = [
     'apps.home',
     'apps.patients',
     'apps.staffs',
-    'apps.services'
-    ]
+    'apps.services',
+    'apps.appointment'
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

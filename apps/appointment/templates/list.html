@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Appointments{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<form method="GET" class="row g-3 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="search" class="form-control" placeholder="Search Patient">
+    </div>
+    <div class="col-md-4">
+        <input type="date" name="date" class="form-control">
+    </div>
+    <div class="col-md-4">
+        <button class="btn btn-secondary w-100">Filter</button>
+    </div>
+</form>
+
+<table class="table table-bordered table-striped">
+<thead class="table-dark">
+<tr>
+    <th>Date</th>
+    <th>Patient</th>
+    <th>Doctor</th>
+    <th>Phone</th>
+    <th>Reason</th>
+    <th>Action</th>
+</tr>
+</thead>
+<tbody>
+{% for a in appointments %}
+<tr>
+    <td>{{ a.date }} {{ a.time }} {{ a.am_pm }}</td>
+    <td>{{ a.patient.name }}</td>
+    <td>{{ a.doctor.name }}</td>
+    <td>{{ a.phone }}</td>
+    <td>{{ a.reason }}</td>
+    <td>
+        <a href="{% url 'appointment_edit' a.id %}" class="btn btn-sm btn-warning">Edit</a>
+        <a href="{% url 'appointment_delete' a.id %}" class="btn btn-sm btn-danger">Cancel</a>
+    </td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+
+</div>
+
+{% endblock %}
+
+{% block footer %}
+    {% include "includes/footer.html" %}
+{% endblock %}

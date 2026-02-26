@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Appointment{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-4">
+<div class="card shadow-lg p-4">
+<h4 class="mb-4 text-center">Appointment Booking</h4>
+
+<form method="POST">
+    {% csrf_token %}
+
+    <div class="row g-3">
+
+
+
+        <div class="col-md-6 position-relative">
+            <label>Patient</label>
+            <input type="text" id="patientSearch" class="form-control" autocomplete="off">
+            <input type="hidden" name="patient" id="patientId">
+            <div id="suggestions" class="list-group position-absolute w-100"></div>
+        </div>
+
+        <div class="col-md-6">
+            <label>Phone</label>
+            <input type="text" name="phone" id="phoneField" class="form-control">
+        </div>
+
+        <div class="col-md-6">
+            <label>Doctor</label>
+             {{ form.doctor}}
+          
+        </div>
+
+        <div class="col-md-6">
+            <label>Date</label>
+            {{ form.date }}
+        </div>
+
+        <div class="col-md-6">
+            <label>Time</label>
+            {{ form.time }}
+        </div>
+
+        <div class="col-12">
+            <label>Reason</label>
+            {{ form.reason }}
+        </div>
+
+        <div class="col-12 text-center mt-3">
+            <button class="btn btn-primary px-5">Save Appointment</button>
+        </div>
+
+    </div>
+</form>
+</div>
+</div>
+
+
+<script>
+const searchInput = document.getElementById('patientSearch');
+const suggestionBox = document.getElementById('suggestions');
+
+searchInput.addEventListener('keyup', function() {
+    fetch(`/appointment/patient_search/?term=${this.value}`)
+    .then(res => res.json())
+    .then(data => {
+        suggestionBox.innerHTML = '';
+        data.forEach(item => {
+            const div = document.createElement('a');
+            div.classList.add('list-group-item','list-group-item-action');
+            div.textContent = item.name + ' - ' + item.phone;
+
+            div.onclick = function(){
+                document.getElementById('patientId').value = item.id;
+                document.getElementById('phoneField').value = item.phone;
+                searchInput.value = item.name;
+                suggestionBox.innerHTML = '';
+            }
+
+            suggestionBox.appendChild(div);
+        });
+    });
+});
+</script>
+
+
+{% endblock %}
+
+{% block footer %}
+    {% include "includes/footer.html" %}
+{% endblock %}
