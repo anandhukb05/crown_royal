@@ -28,6 +28,7 @@
     <th>Doctor</th>
     <th>Phone</th>
     <th>Reason</th>
+    <th>Status</th>
     <th>Action</th>
 </tr>
 </thead>
@@ -40,8 +41,19 @@
     <td>{{ a.phone }}</td>
     <td>{{ a.reason }}</td>
     <td>
+    <span class="badge 
+    {% if a.status == 'waiting' %} bg-warning
+    {% elif a.status == 'confirmed' %} bg-primary
+    {% elif a.status == 'completed' %} bg-success
+    {% elif a.status == 'cancelled' %} bg-danger
+    {% endif %}
+    ">
+    {{ a.get_status_display }}
+    </span>
+</td>
+    <td>
         <a href="{% url 'appointment_edit' a.id %}" class="btn btn-sm btn-warning">Edit</a>
-        <a href="{% url 'appointment_delete' a.id %}" class="btn btn-sm btn-danger">Cancel</a>
+        <a href="{% url 'appointment_delete' a.id %}" class="btn btn-sm btn-danger">Delete</a>
     </td>
 </tr>
 {% endfor %}

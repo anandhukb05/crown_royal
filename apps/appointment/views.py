@@ -9,31 +9,55 @@ from django.http import JsonResponse
 
 
 def appointment_create(request):
-    form = AppointmentForm()
-
     if request.method == 'POST':
         form = AppointmentForm(request.POST)
+
         if form.is_valid():
-            try:
-                form.save()
+
+            patient_id = request.POST.get('patient')
+
+            if not patient_id:
+                form.add_error(None, "Please select a patient properly.")
+            else:
+                appointment = form.save(commit=False)
+                appointment.patient = PatientProfile.objects.get(patient_id=patient_id)
+                appointment.phone = appointment.patient.phno
+                appointment.save()
                 return redirect('appointment_list')
-            except:
-                form.add_error(None, "Doctor already has appointment on this date.")
+
+    else:
+        form = AppointmentForm()
 
     return render(request, 'add.html', {'form': form})
 
 
 def appointment_edit(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
-    form = AppointmentForm(instance=appointment)
 
     if request.method == 'POST':
         form = AppointmentForm(request.POST, instance=appointment)
+
         if form.is_valid():
-            form.save()
+            appointment = form.save(commit=False)
+
+            patient_id = request.POST.get('patient')
+
+            if patient_id:
+                appointment.patient = PatientProfile.objects.get(patient_id=patient_id)
+                appointment.phone = appointment.patient.phno
+
+            appointment.save()
             return redirect('appointment_list')
 
-    return render(request, 'add.html', {'form': form})
+    else:
+        form = AppointmentForm(instance=appointment)
+
+    return render(request, 'add.html', {
+        'form': form,
+        'selected_patient_name': appointment.patient.name,
+        'selected_patient_id': appointment.patient.patient_id,
+        'selected_phone': appointment.patient.phno,
+    })
 
 
 def appointment_delete(request, pk):

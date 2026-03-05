@@ -17,17 +17,32 @@
 
 
 
-        <div class="col-md-6 position-relative">
+       <div class="col-md-6 position-relative">
             <label>Patient</label>
-            <input type="text" id="patientSearch" class="form-control" autocomplete="off">
-            <input type="hidden" name="patient" id="patientId">
+
+            <input type="text"
+                id="patientSearch"
+                class="form-control"
+                value="{{ selected_patient_name|default:'' }}"
+                >
+
+            <input type="hidden"
+                name="patient"
+                id="patientId"
+                value="{{ selected_patient_id|default:'' }}">
             <div id="suggestions" class="list-group position-absolute w-100"></div>
         </div>
 
         <div class="col-md-6">
             <label>Phone</label>
-            <input type="text" name="phone" id="phoneField" class="form-control">
+            <input type="text"
+                name="phone"
+                id="phoneField"
+                class="form-control"
+                value="{{ selected_phone|default:'' }}">
         </div>
+
+      
 
         <div class="col-md-6">
             <label>Doctor</label>
@@ -45,14 +60,29 @@
             {{ form.time }}
         </div>
 
+        <div class="col-md-6">
+            <label>Status</label>
+            {{ form.status }}
+        </div>
+
         <div class="col-12">
             <label>Reason</label>
             {{ form.reason }}
         </div>
+        
 
         <div class="col-12 text-center mt-3">
             <button class="btn btn-primary px-5">Save Appointment</button>
         </div>
+        <div class="col-12 text-center mt-3">
+
+
+    <a href="{% url 'appointment_list' %}" 
+       class="btn btn-outline-secondary px-4">
+        Cancel
+    </a>
+
+</div>
 
     </div>
 </form>
@@ -85,6 +115,7 @@ searchInput.addEventListener('keyup', function() {
         });
     });
 });
+
 </script>
 
 
