@@ -6,11 +6,11 @@ from .forms import PatientProfileForm
 from .models import PatientProfile
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Vital, ClinicalNotes, PatientProcedure
+from .models import Vital, ClinicalNotes, PatientProcedure, Prescription
 from apps.services.models import Procedures
 from django.urls import reverse
 from django.utils import timezone
-from apps.services.models import Procedures
+from apps.services.models import Procedures, Medicine
 
 def create_patient(request):
     if request.method == "POST":
@@ -205,13 +205,13 @@ def patient_procedure_edit(request, pk):
 
     if request.method == "POST":
         fields = [
-            "procedure", "notes", "quantity", "price", "discount", "discount_type", "status"
+            "procedure", "notes", "quantity", "price", "discount", "discount_type", "status", "total"
         ]
         for field in fields:
             setattr(procedure, field, request.POST.get(field) or None)
 
         procedure.save()
-        return redirect(f"{reverse('patient_profile', kwargs={'pk': procedure.patient_id})}#tab-procedure")
+        return redirect(f"{reverse('patient_profile', kwargs={'pk': procedure.patient.patient_id})}#tab-procedure")
 
 def patient_procedure_delete(request, pk):
     procedure = get_object_or_404(PatientProcedure, pk=pk)
@@ -222,6 +222,31 @@ def patient_procedure_delete(request, pk):
 )
 
 
-def patient_bill(request, patient_id):
+def add_prescription(request, patient_id):
+    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
 
-    return render(request, "bill.html")
+    if request.method == 'POST':
+
+        Prescription.objects.create(
+            patient=patient,
+            next_review_date=request.POST.get('next_review', 0),
+            medicine=get_object_or_404(
+                        Medicine, id=request.POST.get('medicine_id')
+                    ),
+            srength=request.POST.get('strength', 0),
+            unit=request.POST.get('quantity', 0),
+            duration=request.POST.get('quantity', 0),
+            duration_period=request.POST.get('quantity', 0),
+            morning=int(request.POST.get('quantity', 0)),
+            noon=int(request.POST.get('quantity', 0)),
+            night=int(request.POST.get('quantity', 0)),
+            after_food=request.POST.get('quantity', 0),
+            usage=request.POST.get('quantity', 0)
+        )
+
+    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription")
+
+
+def patient_bill(request, patient_id):
+    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+    return render(request, "bill.html",{"patient": patient})

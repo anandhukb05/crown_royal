@@ -1,32 +1,119 @@
-
 <div class="modal fade" id="editVitalModal{{ v.id }}">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
+
       <form method="post" action="{% url 'vital_edit' v.id %}">
         {% csrf_token %}
+
         <div class="modal-header">
           <h5 class="modal-title">Edit Vital</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
+
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
-          <div class="row g-2">
-            <input class="form-control" name="temperature" value="{{ v.temperature }}" placeholder="Temperature">
-            <input class="form-control" name="weight" value="{{ v.weight }}" placeholder="Weight">
-            <input class="form-control" name="height" value="{{ v.height }}" placeholder="Height">
-            <input class="form-control" name="sugar" value="{{ v.sugar }}" placeholder="Sugar">
-            <input class="form-control" name="systolic" value="{{ v.systolic }}" placeholder="Systolic">
-            <input class="form-control" name="diastolic" value="{{ v.diastolic }}" placeholder="Diastolic">
-            <input class="form-control" name="pulse" value="{{ v.pulse }}" placeholder="Pulse">
-            <input class="form-control" name="spo2" value="{{ v.spo2 }}" placeholder="SpO₂">
-            <input class="form-control" name="respiratory" value="{{ v.respiratory }}" placeholder="Respiratory">
+
+          <div class="row g-3">
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Temperature (°F)</label>
+              <input class="form-control"
+                     type="number"
+                     step="any"
+                     name="temperature"
+                     value="{{ v.temperature }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Weight (kg)</label>
+              <input class="form-control"
+                     type="number"
+                     step="any"
+                     name="weight"
+                     value="{{ v.weight }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Height (cm)</label>
+              <input class="form-control"
+                     type="number"
+                     step="any"
+                     name="height"
+                     value="{{ v.height }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Sugar</label>
+              <input class="form-control"
+                     type="number"
+                     step="any"
+                     name="sugar"
+                     value="{{ v.sugar }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Systolic BP</label>
+              <input class="form-control"
+                     type="number"
+                     name="systolic"
+                     value="{{ v.systolic }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Diastolic BP</label>
+              <input class="form-control"
+                     type="number"
+                     name="diastolic"
+                     value="{{ v.diastolic }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Pulse</label>
+              <input class="form-control"
+                     type="number"
+                     name="pulse"
+                     value="{{ v.pulse }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">SpO₂ (%)</label>
+              <input class="form-control"
+                     type="number"
+                     name="spo2"
+                     value="{{ v.spo2 }}">
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label small text-muted">Respiratory Rate</label>
+              <input class="form-control"
+                     type="number"
+                     name="respiratory"
+                     value="{{ v.respiratory }}">
+            </div>
+
           </div>
+
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-primary">Update</button>
+
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary">
+            Update
+          </button>
+
         </div>
+
       </form>
+
     </div>
   </div>
 </div>

@@ -1,94 +1,174 @@
-
 <div class="modal fade" id="editProcedureModal{{ p.id }}">
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
+
       <form method="post" action="{% url 'patient_procedure_edit' p.id %}">
         {% csrf_token %}
+
         <div class="modal-header">
           <h5 class="modal-title">Edit Procedure</h5>
-          <button class="btn-close" data-bs-dismiss="modal"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
         <div class="modal-body">
-          <div class="row g-2">
-            
-             <div class="mb-2">
-        <label class="form-label small text-muted">Added Date</label>
-        <input type="date" class="form-control" name="added_date" value="{{ p.created_at|date:"d M Y" }}">
 
-    </div>
-
-    <!-- Procedure -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Procedure</label>
-        <select class="form-control" required name="procedure_id">
-            <option value="{{ p.procedure.prodecure }}">{{ p.procedure.prodecure }}</option>
-            {% if procedures_list %}
-                {% for p in procedures_list %}
-                    <option value="{{ p.id }}" data-price="{{ p.price }}">{{ p.prodecure }}</option>
-                {% endfor %}
-            {% endif %}
-        </select>
-    </div>
-
-    <!-- Quantity & Price -->
-    <div class="row g-2 mb-2">
-        <div class="col-6">
-            <label class="form-label small text-muted">Quantity</label>
-            <input type="number" class="form-control" name="quantity" value="1" min="1" id="ProcedureQuantity1" value="{{p.quantity}}">
-        </div>
-
-        <div class="col-6">
-            <label class="form-label small text-muted">Price</label>
-            <input type="number" class="form-control" name="price" placeholder="Price" id="ProcedurePrice1" value="{{p.price}}">
-        </div>
-    </div>
-
-    <!-- Notes -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Notes</label>
-        <textarea class="form-control" rows="3" name="notes" placeholder="Notes" value="{{p.notes}}"></textarea>
-    </div>
-
-    <!-- Discount Type & Discount -->
-    <div class="row g-2 mb-2">
-        <div class="col-6">
-            <label class="form-label small text-muted">Discount Type</label>
-            <option value="{{p.discount_type}}"></option>
-            <select class="form-select" name="discount_type" id="discount_type1">
-                <option value="amount">₹</option>
-                <option value="percentage">%</option>
-            </select>
-        </div>
-
-        <div class="col-6">
-            <label class="form-label small text-muted">Discount</label>
-            <input type="number" class="form-control" name="discount" value="0" id="ProcedureDiscount1">
-        </div>
-    </div>
-
-    <!-- Total -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Total</label>
-        <input type="number" class="form-control" name="total" value="0" readonly id="ProcedureTotal1">
-    </div>
-
-    <!-- Status -->
-    <div class="mb-3">
-        <label class="form-label small text-muted">Status</label>
-        <select class="form-select" name="status">
-            <option value="planned">Planned</option>
-            <option value="completed">Completed</option>
-        </select>
-    </div>
-            
+          <!-- Added Date -->
+          <div class="mb-2">
+            <label class="form-label small text-muted">Added Date</label>
+            <input type="date"
+                   class="form-control"
+                   name="added_date"
+                   value="{{ p.created_at|date:'Y-m-d' }}">
           </div>
+
+          <!-- Procedure -->
+          <div class="mb-2">
+            <label class="form-label small text-muted">Procedure</label>
+
+            <select class="form-control" required name="procedure_id">
+
+              {% for proc in procedures_list %}
+
+              <option value="{{ proc.id }}"
+                {% if proc.id == p.procedure.id %}selected{% endif %}
+                data-price="{{ proc.price }}">
+
+                {{ proc.prodecure }}
+
+              </option>
+
+              {% endfor %}
+
+            </select>
+          </div>
+
+          <!-- Quantity & Price -->
+          <div class="row g-2 mb-2">
+
+            <div class="col-6">
+              <label class="form-label small text-muted">Quantity</label>
+              <input type="number"
+                     class="form-control"
+                     name="quantity"
+                     min="1"
+                     value="{{ p.quantity }}"
+                     id="ProcedureQuantity1">
+            </div>
+
+            <div class="col-6">
+              <label class="form-label small text-muted">Price</label>
+              <input type="number"
+                     class="form-control"
+                     name="price"
+                     value="{{ p.price }}"
+                     id="ProcedurePrice1">
+            </div>
+
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-2">
+            <label class="form-label small text-muted">Notes</label>
+
+            <textarea class="form-control"
+                      rows="3"
+                      name="notes">{{ p.notes }}</textarea>
+
+          </div>
+
+          <!-- Discount -->
+          <div class="row g-2 mb-2">
+
+            <div class="col-6">
+
+              <label class="form-label small text-muted">Discount Type</label>
+
+              <select class="form-select"
+                      name="discount_type"
+                      id="discount_type1">
+
+                <option value="amount"
+                  {% if p.discount_type == "amount" %}selected{% endif %}>
+                  ₹
+                </option>
+
+                <option value="percentage"
+                  {% if p.discount_type == "percentage" %}selected{% endif %}>
+                  %
+                </option>
+
+              </select>
+
+            </div>
+
+            <div class="col-6">
+
+              <label class="form-label small text-muted">Discount</label>
+
+              <input type="number"
+                     class="form-control"
+                     name="discount"
+                     value="{{ p.discount }}"
+                     id="ProcedureDiscount1">
+
+            </div>
+
+          </div>
+
+          <!-- Total -->
+          <div class="mb-2">
+
+            <label class="form-label small text-muted">Total</label>
+
+            <input type="number"
+                   class="form-control"
+                   name="total"
+                   readonly
+                   value="{{ p.total }}"
+                   id="ProcedureTotal1">
+
+          </div>
+
+          <!-- Status -->
+          <div class="mb-3">
+
+            <label class="form-label small text-muted">Status</label>
+
+            <select class="form-select" name="status">
+
+              <option value="planned"
+                {% if p.status == "planned" %}selected{% endif %}>
+                Planned
+              </option>
+
+              <option value="completed"
+                {% if p.status == "completed" %}selected{% endif %}>
+                Completed
+              </option>
+
+            </select>
+
+          </div>
+
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-primary">Update</button>
+
+          <button type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal">
+            Cancel
+          </button>
+
+          <button type="submit"
+                  class="btn btn-primary">
+            Update
+          </button>
+
         </div>
+
       </form>
+
     </div>
   </div>
 </div>

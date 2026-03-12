@@ -457,7 +457,7 @@ body { background:#f4f6f9; }
 <div class="modal-content p-3">
 <h5>Prescription</h5>
 
-<form id="prescriptionForm" name="prescription_form">
+<form id="prescriptionForm" name="prescription_form"  method="post" action="{% url 'add_procedure' profile.patient_id %}">
 
     <!-- Added Date -->
     <div class="mb-2">
@@ -471,13 +471,13 @@ body { background:#f4f6f9; }
         <input type="date" class="form-control" name="next_review" value="2025-11-17">
     </div>
 
-    <!-- Prescription Template -->
+    <!-- Prescription Template 
     <div class="mb-2">
         <label class="form-label small text-muted">Prescription Template</label>
         <select class="form-select" name="template_id">
             <option value="">Select Template</option>
         </select>
-    </div>
+    </div> -->
 
     <!-- Medicine -->
     <div class="mb-2">
@@ -495,7 +495,7 @@ body { background:#f4f6f9; }
         </div>
         <div class="col-6">
             <label class="form-label small text-muted">Unit</label>
-            <select class="form-select" name="duration">
+            <select class="form-select" name="strength_unit">
                 <option value="">Select units</option>
             </select>
         </div>
