@@ -9,37 +9,175 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
-body { background:#f4f6f9; }
+
+body{
+    background:#f4f6f9;
+    font-size:15px;
+}
+
+/* Top bar */
+
 .top-bar{
-    background:#1e9bd7;color:#fff;padding:12px 15px;
-    display:flex;justify-content:space-between;align-items:center;
+    background:#1e9bd7;
+    color:#fff;
+    padding:12px 15px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
 }
-.card-custom{border-radius:14px;box-shadow:0 4px 10px rgba(0,0,0,.08);}
-.profile-img{width:55px;height:55px;border-radius:50%;background:#ccc;}
-.nav-pills .nav-link{border-radius:12px;}
-.nav-pills .nav-link.active{background:#e3f2fd;color:#1e9bd7;font-weight:600;}
-.no-data{text-align:center;padding:60px;color:#6c757d;}
+
+.top-bar h5{
+    margin:0;
+    font-size:18px;
+}
+
+/* Cards */
+
+.card-custom{
+    border-radius:14px;
+    box-shadow:0 4px 10px rgba(0,0,0,.08);
+    border:none;
+}
+
+/* Profile */
+
+.profile-img{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#ccc;
+    flex-shrink:0;
+}
+
+/* Tabs */
+
+.nav-pills{
+    flex-wrap:wrap;
+    gap:6px;
+}
+
+.nav-pills .nav-link{
+    border-radius:12px;
+    font-size:14px;
+}
+
+.nav-pills .nav-link.active{
+    background:#e3f2fd;
+    color:#1e9bd7;
+    font-weight:600;
+}
+
+/* No Data */
+
+.no-data{
+    text-align:center;
+    padding:60px 10px;
+    color:#6c757d;
+}
+
+/* Floating Button */
+
 .fab{
-    position:fixed;bottom:20px;right:20px;
-    width:55px;height:55px;border-radius:50%;
-    background:#28a745;color:#fff;font-size:26px;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 4px 12px rgba(0,0,0,.3);cursor:pointer;
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#28a745;
+    color:#fff;
+    font-size:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+    cursor:pointer;
+    z-index:999;
 }
-.modal input,.modal textarea,.modal select{
+
+/* Modal inputs */
+
+.modal input,
+.modal textarea,
+.modal select{
     border-radius:10px;
 }
 
-.tab-content-box {
-    display: none;
+/* Custom Tabs */
+
+.tab-content-box{
+    display:none;
 }
 
-.tab-content-box.active {
-    display: block;
+.tab-content-box.active{
+    display:block;
+}
+
+/* Tablet */
+
+@media (max-width:991px){
+
+    .top-bar{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .profile-img{
+        width:50px;
+        height:50px;
+    }
+
+}
+
+/* Mobile */
+
+@media (max-width:576px){
+
+    body{
+        font-size:14px;
+    }
+
+    .top-bar{
+        padding:10px;
+    }
+
+    .top-bar h5{
+        font-size:16px;
+    }
+
+    .profile-img{
+        width:45px;
+        height:45px;
+    }
+
+    .nav-pills .nav-link{
+        font-size:13px;
+        padding:6px 10px;
+    }
+
+    .fab{
+        width:50px;
+        height:50px;
+        font-size:22px;
+    }
+
+    .card-custom{
+        border-radius:12px;
+    }
+
+}
+
+/* Prevent overflow on mobile */
+
+.table-responsive{
+    overflow-x:auto;
 }
 
 </style>
 </head>
+
 <body>
 
 <!-- HEADER -->
@@ -57,7 +195,9 @@ body { background:#f4f6f9; }
 
         <!-- Left: Profile + Basic Info -->
         <div class="d-flex align-items-center">
-            <div class="profile-img"></div>
+            <div class="profile-img">
+                <img src="{{ profile.image_path.url }}" class="profile-photo">
+            </div>
 
             <div class="ms-3">
                 
@@ -65,7 +205,7 @@ body { background:#f4f6f9; }
 
                 <div class="d-flex flex-wrap gap-2">
                     <small class="text-muted">
-                        {{profile.patient_id}} / {{profile.gender}} / {{profile.age}}
+                        {{profile.patient_id}} / {{profile.gender}} / {{profile.age}} / {{ profile.image_path }}
                     </small>
                 </div>
             </div>
@@ -232,61 +372,65 @@ body { background:#f4f6f9; }
 
     <!-- Procedure -->
     <div class="tab-content-box" id="tab-procedure">
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-primary">
-                <tr>
-                    <th class="col-sm-2">Procedure</th>
-                    <th class="col-sm-2">Price</th>
-                    <th class="col-sm-2">Quantity</th>
-                    <th class="col-sm-2">Discount Type</th>
-                    <th class="col-sm-2">Discount</th>
-                    <th class="d-none d-md-table-cell col-sm-8">Notes</th>
-                    <th class="col-sm-2">Date</th> 
-                    <th class="col-sm-2">Time</th> 
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in procedures %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-primary">
                     <tr>
-                        <td>{{ p.procedure.prodecure }}</td>
-                        <td>{{ p.price }}</td>
-                        <td>{{ p.quantity }}</td>
-                        <td>{{ p.discount_type }}</td>
-                        <td>{{ p.discount }}</td>
-                        <td>{{ p.notes }}</td>
-
-                        <td>{{ p.created_at|date:"d M Y" }}</td>
-                        <td>{{ p.created_at|time:"H:i:s" }}</td>
-                    
-                        <!-- Edit -->
-                        <td>
-                            <button class="btn btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editProcedureModal{{ p.id }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                                </svg>
-                            </button>
-
-                            <!-- Delete -->
-                            <button class="btn btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#deleteProcedureModal{{ p.id }}"
-                                >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-                                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
-                                    </svg>
-                            </button>
-                        </td>
+                        <th class="col-sm-2">Procedure</th>
+                        <th class="col-sm-2">Price</th>
+                        <th class="col-sm-2">Quantity</th>
+                        <th class="col-sm-2">Discount Type</th>
+                        <th class="col-sm-2">Discount</th>
+                        <th class="col-sm-2">Total</th>
+                        <th class="col-sm-2">Notes</th>
+                        <th class="col-sm-2">Date</th> 
+                        <th class="col-sm-2">Time</th> 
+                        <th>Actions</th>
                     </tr>
-                    {% include "procedure/edit.html" %}
-                    {% include "procedure/delete.html" %}
-                  
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for p in procedures %}
+                        <tr>
+                            <td>{{ p.procedure.prodecure }}</td>
+                            <td>{{ p.price }}</td>
+                            <td>{{ p.quantity }}</td>
+                            <td>{{ p.discount_type }}</td>
+                            <td>{{ p.discount }}</td>
+                            <td>{{ p.total }}</td>
+                            <td>{{ p.notes }}</td>
+
+                            <td>{{ p.created_at|date:"d M Y" }}</td>
+                            <td>{{ p.created_at|time:"H:i:s" }}</td>
+                        
+                            <!-- Edit -->
+                            <td>
+                                <button class="btn btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#editProcedureModal{{ p.id }}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Delete -->
+                                <button class="btn btn-sm"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#deleteProcedureModal{{ p.id }}"
+                                    >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                        </svg>
+                                </button>
+                            </td>
+                        </tr>
+                        {% include "procedure/edit.html" %}
+                        {% include "procedure/delete.html" %}
+                    
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- Prescription -->

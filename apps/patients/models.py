@@ -15,7 +15,7 @@ class PatientProfile(models.Model):
     state = models.CharField(max_length=50)
     address = models.CharField(max_length=250)
     pincode = models.CharField(max_length=20)
-    image_path = models.CharField(max_length=50)
+    image_path = models.CharField(max_length=200)
      
 
 class Vital(models.Model):
@@ -49,10 +49,10 @@ class PatientProcedure(models.Model):
     procedure = models.ForeignKey(Procedures, on_delete=models.CASCADE)
     quantity = models.IntegerField(default=0)
     price = models.FloatField(default=0)
-    # total = models.FloatField()
     notes = models.TextField(blank=True, null=True)
     discount_type = models.CharField(max_length=15)
     discount = models.FloatField(default=0)
+    total = models.FloatField(default=0)
     status = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True, blank=True)

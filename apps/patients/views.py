@@ -16,6 +16,7 @@ def create_patient(request):
     if request.method == "POST":
         form = PatientProfileForm(request.POST)
         image_file = request.FILES.get("image_file")
+        print("----- imag_file----", image_file)
         if form.is_valid():
             # 1️⃣ Save patient first (to get primary key)
             patient = form.save(commit=False)
@@ -36,7 +37,8 @@ def create_patient(request):
                         f.write(chunk)
 
                 # 3️⃣ Save folder name or relative path in DB
-                patient.image_path = f"patients/photo_{str(patient.patient_id)}.png"
+                print("---- image_full_path -----", image_full_path)
+                patient.image_path =  f"patients/{str(patient.patient_id)}/photo_{str(patient.patient_id)}.png"
                 patient.save()
 
             messages.success(request, "Patient profile created successfully.")
@@ -204,14 +206,21 @@ def patient_procedure_edit(request, pk):
     procedure = get_object_or_404(PatientProcedure, pk=pk)
 
     if request.method == "POST":
-        fields = [
-            "procedure", "notes", "quantity", "price", "discount", "discount_type", "status", "total"
-        ]
-        for field in fields:
-            setattr(procedure, field, request.POST.get(field) or None)
+
+        procedure.procedure_id = request.POST.get("procedure_id")
+
+        for field in ("notes", "quantity",
+                      "price", "discount", "discount_type", "status", "total"):
+            value = request.POST.get(field)
+            if value:
+                setattr(procedure, field, value)
 
         procedure.save()
-        return redirect(f"{reverse('patient_profile', kwargs={'pk': procedure.patient.patient_id})}#tab-procedure")
+
+        return redirect(
+            f"{reverse('patient_profile', kwargs={'pk': procedure.patient.patient_id})}#tab-procedure"
+        )
+
 
 def patient_procedure_delete(request, pk):
     procedure = get_object_or_404(PatientProcedure, pk=pk)

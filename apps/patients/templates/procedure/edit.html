@@ -1,5 +1,5 @@
 <div class="modal fade" id="editProcedureModal{{ p.id }}">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
 
       <form method="post" action="{% url 'patient_procedure_edit' p.id %}">
@@ -13,7 +13,7 @@
         <div class="modal-body">
 
           <!-- Added Date -->
-          <div class="mb-2">
+          <div class="mb-3">
             <label class="form-label small text-muted">Added Date</label>
             <input type="date"
                    class="form-control"
@@ -22,10 +22,10 @@
           </div>
 
           <!-- Procedure -->
-          <div class="mb-2">
+          <div class="mb-3">
             <label class="form-label small text-muted">Procedure</label>
 
-            <select class="form-control" required name="procedure_id">
+            <select class="form-select" required name="procedure_id" id="procedureSelect1">
 
               {% for proc in procedures_list %}
 
@@ -43,9 +43,9 @@
           </div>
 
           <!-- Quantity & Price -->
-          <div class="row g-2 mb-2">
+          <div class="row g-2 mb-3">
 
-            <div class="col-6">
+            <div class="col-12 col-md-6">
               <label class="form-label small text-muted">Quantity</label>
               <input type="number"
                      class="form-control"
@@ -55,7 +55,7 @@
                      id="ProcedureQuantity1">
             </div>
 
-            <div class="col-6">
+            <div class="col-12 col-md-6">
               <label class="form-label small text-muted">Price</label>
               <input type="number"
                      class="form-control"
@@ -67,20 +67,18 @@
           </div>
 
           <!-- Notes -->
-          <div class="mb-2">
+          <div class="mb-3">
             <label class="form-label small text-muted">Notes</label>
 
             <textarea class="form-control"
                       rows="3"
                       name="notes">{{ p.notes }}</textarea>
-
           </div>
 
           <!-- Discount -->
-          <div class="row g-2 mb-2">
+          <div class="row g-2 mb-3">
 
-            <div class="col-6">
-
+            <div class="col-12 col-md-6">
               <label class="form-label small text-muted">Discount Type</label>
 
               <select class="form-select"
@@ -89,20 +87,18 @@
 
                 <option value="amount"
                   {% if p.discount_type == "amount" %}selected{% endif %}>
-                  ₹
+                  ₹ Amount
                 </option>
 
                 <option value="percentage"
                   {% if p.discount_type == "percentage" %}selected{% endif %}>
-                  %
+                  % Percentage
                 </option>
 
               </select>
-
             </div>
 
-            <div class="col-6">
-
+            <div class="col-12 col-md-6">
               <label class="form-label small text-muted">Discount</label>
 
               <input type="number"
@@ -110,13 +106,12 @@
                      name="discount"
                      value="{{ p.discount }}"
                      id="ProcedureDiscount1">
-
             </div>
 
           </div>
 
           <!-- Total -->
-          <div class="mb-2">
+          <div class="mb-3">
 
             <label class="form-label small text-muted">Total</label>
 
@@ -172,3 +167,66 @@
     </div>
   </div>
 </div>
+
+
+<script>
+
+function calculateTotal() {
+
+    let quantity = parseFloat(document.getElementById("ProcedureQuantity1").value);
+    let price = parseFloat(document.getElementById("ProcedurePrice1").value);
+    let discount = parseFloat(document.getElementById("ProcedureDiscount1").value);
+    let discountType = document.getElementById("discount_type1").value;
+
+    quantity = isNaN(quantity) ? 0 : quantity;
+    price = isNaN(price) ? 0 : price;
+    discount = isNaN(discount) ? 0 : discount;
+
+    let base = quantity * price;
+    let discountAmount = 0;
+
+    if (discount > 0) {
+
+        if (discountType === "percentage") {
+            discountAmount = (base * discount) / 100;
+        } else {
+            discountAmount = discount;
+        }
+
+    }
+
+    let total = base - discountAmount;
+
+    if (total < 0) total = 0;
+
+    document.getElementById("ProcedureTotal1").value = total.toFixed(2);
+}
+
+
+// procedure price auto fill
+document.getElementById('procedureSelect1').addEventListener('change', function () {
+
+    const selectedOption = this.options[this.selectedIndex];
+    const price = selectedOption.getAttribute('data-price');
+
+    document.getElementById('ProcedurePrice1').value = price ? price : '';
+
+    calculateTotal();
+
+});
+
+
+// trigger calculations
+["ProcedureQuantity1","ProcedurePrice1","ProcedureDiscount1"].forEach(id => {
+
+    document.getElementById(id).addEventListener("input", calculateTotal);
+
+});
+
+document.getElementById("discount_type1").addEventListener("change", calculateTotal);
+
+
+// calculate on load
+document.addEventListener("DOMContentLoaded", calculateTotal);
+
+</script>
