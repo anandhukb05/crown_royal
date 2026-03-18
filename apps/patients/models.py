@@ -15,7 +15,7 @@ class PatientProfile(models.Model):
     state = models.CharField(max_length=50)
     address = models.CharField(max_length=250)
     pincode = models.CharField(max_length=20)
-    image_path = models.CharField(max_length=200)
+    image_path = models.ImageField(upload_to="patients/", blank=True, null=True)
      
 
 class Vital(models.Model):

@@ -8,7 +8,7 @@
 <body>
 <div class="container my-4">
 
-<form method="post">
+<form  id="invoiceForm" name="invoice_form" method="post" action="{% url 'add_invoice' profile.patient_id %}">
 {% csrf_token %}
 
 <!-- HEADER -->

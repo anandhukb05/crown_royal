@@ -37,7 +37,6 @@ def create_patient(request):
                         f.write(chunk)
 
                 # 3️⃣ Save folder name or relative path in DB
-                print("---- image_full_path -----", image_full_path)
                 patient.image_path =  f"patients/{str(patient.patient_id)}/photo_{str(patient.patient_id)}.png"
                 patient.save()
 
@@ -70,6 +69,25 @@ def view_patients(request):
         "page_obj": page_obj,
         "query": query
     })
+
+
+def edit_patient(request, pk):
+
+    patient = get_object_or_404(PatientProfile, pk=pk)
+
+    if request.method == "POST":
+        form = PatientProfileForm(request.POST, instance=patient)
+        print("-----", form.is_valid())
+        print(form.errors.as_data())
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Patient updated successfully")
+            return redirect("patient_view")
+
+    else:
+        form = PatientProfileForm(instance=patient)
+
+    return redirect("patient_view")
 
 
 def patient_profile(request, pk):

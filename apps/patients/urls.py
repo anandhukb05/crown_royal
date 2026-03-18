@@ -5,6 +5,7 @@ from .views import *
 urlpatterns = [
     path("create/", create_patient, name="create_patient"),
     path("view/", view_patients, name="patient_view"),
+    path("patients/edit/<int:pk>/", edit_patient, name="edit_patient"),
     path("view/<int:pk>/", patient_profile, name="patient_profile"),
     path("vital/<int:patient_id>", vital_view, name="vital"),
     path("vital/edit/<int:pk>/", vital_edit, name="vital_edit"),

@@ -6,26 +6,20 @@
 {% block style %}
 
 .patient-card{
-    cursor:pointer;
     border-radius:14px;
     transition:0.2s;
 }
 
 .patient-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 6px 16px rgba(0,0,0,0.1);
+    transform:translateY(-4px);
+    box-shadow:0 8px 20px rgba(0,0,0,0.08);
 }
 
-.patient-photo{
-    width:70px;
-    height:70px;
-    border-radius:50%;
-    object-fit:cover;
-}
+
 
 .patient-id{
     font-size:13px;
-    color:#888;
+    color:#777;
 }
 
 {% endblock %}
@@ -53,58 +47,167 @@
 
 
 <!-- Patient Cards -->
-<div class="row g-3">
+<div class="row g-4">
+
 {% for patient in page_obj %}
-<div class="col-xl-3 col-lg-4 col-md-6 col-12">
 
-<div class="card patient-card p-3"
-     onclick="window.location='{% url 'patient_profile' patient.patient_id %}'">
+<div class="col-xl-4 col-lg-4 col-md-6 col-12">
 
-<div class="d-flex align-items-center">
+<div class="card patient-card h-100">
 
-<!-- Photo -->
-<div class="me-3">
+<div class="row g-0 align-items-center">
+
+<!-- IMAGE -->
+<div class="col-md-4 text-center p-2">
 
 {% if patient.image_path %}
-<img src="{{ patient.image_path.url }}" class="patient-photo">
-<img src="/media/patients/5/photo_5.png" class="patient-photo">
-
-
+<img src="{{ patient.image_path.url }}" 
+     class="img-fluid rounded-start patient-photo">
 {% else %}
-<img src="{% static 'img/user.png' %}" class="patient-photo">
+<img src="{% static 'images/patient.png' %}" 
+     class="img-fluid rounded-start patient-photo">
 {% endif %}
 
 </div>
 
-<!-- Info -->
-<div>
+<!-- INFO -->
+<div class="col-md-8">
 
-<div class="fw-semibold">
+<div class="card-body pt-2 pb-2">
+
+<h6 class="fw-semibold mb-1">
 {{ patient.name }}
-</div>
+</h6>
 
-<div class="patient-id">
+<div class="patient-id mb-1">
 ID : {{ patient.patient_id }}
 </div>
 
-<div class="small text-muted">
+<div class="small text-muted mb-1">
 {{ patient.gender }} | Age {{ patient.age }}
 </div>
 
-<div class="small mt-1">
+<div class="small mb-1">
 <i class="bi bi-telephone"></i> {{ patient.phno }}
 </div>
 
-<div class="small text-muted">
+<div class="small text-muted text-truncate">
 <i class="bi bi-envelope"></i> {{ patient.email }}
 </div>
 
 </div>
 
+<!-- ACTIONS -->
+<div class="card-footer bg-white border-0 pt-0 pb-2">
+
+<a href="{% url 'patient_profile' patient.patient_id %}" 
+   class="btn btn-sm btn-primary">
+<i class="bi bi-eye"></i>
+</a>
+
+<button class="btn btn-sm btn-warning"
+        data-bs-toggle="modal"
+        data-bs-target="#editPatientModal{{ patient.patient_id }}">
+<i class="bi bi-pencil"></i>
+</button>
+
+<a href="#" class="btn btn-sm btn-danger">
+<i class="bi bi-trash"></i>
+</a>
+
+</div>
+
 </div>
 
 </div>
 
+</div>
+
+</div>
+
+
+<!-- EDIT MODAL -->
+<div class="modal fade" id="editPatientModal{{ patient.patient_id }}">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-content">
+
+<form method="post" action="{% url 'edit_patient' patient.patient_id %}">
+{% csrf_token %}
+
+<div class="modal-header">
+<h5 class="modal-title">Edit Patient</h5>
+<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+</div>
+
+<div class="modal-body">
+
+<div class="row g-3">
+
+<div class="col-md-6">
+<label class="form-label">Name</label>
+<input type="text" name="name" value="{{ patient.name }}" class="form-control">
+</div>
+
+<div class="col-md-6">
+<label class="form-label">Email</label>
+<input type="email" name="email" value="{{ patient.email }}" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label class="form-label">Age</label>
+<input type="number" name="age" value="{{ patient.age }}" class="form-control">
+</div>
+
+<div class="col-md-3">
+<label class="form-label">Gender</label>
+<select name="gender" class="form-control">
+<option {% if patient.gender == "Male" %}selected{% endif %}>Male</option>
+<option {% if patient.gender == "Female" %}selected{% endif %}>Female</option>
+</select>
+</div>
+
+<div class="col-md-6">
+<label class="form-label">Phone</label>
+<input type="text" name="phno" value="{{ patient.phno }}" class="form-control">
+</div>
+<div class="col-md-6">
+    <label class="form-label">Aadhaar Number</label>
+    <input type="text" name="aadhaar_id" class="form-control" maxlength="12" value="{{ patient.aadhaar_id }}">
+</div>
+
+
+<div class="col-md-6">
+<label class="form-label">Country</label>
+<input type="text" name="country" value="{{ patient.country }}" class="form-control">
+</div>
+
+<div class="col-md-6">
+<label class="form-label">State</label>
+<input type="text" name="state" value="{{ patient.state }}" class="form-control">
+</div>
+
+<div class="col-md-8">
+<label class="form-label">Address</label>
+<input type="text" name="address" value="{{ patient.address }}" class="form-control">
+</div>
+
+<div class="col-md-4">
+<label class="form-label">Pincode</label>
+<input type="text" name="pincode" value="{{ patient.pincode }}" class="form-control">
+</div>
+
+</div>
+
+</div>
+
+<div class="modal-footer">
+<button class="btn btn-primary">Update</button>
+</div>
+
+</form>
+
+</div>
+</div>
 </div>
 
 {% empty %}
@@ -116,62 +219,4 @@ No patients found
 {% endfor %}
 
 </div>
-
-
-<!-- Pagination -->
-{% if page_obj.paginator.num_pages > 1 %}
-
-<nav class="mt-4">
-<ul class="pagination justify-content-center">
-
-{% if page_obj.has_previous %}
-<li class="page-item">
-<a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">
-Previous
-</a>
-</li>
-{% else %}
-<li class="page-item disabled">
-<span class="page-link">Previous</span>
-</li>
-{% endif %}
-
-{% for num in page_obj.paginator.page_range %}
-
-{% if page_obj.number == num %}
-<li class="page-item active">
-<span class="page-link">{{ num }}</span>
-</li>
-
-{% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-<li class="page-item">
-<a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
-</li>
-{% endif %}
-
-{% endfor %}
-
-{% if page_obj.has_next %}
-<li class="page-item">
-<a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">
-Next
-</a>
-</li>
-{% else %}
-<li class="page-item disabled">
-<span class="page-link">Next</span>
-</li>
-{% endif %}
-
-</ul>
-</nav>
-
-{% endif %}
-<a href="{% url 'create_patient' %}" class="btn btn-success rounded-circle center"
-style="position:fixed;bottom:45px;right:25px;width:50px;height:50px;font-size:27px;">
-<i class="bi bi-plus"></i>
-</a>
-
-</div>
-
 {% endblock %}
