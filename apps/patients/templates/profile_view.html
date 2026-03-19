@@ -401,6 +401,7 @@ body{
                         <th class="col-sm-2">Discount</th>
                         <th class="col-sm-2">Total</th>
                         <th class="col-sm-2">Notes</th>
+                        <th class="col-sm-2">Status</th>
                         <th class="col-sm-2">Date</th> 
                         <th class="col-sm-2">Time</th> 
                         <th>Actions</th>
@@ -416,6 +417,7 @@ body{
                             <td>{{ p.discount }}</td>
                             <td>{{ p.total }}</td>
                             <td>{{ p.notes }}</td>
+                            <td>{{ p.status }}</td>
 
                             <td>{{ p.created_at|date:"d M Y" }}</td>
                             <td>{{ p.created_at|time:"H:i:s" }}</td>

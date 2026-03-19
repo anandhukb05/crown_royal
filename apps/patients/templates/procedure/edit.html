@@ -25,7 +25,7 @@
           <div class="mb-3">
             <label class="form-label small text-muted">Procedure</label>
 
-            <select class="form-select" required name="procedure_id" id="procedureSelect1">
+            <select class="form-select" required name="procedure_id" id="procedureSelect">
 
               {% for proc in procedures_list %}
 
@@ -52,7 +52,7 @@
                      name="quantity"
                      min="1"
                      value="{{ p.quantity }}"
-                     id="ProcedureQuantity1">
+                     id="ProcedureQuantity">
             </div>
 
             <div class="col-12 col-md-6">
@@ -61,7 +61,7 @@
                      class="form-control"
                      name="price"
                      value="{{ p.price }}"
-                     id="ProcedurePrice1">
+                     id="ProcedurePrice">
             </div>
 
           </div>
@@ -83,7 +83,7 @@
 
               <select class="form-select"
                       name="discount_type"
-                      id="discount_type1">
+                      id="discount_type">
 
                 <option value="amount"
                   {% if p.discount_type == "amount" %}selected{% endif %}>
@@ -105,7 +105,7 @@
                      class="form-control"
                      name="discount"
                      value="{{ p.discount }}"
-                     id="ProcedureDiscount1">
+                     id="ProcedureDiscount">
             </div>
 
           </div>
@@ -120,7 +120,7 @@
                    name="total"
                    readonly
                    value="{{ p.total }}"
-                   id="ProcedureTotal1">
+                   id="ProcedureTotal">
 
           </div>
 
@@ -173,10 +173,10 @@
 
 function calculateTotal() {
 
-    let quantity = parseFloat(document.getElementById("ProcedureQuantity1").value);
-    let price = parseFloat(document.getElementById("ProcedurePrice1").value);
-    let discount = parseFloat(document.getElementById("ProcedureDiscount1").value);
-    let discountType = document.getElementById("discount_type1").value;
+    let quantity = parseFloat(document.getElementById("ProcedureQuantity").value);
+    let price = parseFloat(document.getElementById("ProcedurePrice").value);
+    let discount = parseFloat(document.getElementById("ProcedureDiscount").value);
+    let discountType = document.getElementById("discount_type").value;
 
     quantity = isNaN(quantity) ? 0 : quantity;
     price = isNaN(price) ? 0 : price;
@@ -199,17 +199,17 @@ function calculateTotal() {
 
     if (total < 0) total = 0;
 
-    document.getElementById("ProcedureTotal1").value = total.toFixed(2);
+    document.getElementById("ProcedureTotal").value = total.toFixed(2);
 }
 
 
 // procedure price auto fill
-document.getElementById('procedureSelect1').addEventListener('change', function () {
+document.getElementById('procedureSelect').addEventListener('change', function () {
 
     const selectedOption = this.options[this.selectedIndex];
     const price = selectedOption.getAttribute('data-price');
 
-    document.getElementById('ProcedurePrice1').value = price ? price : '';
+    document.getElementById('ProcedurePrice').value = price ? price : '';
 
     calculateTotal();
 
@@ -217,13 +217,13 @@ document.getElementById('procedureSelect1').addEventListener('change', function 
 
 
 // trigger calculations
-["ProcedureQuantity1","ProcedurePrice1","ProcedureDiscount1"].forEach(id => {
+["ProcedureQuantity","ProcedurePrice","ProcedureDiscount"].forEach(id => {
 
     document.getElementById(id).addEventListener("input", calculateTotal);
 
 });
 
-document.getElementById("discount_type1").addEventListener("change", calculateTotal);
+document.getElementById("discount_type").addEventListener("change", calculateTotal);
 
 
 // calculate on load
