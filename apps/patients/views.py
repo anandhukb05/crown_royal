@@ -7,41 +7,44 @@ from .models import PatientProfile
 from django.core.paginator import Paginator
 from django.db.models import Q
 from .models import Vital, ClinicalNotes, PatientProcedure, Prescription
-from apps.services.models import Procedures
+from apps.services.models import Procedures, Medicine
 from django.urls import reverse
 from django.utils import timezone
-from apps.services.models import Procedures, Medicine
+
 
 def create_patient(request):
     if request.method == "POST":
-        form = PatientProfileForm(request.POST)
+        form = PatientProfileForm(request.POST, request.FILES)
         image_file = request.FILES.get("image_file")
-        print("----- imag_file----", image_file)
+
         if form.is_valid():
-            # 1️⃣ Save patient first (to get primary key)
             patient = form.save(commit=False)
-            patient.image_path = ""  # temporary
+            patient.image_path = ""
             patient.save()
 
-            # 2️⃣ If image uploaded, save it in folder = patient.id
             if image_file:
                 patient_folder = os.path.join(
                     settings.MEDIA_ROOT, "patients", str(patient.patient_id)
                 )
                 os.makedirs(patient_folder, exist_ok=True)
 
-                image_full_path = os.path.join(patient_folder, "photo_"+str(patient.patient_id)+'.png')
+                image_full_path = os.path.join(
+                    patient_folder,
+                    f"photo_{patient.patient_id}.png"
+                )
 
                 with open(image_full_path, "wb+") as f:
                     for chunk in image_file.chunks():
                         f.write(chunk)
 
-                # 3️⃣ Save folder name or relative path in DB
-                patient.image_path =  f"patients/{str(patient.patient_id)}/photo_{str(patient.patient_id)}.png"
+                patient.image_path = f"patients/{patient.patient_id}/photo_{patient.patient_id}.png"
                 patient.save()
 
             messages.success(request, "Patient profile created successfully.")
-            return redirect("create_patient")
+            return redirect("patient_view")
+
+        else:
+            print(form.errors)  # DEBUG
 
     else:
         form = PatientProfileForm()
@@ -72,23 +75,67 @@ def view_patients(request):
 
 
 def edit_patient(request, pk):
-
     patient = get_object_or_404(PatientProfile, pk=pk)
 
     if request.method == "POST":
-        form = PatientProfileForm(request.POST, instance=patient)
-        print("-----", form.is_valid())
-        print(form.errors.as_data())
+        form = PatientProfileForm(request.POST, request.FILES, instance=patient)  # ✅ FIX
+
         if form.is_valid():
-            form.save()
+            patient = form.save(commit=False)
+
+            image_file = request.FILES.get("image_file")
+
+            # ✅ HANDLE IMAGE UPDATE
+            if image_file:
+                patient_folder = os.path.join(
+                    settings.MEDIA_ROOT, "patients", str(patient.patient_id)
+                )
+                os.makedirs(patient_folder, exist_ok=True)
+
+                image_path = os.path.join(
+                    patient_folder,
+                    f"photo_{patient.patient_id}.png"
+                )
+
+                with open(image_path, "wb+") as f:
+                    for chunk in image_file.chunks():
+                        f.write(chunk)
+
+                patient.image_path = f"patients/{patient.patient_id}/photo_{patient.patient_id}.png"
+
+            patient.save()
+
             messages.success(request, "Patient updated successfully")
             return redirect("patient_view")
 
-    else:
-        form = PatientProfileForm(instance=patient)
+        else:
+            print(form.errors)  # debug
+            messages.error(request, "Please fix the errors")
+
+            # ❗ IMPORTANT: DON'T REDIRECT HERE
+            return redirect("patient_view")  # (see note below)
 
     return redirect("patient_view")
 
+def delete_patient(request, pk):
+    patient = get_object_or_404(PatientProfile, pk=pk)
+
+    if request.method == "POST":
+        # 🔥 Delete image folder (optional but recommended)
+        patient_folder = os.path.join(
+            settings.MEDIA_ROOT, "patients", str(patient.patient_id)
+        )
+
+        if os.path.exists(patient_folder):
+            import shutil
+            shutil.rmtree(patient_folder)
+
+        patient.delete()
+
+        messages.success(request, "Patient deleted successfully")
+        return redirect("patient_view")
+
+    return redirect("patient_view")
 
 def patient_profile(request, pk):
     profile = PatientProfile.objects.get(patient_id=pk)
@@ -277,3 +324,10 @@ def add_prescription(request, patient_id):
 def patient_bill(request, patient_id):
     patient = get_object_or_404(PatientProfile, patient_id=patient_id)
     return render(request, "bill.html",{"patient": patient})
+
+def add_invoice(request, patient_id):
+    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+
+    if request.method == 'POST':
+        pass
+    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription")

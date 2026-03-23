@@ -2,892 +2,1011 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Patient Details</title>
+<title>Patient Profile — DentalOS</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
-
-body{
-    background:#f4f6f9;
-    font-size:15px;
+:root {
+  --navy: #0f1f3d;
+  --navy-mid: #1a3260;
+  --mint: #00c9a7;
+  --mint-light: #e6faf6;
+  --surface: #f7f9fc;
+  --card: #ffffff;
+  --text-primary: #0f1f3d;
+  --text-secondary: #6b7a99;
+  --text-muted: #a0aec0;
+  --border: #e8edf5;
+  --danger: #ff4d6d;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 20px rgba(15,31,61,.07);
+  --shadow-md: 0 8px 32px rgba(15,31,61,.12);
 }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: var(--text-primary); font-size: 14px; min-height: 100vh; }
 
-/* Top bar */
+/* NAV */
+.topnav { background: var(--navy); padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.topnav-brand { display: flex; align-items: center; gap: 10px; font-family: 'Playfair Display', serif; font-size: 18px; color: #fff; font-weight: 600; }
+.topnav-brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--mint); }
+.topnav-actions { display: flex; align-items: center; gap: 10px; }
+.btn-nav { background: rgba(255,255,255,.1); border: none; color: rgba(255,255,255,.85); font-size: 13px; font-family: inherit; padding: 7px 16px; border-radius: 8px; cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
+.btn-nav:hover { background: rgba(255,255,255,.2); color: #fff; }
+.btn-nav-mint { background: var(--mint); color: var(--navy); font-weight: 600; }
+.btn-nav-mint:hover { background: #00b899; color: var(--navy); }
 
-.top-bar{
-    background:#1e9bd7;
-    color:#fff;
-    padding:12px 15px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
+/* BREADCRUMB */
+.breadcrumb-bar { padding: 12px 24px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+.breadcrumb-bar a { color: var(--text-muted); text-decoration: none; }
+.breadcrumb-bar a:hover { color: var(--mint); }
+.breadcrumb-bar .current { color: var(--text-primary); font-weight: 500; }
+
+/* MAIN */
+.main-wrap { padding: 0 24px 100px; max-width: 1200px; margin: 0 auto; }
+
+/* HERO */
+.hero-card { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%); border-radius: var(--radius); padding: 28px 32px; display: flex; align-items: center; gap: 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
+.hero-card::before { content: ''; position: absolute; top: -40px; right: -40px; width: 200px; height: 200px; border-radius: 50%; background: rgba(0,201,167,.08); }
+.hero-card::after { content: ''; position: absolute; bottom: -60px; right: 80px; width: 140px; height: 140px; border-radius: 50%; background: rgba(0,201,167,.05); }
+.avatar-wrap { position: relative; flex-shrink: 0; }
+.avatar-ring { width: 80px; height: 80px; border-radius: 50%; background: var(--mint); padding: 3px; display: flex; align-items: center; justify-content: center; }
+.avatar-ring img { width: 74px; height: 74px; border-radius: 50%; object-fit: cover; display: block; cursor: pointer; }
+.avatar-fallback { width: 74px; height: 74px; border-radius: 50%; background: var(--navy-mid); display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--mint); font-family: 'Playfair Display', serif; font-weight: 600; }
+.status-dot { position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; background: var(--mint); border: 2px solid var(--navy); }
+.hero-info { flex: 1; min-width: 0; }
+.hero-name { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 600; color: #fff; margin-bottom: 6px; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.meta-pill { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); font-size: 11px; padding: 4px 10px; border-radius: 20px; display: flex; align-items: center; gap: 4px; }
+.meta-pill i { color: var(--mint); font-size: 11px; }
+.hero-contacts { display: flex; flex-wrap: wrap; gap: 16px; }
+.contact-item { display: flex; align-items: center; gap: 6px; color: rgba(255,255,255,.65); font-size: 12px; }
+.contact-item i { color: var(--mint); font-size: 13px; }
+.hero-right { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; flex-shrink: 0; }
+.pid-badge { background: rgba(0,201,167,.15); color: var(--mint); font-size: 12px; font-weight: 600; padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(0,201,167,.3); letter-spacing: .5px; }
+
+/* TABS */
+.tab-bar { background: var(--card); border-radius: var(--radius); padding: 6px; margin-bottom: 20px; display: flex; gap: 4px; flex-wrap: wrap; box-shadow: var(--shadow); }
+.tab-btn { padding: 9px 18px; border-radius: 10px; border: none; background: none; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tab-btn:hover { background: var(--surface); color: var(--text-primary); }
+.tab-btn.active { background: var(--navy); color: #fff; }
+.tab-count { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; background: var(--mint-light); color: var(--mint); }
+.tab-btn.active .tab-count { background: rgba(255,255,255,.2); color: #fff; }
+
+/* PANEL */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeUp .25s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* PANEL HEADER */
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.panel-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; }
+.panel-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* CARD */
+.card-base { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); overflow: hidden; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table thead tr { background: var(--surface); border-bottom: 1px solid var(--border); }
+.data-table thead th { padding: 12px 16px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .7px; white-space: nowrap; }
+.data-table tbody tr { border-bottom: 1px solid var(--border); transition: .15s; }
+.data-table tbody tr:last-child { border-bottom: none; }
+.data-table tbody tr:hover { background: var(--surface); }
+.data-table td { padding: 13px 16px; font-size: 13px; color: var(--text-primary); }
+.data-table td.muted { color: var(--text-muted); }
+
+/* CHIPS & BADGES */
+.vital-chip { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.chip-normal { background: #e6faf6; color: #00967d; }
+.badge-status { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-completed { background: var(--mint-light); color: #00967d; }
+.badge-planned { background: #eff2ff; color: #3355cc; }
+
+/* ACTION BUTTONS */
+.act-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: .15s; color: var(--text-secondary); }
+.act-btn:hover { background: var(--surface); color: var(--text-primary); }
+.act-btn.danger:hover { background: #ffe8ec; border-color: #ffb3c1; color: var(--danger); }
+.act-btn i { font-size: 13px; }
+
+/* NOTE CARD */
+.note-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px 20px; box-shadow: var(--shadow); transition: .2s; margin-bottom: 12px; }
+.note-card:hover { border-color: var(--mint); box-shadow: 0 4px 24px rgba(0,201,167,.1); }
+.note-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.note-date { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 5px; }
+.note-date i { color: var(--mint); }
+.note-body { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon { width: 64px; height: 64px; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; border: 1px solid var(--border); }
+.empty-icon i { font-size: 24px; color: var(--text-muted); }
+.empty-title { font-size: 15px; font-weight: 500; margin-bottom: 6px; }
+.empty-sub { font-size: 13px; color: var(--text-muted); }
+
+/* FAB */
+.fab { position: fixed; bottom: 28px; right: 28px; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(135deg, var(--mint) 0%, #00b899 100%); color: var(--navy); font-size: 26px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(0,201,167,.4); cursor: pointer; border: none; transition: .2s; z-index: 200; }
+.fab:hover { transform: scale(1.08); }
+.fab:active { transform: scale(.96); }
+
+/* MODAL */
+.modal-content { border-radius: var(--radius) !important; border: none !important; box-shadow: var(--shadow-md) !important; }
+.modal-header-custom { padding: 20px 24px 0; border-bottom: none; display: flex; align-items: center; justify-content: space-between; }
+.modal-title-custom { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; }
+.modal-body-custom { padding: 16px 24px 24px; }
+.btn-close-custom { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); font-size: 18px; line-height: 1; }
+.form-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; display: block; }
+.form-control, .form-select { border-radius: var(--radius-sm) !important; border: 1px solid var(--border) !important; font-family: 'DM Sans', sans-serif !important; font-size: 13px !important; color: var(--text-primary) !important; padding: 9px 12px !important; transition: .2s !important; background: var(--surface) !important; }
+.form-control:focus, .form-select:focus { border-color: var(--mint) !important; box-shadow: 0 0 0 3px rgba(0,201,167,.12) !important; outline: none !important; background: #fff !important; }
+.btn-submit { background: linear-gradient(135deg, var(--mint) 0%, #00b899 100%); color: var(--navy); font-weight: 600; border: none; border-radius: var(--radius-sm); padding: 10px 24px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; transition: .2s; }
+.btn-submit:hover { opacity: .9; }
+.btn-cancel { background: var(--surface); color: var(--text-secondary); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; }
+.btn-cancel:hover { background: var(--border); }
+.btn-danger-confirm { background: #ffe8ec; color: var(--danger); border: 1px solid #ffb3c1; border-radius: var(--radius-sm); padding: 10px 20px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; font-weight: 600; }
+.btn-danger-confirm:hover { background: var(--danger); color: #fff; }
+
+/* VITAL SUMMARY */
+.vital-summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.vstat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; transition: .2s; }
+.vstat-card:hover { border-color: var(--mint); transform: translateY(-1px); box-shadow: var(--shadow); }
+.vstat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .7px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+.vstat-val { font-size: 20px; font-weight: 600; color: var(--text-primary); line-height: 1; }
+.vstat-unit { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+.vstat-icon { font-size: 18px; margin-bottom: 8px; }
+
+/* DELETE CONFIRM */
+.delete-confirm-wrap { text-align: center; padding: 8px 0 16px; }
+.delete-confirm-icon { width: 64px; height: 64px; border-radius: 50%; background: #ffe8ec; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+.delete-confirm-icon i { font-size: 28px; color: var(--danger); }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .main-wrap { padding: 0 12px 100px; }
+  .hero-card { flex-wrap: wrap; padding: 20px; gap: 16px; }
+  .hero-right { align-items: flex-start; width: 100%; }
+  .topnav { padding: 0 14px; }
+  .tab-btn { padding: 8px 10px; font-size: 12px; }
+  .d-mobile-none { display: none !important; }
 }
-
-.top-bar h5{
-    margin:0;
-    font-size:18px;
+@media (max-width: 480px) {
+  .tab-btn .tab-label { display: none; }
 }
-
-/* Cards */
-
-.card-custom{
-    border-radius:14px;
-    box-shadow:0 4px 10px rgba(0,0,0,.08);
-    border:none;
-}
-
-/* Profile */
-
-.profile-img{
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    background:#ccc;
-    flex-shrink:0;
-}
-
-/* Tabs */
-
-.nav-pills{
-    flex-wrap:wrap;
-    gap:6px;
-}
-
-.nav-pills .nav-link{
-    border-radius:12px;
-    font-size:14px;
-}
-
-.nav-pills .nav-link.active{
-    background:#e3f2fd;
-    color:#1e9bd7;
-    font-weight:600;
-}
-
-/* No Data */
-
-.no-data{
-    text-align:center;
-    padding:60px 10px;
-    color:#6c757d;
-}
-
-/* Floating Button */
-
-.fab{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    width:55px;
-    height:55px;
-    border-radius:50%;
-    background:#28a745;
-    color:#fff;
-    font-size:26px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    box-shadow:0 4px 12px rgba(0,0,0,.3);
-    cursor:pointer;
-    z-index:999;
-}
-
-/* Modal inputs */
-
-.modal input,
-.modal textarea,
-.modal select{
-    border-radius:10px;
-}
-
-/* Custom Tabs */
-
-.tab-content-box{
-    display:none;
-}
-
-.tab-content-box.active{
-    display:block;
-}
-
-/* Tablet */
-
-@media (max-width:991px){
-
-    .top-bar{
-        flex-direction:column;
-        align-items:flex-start;
-    }
-
-    .profile-img{
-        width:50px;
-        height:50px;
-    }
-
-}
-
-/* Mobile */
-
-@media (max-width:576px){
-
-    body{
-        font-size:14px;
-    }
-
-    .top-bar{
-        padding:10px;
-    }
-
-    .top-bar h5{
-        font-size:16px;
-    }
-
-    .profile-img{
-        width:45px;
-        height:45px;
-    }
-
-    .nav-pills .nav-link{
-        font-size:13px;
-        padding:6px 10px;
-    }
-
-    .fab{
-        width:50px;
-        height:50px;
-        font-size:22px;
-    }
-
-    .card-custom{
-        border-radius:12px;
-    }
-
-}
-
-/* Prevent overflow on mobile */
-
-.table-responsive{
-    overflow-x:auto;
-}
-
-.thumb img{
-    transition: 0.3s;
-    border-radius: 10px;
-}
-.thumb img:hover{
-    transform: scale(1.05);
-}
-
-
 </style>
 </head>
-
 <body>
 
-<!-- HEADER -->
-<div class="top-bar">
-    <a class="nav-link" href="{% url 'patient_view' %}"><i class="bi bi-arrow-left"></i></a>
-    <span>Patient Details</span>
-    <span>Edit</span>
-</div>
 
-<div class="container mt-3">
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080; margin-top:70px;">
+    
+    {% for message in messages %}
+    <div class="toast show align-items-center text-white 
+        {% if message.tags == 'success' %}bg-success
+        {% elif message.tags == 'error' %}bg-danger
+        {% else %}bg-primary{% endif %}
+        border-0 mb-2" role="alert">
 
-<!-- PATIENT CARD -->
-<div class="card card-custom p-3 mb-3">
-    <div class="d-flex align-items-center justify-content-between flex-wrap">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi 
+                    {% if message.tags == 'success' %}bi-check-circle
+                    {% elif message.tags == 'error' %}bi-x-circle
+                    {% else %}bi-info-circle{% endif %}
+                me-2"></i>
 
-        <!-- Left: Profile + Basic Info -->
-        <div class="d-flex align-items-center">
-            <div class="profile-img">
-                <img src="{{ profile.image_path.url }}"
-                    class="profile-img img-fluid"
-                    data-bs-toggle="modal"
-                    data-bs-target="#imageModal"
-                    style="cursor:pointer;">
+                {{ message }}
             </div>
 
-            <div class="ms-3">
-                
-                <div class="fw-semibold">{{profile.name}}</div>
-
-                <div class="d-flex flex-wrap gap-2">
-                    <small class="text-muted">
-                        {{profile.patient_id}} / {{profile.gender}} / {{profile.age}} / {{ profile.image_path }}
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right: Contact Info -->
-        <div class="text-end mt-2 mt-md-0">
-            <small class="d-block text-muted">
-                📧 {{profile.email}}
-            </small>
-            <small class="d-block text-muted">
-                📞 {{profile.phno}}
-            </small>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
         </div>
 
     </div>
-</div>
-
-
-<!-- TABS -->
-<ul class="nav nav-pills mb-3" id="tabs">
-    <li class="nav-item">
-        <button class="nav-link" data-tab="vital">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-vital">Vital Signs</a>
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="notes">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-notes">Clinical Notes</a>
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="procedure">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-procedure">Procedure</a>
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="prescription">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-prescription">Prescription</a>
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="invoice">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-invoice">Invoice</a>
-        </button>
-    </li>
-    <li class="nav-item">
-        <button class="nav-link" data-tab="gallary">
-            <a class="nav-link" data-bs-toggle="tab" href="#tab-gallary">Gallary</a>
-        </button>
-    </li>
-</ul>
-
-
-
-<div class="card card-custom p-3">
-
-    <!-- Vital -->
-
-    <div class="tab-content-box" id="tab-vital">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-primary">
-                    <tr>
-                        <th>Date</th>
-                        <th>Temp</th>
-                        <th class="d-none d-md-table-cell">Weight</th>
-                        <th class="d-none d-md-table-cell">Height</th>
-                        <th>Sugar</th>
-                        <th>BP</th>
-                        <th class="d-none d-lg-table-cell">Pulse</th>
-                        <th class="d-none d-lg-table-cell">SpO₂</th>
-                        <th class="d-none d-lg-table-cell">Resp</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for v in vitals %}
-                        <tr>
-                            <td>{{ v.created_at|date:"d M Y" }}</td>
-                            <td>{{ v.temperature }}</td>
-                            <td class="d-none d-md-table-cell">{{ v.weight }}</td>
-                            <td class="d-none d-md-table-cell">{{ v.height }}</td>
-                            <td>{{ v.sugar }}</td>
-                            <td>{{ v.systolic }}/{{ v.diastolic }}</td>
-                            <td class="d-none d-lg-table-cell">{{ v.pulse }}</td>
-                            <td class="d-none d-lg-table-cell">{{ v.spo2 }}</td>
-                            <td class="d-none d-lg-table-cell">{{ v.respiratory }}</td>
-
-                            <td>
-                            <!-- Edit -->
-                            <button class="btn btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#editVitalModal{{ v.id }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                    <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                    <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                                </svg>
-                            </button>
-
-                            <!-- Delete -->
-                            <button class="btn btn-sm"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#deleteVitalModal{{ v.id }}">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
-                                </svg>
-                            </button>
-                            </td>
-                        </tr>
-
-                        {% include "vitals/edit_modal.html" %}
-                        {% include "vitals/delete_modal.html" %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-    </div>
-
-    <!-- Notes -->
-    <div class="tab-content-box" id="tab-notes">
-
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-primary">
-                <tr>
-                    <th class="col-sm-2">Date</th>
-                    <th class="col-sm-2">Time</th>
-                    <th class="d-none d-md-table-cell col-sm-8">Notes</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for n in notes %}
-                    <tr>
-                        <td>{{ n.created_at|date:"d M Y" }}</td>
-                        <td>{{ n.created_at|time:"H:i:s" }}</td>
-                        <td>{{ n.notes }}</td>
-                        <td>
-                        <!-- Edit -->
-                        <button class="btn btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#editNoteModal{{ n.id }}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                            </svg>
-                        </button>
-
-                        <!-- Delete -->
-                        <button class="btn btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#deleteNoteModal{{ n.id }}"
-                            >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
-                                </svg>
-                        </button>
-                        </td>
-                    </tr>
-                    {% include "notes/edit.html" %}
-                    {% include "notes/delete.html" %}
-                  
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Procedure -->
-    <div class="tab-content-box" id="tab-procedure">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-primary">
-                    <tr>
-                        <th class="col-sm-2">Procedure</th>
-                        <th class="col-sm-2">Price</th>
-                        <th class="col-sm-2">Quantity</th>
-                        <th class="col-sm-2">Discount Type</th>
-                        <th class="col-sm-2">Discount</th>
-                        <th class="col-sm-2">Total</th>
-                        <th class="col-sm-2">Notes</th>
-                        <th class="col-sm-2">Status</th>
-                        <th class="col-sm-2">Date</th> 
-                        <th class="col-sm-2">Time</th> 
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in procedures %}
-                        <tr>
-                            <td>{{ p.procedure.prodecure }}</td>
-                            <td>{{ p.price }}</td>
-                            <td>{{ p.quantity }}</td>
-                            <td>{{ p.discount_type }}</td>
-                            <td>{{ p.discount }}</td>
-                            <td>{{ p.total }}</td>
-                            <td>{{ p.notes }}</td>
-                            <td>{{ p.status }}</td>
-
-                            <td>{{ p.created_at|date:"d M Y" }}</td>
-                            <td>{{ p.created_at|time:"H:i:s" }}</td>
-                        
-                            <!-- Edit -->
-                            <td>
-                                <button class="btn btn-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#editProcedureModal{{ p.id }}">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
-                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
-                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
-                                    </svg>
-                                </button>
-
-                                <!-- Delete -->
-                                <button class="btn btn-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteProcedureModal{{ p.id }}"
-                                    >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
-                                            <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
-                                        </svg>
-                                </button>
-                            </td>
-                        </tr>
-                        {% include "procedure/edit.html" %}
-                        {% include "procedure/delete.html" %}
-                    
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Prescription -->
-    <div class="tab-content-box" id="tab-prescription">
-        <h6>Prescription</h6>
-        <p>Medicines list...</p>
-    </div>
-
-    <div class="tab-content-box" id="tab-invoice">
-        <h6>Bill</h6>
-        
-    </div>
-    <div class="tab-content-box" id="tab-gallary">
-
-
-            
-
-   
-    </div>
+    {% endfor %}
 
 </div>
+{% endif %}
 
 
+<!-- NAV -->
+<nav class="topnav">
+  <div class="topnav-brand">
+    <div class="dot"></div>
+    DentalOS
+  </div>
+  <div class="topnav-actions">
+    <a class="btn-nav" href="{% url 'patient_view' %}">
+      <i class="bi bi-arrow-left"></i> Patients
+    </a>
+    <button class="btn-nav btn-nav-mint">
+      <i class="bi bi-pencil"></i> Edit
+    </button>
+  </div>
+</nav>
 
-<!-- FLOATING BUTTON -->
-<div class="fab" id="addBtn">+</div>
-
-<!-- ================= VITAL SIGNS FORM ================= -->
-<div class="modal fade" id="vitalModal">
-<div class="modal-dialog modal-dialog-centered modal-lg">
-<div class="modal-content p-3">
-<h5>Vital Signs</h5>
-
-<form id="vitalForm" name="vital_form" method="post" action="{% url 'vital' profile.patient_id %}">
-       {% csrf_token %}
-<div class="row g-2">
-<input class="form-control" placeholder="Temperature (°F)" name="temperature">
-<input class="form-control" placeholder="Weight (kg)" name="weight">
-<input class="form-control" placeholder="Height (cm)" name="height">
-<input class="form-control" placeholder="Sugar" name="sugar">
-<input class="form-control" placeholder="Systolic" name="systolic">
-<input class="form-control" placeholder="Diastolic" name="diastolic">
-<input class="form-control" placeholder="Pulse" name="pulse">
-<input class="form-control" placeholder="SpO2" name="spo2">
-<input class="form-control" placeholder="Respiratory" name="respiratory">
+<!-- BREADCRUMB -->
+<div class="breadcrumb-bar">
+  <a href="#">Dashboard</a> <span style="opacity:.4">›</span>
+  <a href="{% url 'patient_view' %}">Patients</a> <span style="opacity:.4">›</span>
+  <span class="current">{{ profile.name }}</span>
 </div>
 
-<div class="d-flex justify-content-end mt-3">
-<button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Cancel</button>
-<button class="btn btn-success">Submit</button>
-</div>
-</form>
+<div class="main-wrap">
 
-</div>
-</div>
-</div>
-
-<!-- ================= CLINICAL NOTES ================= -->
-<div class="modal fade" id="notesModal">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content p-3">
-<h5>Clinical Notes</h5>
-
-<form id="notesForm" name="clinical_notes_form" method="post" action="{% url 'clinical_note' profile.patient_id %}">
-     {% csrf_token %}
-<textarea class="form-control" rows="5" placeholder="Enter clinical notes" name="note"></textarea>
-
-<div class="text-end mt-3">
-<button class="btn btn-success">Save</button>
-</div>
-</form>
-
-</div>
-</div>
-</div>
-
-<!-- ================= PROCEDURE ================= -->
-<div class="modal fade" id="procedureModal">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content p-3">
-<h5>Procedure</h5>
-
-<form id="procedureForm" name="procedure_form"  method="post" action="{% url 'add_procedure' profile.patient_id %}">
-    {% csrf_token %}
-    <!-- Added Date -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Added Date</label>
-        <input type="date" class="form-control" name="added_date" id="added_date">
-
-    </div>
-
-    <!-- Procedure -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Procedure</label>
-        <select class="form-control" required name="procedure_id" id="procedureSelect">
-            <option value="">Select Procedure</option>
-            {% if procedures_list %}
-                {% for p in procedures_list %}
-                    <option value="{{ p.id }}" data-price="{{ p.price }}">{{ p.prodecure }}</option>
-                {% endfor %}
-            {% endif %}
-        </select>
-    </div>
-
-    <!-- Quantity & Price -->
-    <div class="row g-2 mb-2">
-        <div class="col-6">
-            <label class="form-label small text-muted">Quantity</label>
-            <input type="number" class="form-control" name="quantity" value="1" min="1" id="ProcedureQuantity">
-        </div>
-
-        <div class="col-6">
-            <label class="form-label small text-muted">Price</label>
-            <input type="number" class="form-control" name="price" placeholder="Price" id="ProcedurePrice">
-        </div>
-    </div>
-
-    <!-- Notes -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Notes</label>
-        <textarea class="form-control" rows="3" name="notes" placeholder="Notes"></textarea>
-    </div>
-
-    <!-- Discount Type & Discount -->
-    <div class="row g-2 mb-2">
-        <div class="col-6">
-            <label class="form-label small text-muted">Discount Type</label>
-            <select class="form-select" name="discount_type" id="discount_type">
-                <option value="amount">₹</option>
-                <option value="percentage">%</option>
-            </select>
-        </div>
-
-        <div class="col-6">
-            <label class="form-label small text-muted">Discount</label>
-            <input type="number" class="form-control" name="discount" value="0" id="ProcedureDiscount">
-        </div>
-    </div>
-
-    <!-- Total -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Total</label>
-        <input type="number" class="form-control" name="total" value="0" readonly id="ProcedureTotal">
-    </div>
-
-    <!-- Status -->
-    <div class="mb-3">
-        <label class="form-label small text-muted">Status</label>
-        <select class="form-select" name="status">
-            <option value="planned">Planned</option>
-            <option value="completed">Completed</option>
-        </select>
-    </div>
-
-    <!-- Actions -->
-    <div class="d-flex justify-content-between">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-            ❌ Cancel
-        </button>
-        <button type="submit" class="btn btn-primary">
-            ✔ Submit
-        </button>
-    </div>
-
-</form>
-
-
-</div>
-</div>
-</div>
-
-<!-- ================= PRESCRIPTION ================= -->
-<div class="modal fade" id="prescriptionModal">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content p-3">
-<h5>Prescription</h5>
-
-<form id="prescriptionForm" name="prescription_form"  method="post" action="{% url 'add_procedure' profile.patient_id %}">
-
-    <!-- Added Date -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Added Date</label>
-        <input type="date" class="form-control" name="added_date" value="2025-11-17" readonly>
-    </div>
-
-    <!-- Next Review -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Next Review</label>
-        <input type="date" class="form-control" name="next_review" value="2025-11-17">
-    </div>
-
-    <!-- Prescription Template 
-    <div class="mb-2">
-        <label class="form-label small text-muted">Prescription Template</label>
-        <select class="form-select" name="template_id">
-            <option value="">Select Template</option>
-        </select>
-    </div> -->
-
-    <!-- Medicine -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">Medicine</label>
-        <select class="form-select" name="medicine_id">
-            <option value="">Select Medicine</option>
-        </select>
-    </div>
-
-    <!-- Strength -->
-    <div class="row g-2 mb-2">
-        <div class="col-6">
-            <label class="form-label small text-muted">Strength</label>
-            <input type="text" class="form-control" name="strength">
-        </div>
-        <div class="col-6">
-            <label class="form-label small text-muted">Unit</label>
-            <select class="form-select" name="strength_unit">
-                <option value="">Select units</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Units & Duration -->
-    <div class="row g-2 mb-2">
-        <div class="col-6">
-            <label class="form-label small text-muted">Units</label>
-            <input type="number" class="form-control" name="duration">
-            
-        </div>
-        <div class="col-6">
-            <label class="form-label small text-muted">Period</label>
-            <select class="form-select" name="duration_period">
-                <option value="Day">Day</option>
-                <option value="Week">Week</option>
-                <option value="Month">Month</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- Morning / Noon / Night -->
-    <div class="row g-2 mb-2">
-        <div class="col-4">
-            <label class="form-label small text-muted">Morning</label>
-            <input type="number" class="form-control" name="morning" value="1">
-        </div>
-        <div class="col-4">
-            <label class="form-label small text-muted">Noon</label>
-            <input type="number" class="form-control" name="noon" value="1">
-        </div>
-        <div class="col-4">
-            <label class="form-label small text-muted">Night</label>
-            <input type="number" class="form-control" name="night" value="1">
-        </div>
-    </div>
-
-    <!-- After Food -->
-    <div class="mb-2">
-        <label class="form-label small text-muted">After Food</label>
-        <select class="form-select" name="after_food">
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-        </select>
-    </div>
-
-    <!-- Usage -->
-    <div class="mb-3">
-        <label class="form-label small text-muted">Usage</label>
-        <textarea class="form-control" rows="2" name="usage" placeholder="Select usage"></textarea>
-    </div>
-
-    <!-- ACTION BUTTONS -->
-    <div class="d-flex justify-content-between">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
-            ❌ Cancel
-        </button>
-        <button type="submit" class="btn btn-primary">
-            ➕ Add Prescription
-        </button>
-    </div>
-
-</form>
-
-
-</div>
-</div>
-</div>
-
-<div class="modal fade" id="invoiceModal">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content p-3">
-<h5>Invoice</h5>
-<a class="nav-link" href="{% url 'patient_bill' profile.patient_id%}">Generate Bill</a>
-
-</div>
-</div>
-</div>
-
-<div class="modal fade" id="gallaryModal">
-<div class="modal-dialog modal-dialog-centered">
-<div class="modal-content p-3">
-<h5>Images</h5>
-<div class="mb-3">
-  <label for="formFile" class="form-label">Upload Image</label>
-  <input class="form-control" type="file" id="formFile" accept="image/*">
-</div>
-
-</div>
-</div>
-</div>
-
-<div class="modal fade" id="imageModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content bg-transparent border-0">
-
-      <div class="modal-body text-center p-0">
-        <img src="{{ profile.image_path.url }}" 
-             class="img-fluid rounded">
+  <!-- HERO -->
+  <div class="hero-card">
+    <div class="avatar-wrap">
+      <div class="avatar-ring">
+        {% if profile.image_path %}
+          <img src="{{ profile.image_path.url }}"
+               data-bs-toggle="modal" data-bs-target="#imageModal"
+               alt="{{ profile.name }}">
+        {% else %}
+          <div class="avatar-fallback">{{ profile.name|first|upper }}</div>
+        {% endif %}
       </div>
-
+      <div class="status-dot"></div>
+    </div>
+    <div class="hero-info">
+      <div class="hero-name">{{ profile.name }}</div>
+      <div class="hero-meta">
+        <span class="meta-pill"><i class="bi bi-person"></i> {{ profile.gender }}</span>
+        <span class="meta-pill"><i class="bi bi-calendar"></i> {{ profile.age }} yrs</span>
+        <span class="meta-pill"><i class="bi bi-heart"></i> Active Patient</span>
+      </div>
+      <div class="hero-contacts">
+        <span class="contact-item"><i class="bi bi-envelope"></i> {{ profile.email }}</span>
+        <span class="contact-item"><i class="bi bi-telephone"></i> {{ profile.phno }}</span>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="pid-badge">{{ profile.patient_id }}</div>
     </div>
   </div>
-</div>
 
+  <!-- TABS -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-panel="vital">
+      <i class="bi bi-activity"></i>
+      <span class="tab-label">Vital Signs</span>
+      {% if vitals %}<span class="tab-count">{{ vitals|length }}</span>{% endif %}
+    </button>
+    <button class="tab-btn" data-panel="notes">
+      <i class="bi bi-journal-text"></i>
+      <span class="tab-label">Clinical Notes</span>
+      {% if notes %}<span class="tab-count">{{ notes|length }}</span>{% endif %}
+    </button>
+    <button class="tab-btn" data-panel="procedure">
+      <i class="bi bi-clipboard2-pulse"></i>
+      <span class="tab-label">Procedure</span>
+      {% if procedures %}<span class="tab-count">{{ procedures|length }}</span>{% endif %}
+    </button>
+    <button class="tab-btn" data-panel="prescription">
+      <i class="bi bi-capsule"></i>
+      <span class="tab-label">Prescription</span>
+    </button>
+    <button class="tab-btn" data-panel="invoice">
+      <i class="bi bi-receipt"></i>
+      <span class="tab-label">Invoice</span>
+    </button>
+    <button class="tab-btn" data-panel="gallery">
+      <i class="bi bi-images"></i>
+      <span class="tab-label">Gallery</span>
+    </button>
+  </div>
+
+  <!-- ═══ VITALS ═══ -->
+  <div class="panel active" id="panel-vital">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Vital Signs</div>
+        <div class="panel-subtitle">Recorded measurements over time</div>
+      </div>
+    </div>
+
+    {% if vitals %}
+      {% with v=vitals|first %}
+      <div class="vital-summary-grid">
+        <div class="vstat-card"><div class="vstat-icon">🌡️</div><div class="vstat-label">Temperature</div><div class="vstat-val">{{ v.temperature }} <span class="vstat-unit">°F</span></div></div>
+        <div class="vstat-card"><div class="vstat-icon">💓</div><div class="vstat-label">Pulse</div><div class="vstat-val">{{ v.pulse }} <span class="vstat-unit">bpm</span></div></div>
+        <div class="vstat-card"><div class="vstat-icon">🩸</div><div class="vstat-label">Blood Pressure</div><div class="vstat-val">{{ v.systolic }}<span class="vstat-unit">/{{ v.diastolic }}</span></div></div>
+        <div class="vstat-card"><div class="vstat-icon">🫁</div><div class="vstat-label">SpO₂</div><div class="vstat-val">{{ v.spo2 }} <span class="vstat-unit">%</span></div></div>
+        <div class="vstat-card"><div class="vstat-icon">⚖️</div><div class="vstat-label">Weight</div><div class="vstat-val">{{ v.weight }} <span class="vstat-unit">kg</span></div></div>
+        <div class="vstat-card"><div class="vstat-icon">📏</div><div class="vstat-label">Height</div><div class="vstat-val">{{ v.height }} <span class="vstat-unit">cm</span></div></div>
+      </div>
+      {% endwith %}
+
+      <div class="card-base">
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th><th>Temp (°F)</th>
+                <th class="d-mobile-none">Weight</th>
+                <th class="d-mobile-none">Height</th>
+                <th>Sugar</th><th>BP</th>
+                <th class="d-mobile-none">Pulse</th>
+                <th class="d-mobile-none">SpO₂</th>
+                <th class="d-mobile-none">Resp</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for v in vitals %}
+              <tr>
+                <td style="font-weight:500;">{{ v.created_at|date:"d M Y" }}</td>
+                <td><span class="vital-chip chip-normal">{{ v.temperature }}</span></td>
+                <td class="d-mobile-none">{{ v.weight }} kg</td>
+                <td class="d-mobile-none">{{ v.height }} cm</td>
+                <td><span class="vital-chip chip-normal">{{ v.sugar }}</span></td>
+                <td style="font-weight:500;">{{ v.systolic }}/{{ v.diastolic }}</td>
+                <td class="d-mobile-none">{{ v.pulse }}</td>
+                <td class="d-mobile-none">{{ v.spo2 }}%</td>
+                <td class="d-mobile-none">{{ v.respiratory }}</td>
+                <td>
+                  <div style="display:flex;gap:4px;">
+                    <button class="act-btn" data-bs-toggle="modal" data-bs-target="#editVitalModal{{ v.id }}">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="act-btn danger" data-bs-toggle="modal" data-bs-target="#deleteVitalModal{{ v.id }}">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Vital Edit/Delete Modals (outside table for valid HTML) -->
+      {% for v in vitals %}
+
+      <div class="modal fade" id="editVitalModal{{ v.id }}" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header-custom">
+          <div class="modal-title-custom">Edit Vital Signs</div>
+          <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+        </div>
+        <div class="modal-body-custom">
+          <form method="post" action="{% url 'vital_edit' v.id %}">
+            {% csrf_token %}
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+              <div><label class="form-label">Temperature (°F)</label>
+                <input class="form-control" name="temperature" value="{{ v.temperature }}" type="number" step="0.1"></div>
+              <div><label class="form-label">Weight (kg)</label>
+                <input class="form-control" name="weight" value="{{ v.weight }}" type="number"></div>
+              <div><label class="form-label">Height (cm)</label>
+                <input class="form-control" name="height" value="{{ v.height }}" type="number"></div>
+              <div><label class="form-label">Blood Sugar</label>
+                <input class="form-control" name="sugar" value="{{ v.sugar }}" type="number"></div>
+              <div><label class="form-label">Systolic</label>
+                <input class="form-control" name="systolic" value="{{ v.systolic }}" type="number"></div>
+              <div><label class="form-label">Diastolic</label>
+                <input class="form-control" name="diastolic" value="{{ v.diastolic }}" type="number"></div>
+              <div><label class="form-label">Pulse (bpm)</label>
+                <input class="form-control" name="pulse" value="{{ v.pulse }}" type="number"></div>
+              <div><label class="form-label">SpO₂ (%)</label>
+                <input class="form-control" name="spo2" value="{{ v.spo2 }}" type="number"></div>
+              <div style="grid-column:1/-1;"><label class="form-label">Respiratory Rate</label>
+                <input class="form-control" name="respiratory" value="{{ v.respiratory }}" type="number"></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;">
+              <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn-submit">Update Vitals</button>
+            </div>
+          </form>
+        </div>
+      </div></div></div>
+
+      <div class="modal fade" id="deleteVitalModal{{ v.id }}" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
+      <div class="modal-content">
+        <div class="modal-body-custom">
+          <div class="delete-confirm-wrap">
+            <div class="delete-confirm-icon"><i class="bi bi-trash3"></i></div>
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:8px;">Delete Vital Record?</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">
+              Record from <strong>{{ v.created_at|date:"d M Y" }}</strong> will be permanently removed.
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+              <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+              <form method="post" action="{% url 'vital_delete' v.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger-confirm">Yes, Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+
+      {% endfor %}
+
+    {% else %}
+      <div class="card-base">
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-activity"></i></div>
+          <div class="empty-title">No vital signs recorded</div>
+          <div class="empty-sub">Tap the + button to add the first record</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ═══ NOTES ═══ -->
+  <div class="panel" id="panel-notes">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Clinical Notes</div>
+        <div class="panel-subtitle">Doctor observations &amp; remarks</div>
+      </div>
+    </div>
+
+    {% if notes %}
+      {% for n in notes %}
+      <div class="note-card">
+        <div class="note-header">
+          <div class="note-date">
+            <i class="bi bi-calendar3"></i>
+            {{ n.created_at|date:"d M Y" }} &nbsp;·&nbsp; {{ n.created_at|time:"H:i" }}
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="act-btn" data-bs-toggle="modal" data-bs-target="#editNoteModal{{ n.id }}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="act-btn danger" data-bs-toggle="modal" data-bs-target="#deleteNoteModal{{ n.id }}">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="note-body">{{ n.notes }}</div>
+      </div>
+      {% endfor %}
+
+      {% for n in notes %}
+      <div class="modal fade" id="editNoteModal{{ n.id }}" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header-custom">
+          <div class="modal-title-custom">Edit Clinical Note</div>
+          <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+        </div>
+        <div class="modal-body-custom">
+          <form method="post" action="{% url 'note_edit' n.id %}">
+            {% csrf_token %}
+            <label class="form-label">Clinical Observations</label>
+            <textarea class="form-control" rows="5" name="note" style="resize:vertical;">{{ n.notes }}</textarea>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+              <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn-submit">Update Note</button>
+            </div>
+          </form>
+        </div>
+      </div></div></div>
+
+      <div class="modal fade" id="deleteNoteModal{{ n.id }}" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
+      <div class="modal-content">
+        <div class="modal-body-custom">
+          <div class="delete-confirm-wrap">
+            <div class="delete-confirm-icon"><i class="bi bi-trash3"></i></div>
+            <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:8px;">Delete Note?</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">
+              Note from <strong>{{ n.created_at|date:"d M Y" }}</strong> will be permanently removed.
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center;">
+              <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+              <form method="post" action="{% url 'note_delete' n.id %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-danger-confirm">Yes, Delete</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div></div></div>
+      {% endfor %}
+
+    {% else %}
+      <div class="card-base">
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-journal-text"></i></div>
+          <div class="empty-title">No clinical notes yet</div>
+          <div class="empty-sub">Tap the + button to add a note</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ═══ PROCEDURE ═══ -->
+  <div class="panel" id="panel-procedure">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Procedures</div>
+        <div class="panel-subtitle">Treatment history &amp; billing</div>
+      </div>
+    </div>
+
+    {% if procedures %}
+    <div class="card-base">
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Procedure</th><th>Price</th><th>Qty</th>
+              <th class="d-mobile-none">Discount</th>
+              <th>Total</th>
+              <th class="d-mobile-none">Notes</th>
+              <th>Status</th>
+              <th class="d-mobile-none">Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in procedures %}
+            <tr>
+              <td style="font-weight:500;">{{ p.procedure.prodecure }}</td>
+              <td>₹{{ p.price }}</td>
+              <td>{{ p.quantity }}</td>
+              <td class="d-mobile-none">{{ p.discount }}{% if p.discount_type == 'percentage' %}%{% else %} ₹{% endif %}</td>
+              <td style="font-weight:600;color:var(--mint);">₹{{ p.total }}</td>
+              <td class="d-mobile-none muted">{{ p.notes|default:"—" }}</td>
+              <td>
+                {% if p.status == 'completed' %}
+                  <span class="badge-status badge-completed">Completed</span>
+                {% else %}
+                  <span class="badge-status badge-planned">Planned</span>
+                {% endif %}
+              </td>
+              <td class="d-mobile-none muted">{{ p.created_at|date:"d M Y" }}</td>
+              <td>
+                <div style="display:flex;gap:4px;">
+                  <button class="act-btn" data-bs-toggle="modal" data-bs-target="#editProcedureModal{{ p.id }}">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="act-btn danger" data-bs-toggle="modal" data-bs-target="#deleteProcedureModal{{ p.id }}">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% for p in procedures %}
+    <div class="modal fade" id="editProcedureModal{{ p.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header-custom">
+        <div class="modal-title-custom">Edit Procedure</div>
+        <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+      </div>
+      <div class="modal-body-custom">
+        <form method="post" action="{% url 'patient_procedure_edit' p.id %}">
+          {% csrf_token %}
+          <div style="margin-bottom:12px;">
+            <label class="form-label">Procedure</label>
+            <select class="form-select" name="procedure_id">
+              {% for pl in procedures_list %}
+                <option value="{{ pl.id }}" data-price="{{ pl.price }}"
+                  {% if pl.id == p.procedure.id %}selected{% endif %}>{{ pl.prodecure }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div><label class="form-label">Quantity</label>
+              <input type="number" class="form-control ep-qty" name="quantity"
+                     value="{{ p.quantity }}" min="1" data-form="{{ p.id }}"></div>
+            <div><label class="form-label">Unit Price (₹)</label>
+              <input type="number" class="form-control ep-price" name="price"
+                     value="{{ p.price }}" data-form="{{ p.id }}"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div><label class="form-label">Discount Type</label>
+              <select class="form-select ep-dtype" name="discount_type" data-form="{{ p.id }}">
+                <option value="amount" {% if p.discount_type == 'amount' %}selected{% endif %}>₹ Amount</option>
+                <option value="percentage" {% if p.discount_type == 'percentage' %}selected{% endif %}>% Percentage</option>
+              </select></div>
+            <div><label class="form-label">Discount</label>
+              <input type="number" class="form-control ep-disc" name="discount"
+                     value="{{ p.discount }}" data-form="{{ p.id }}"></div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <label class="form-label">Notes</label>
+            <textarea class="form-control" rows="2" name="notes" style="resize:vertical;">{{ p.notes }}</textarea>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+            <div><label class="form-label">Total (₹)</label>
+              <input type="number" class="form-control ep-total" name="total"
+                     value="{{ p.total }}" readonly data-form="{{ p.id }}"
+                     style="font-weight:600;color:var(--mint);"></div>
+            <div><label class="form-label">Status</label>
+              <select class="form-select" name="status">
+                <option value="planned" {% if p.status == 'planned' %}selected{% endif %}>Planned</option>
+                <option value="completed" {% if p.status == 'completed' %}selected{% endif %}>Completed</option>
+              </select></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px;">
+            <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn-submit">Update Procedure</button>
+          </div>
+        </form>
+      </div>
+    </div></div></div>
+
+    <div class="modal fade" id="deleteProcedureModal{{ p.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
+    <div class="modal-content">
+      <div class="modal-body-custom">
+        <div class="delete-confirm-wrap">
+          <div class="delete-confirm-icon"><i class="bi bi-trash3"></i></div>
+          <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:8px;">Delete Procedure?</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">
+            <strong>{{ p.procedure.prodecure }}</strong> added on {{ p.created_at|date:"d M Y" }} will be permanently removed.
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;">
+            <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+            <form method="post" action="{% url 'patient_procedure_delete' p.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-danger-confirm">Yes, Delete</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div></div></div>
+    {% endfor %}
+
+    {% else %}
+      <div class="card-base">
+        <div class="empty-state">
+          <div class="empty-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+          <div class="empty-title">No procedures recorded</div>
+          <div class="empty-sub">Tap the + button to add a procedure</div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- ═══ PRESCRIPTION ═══ -->
+  <div class="panel" id="panel-prescription">
+    <div class="panel-header">
+      <div><div class="panel-title">Prescriptions</div><div class="panel-subtitle">Medicine &amp; dosage records</div></div>
+    </div>
+    <div class="card-base">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-capsule"></i></div>
+        <div class="empty-title">No prescriptions yet</div>
+        <div class="empty-sub">Tap the + button to add a prescription</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ INVOICE ═══ -->
+  <div class="panel" id="panel-invoice">
+    <div class="panel-header">
+      <div><div class="panel-title">Invoices &amp; Billing</div><div class="panel-subtitle">Payment records</div></div>
+    </div>
+    <div class="card-base">
+      <div class="empty-state">
+        <div class="empty-icon"><i class="bi bi-receipt"></i></div>
+        <div class="empty-title">No invoices generated</div>
+        <div class="empty-sub">Tap the + button to generate an invoice</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ GALLERY ═══ -->
+  <div class="panel" id="panel-gallery">
+    <div class="panel-header">
+      <div><div class="panel-title">Image Gallery</div><div class="panel-subtitle">X-rays, photos &amp; documents</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
+      <div style="border:2px dashed var(--border);border-radius:12px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-size:12px;cursor:pointer;transition:.2s;"
+           onclick="document.getElementById('galleryUpload').click()"
+           onmouseover="this.style.borderColor='var(--mint)';this.style.color='var(--mint)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+        <i class="bi bi-plus-circle" style="font-size:28px;"></i>
+        <span>Upload Image</span>
+        <input type="file" id="galleryUpload" style="display:none;" accept="image/*" multiple>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-wrap -->
+
+<!-- FAB -->
+<button class="fab" id="fabBtn">+</button>
+
+<!-- ═══════ ADD MODALS ═══════ -->
+
+<!-- Add Vital -->
+<div class="modal fade" id="vitalModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content">
+  <div class="modal-header-custom">
+    <div class="modal-title-custom">Record Vital Signs</div>
+    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body-custom">
+    <form method="post" action="{% url 'vital' profile.patient_id %}">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Temperature (°F)</label><input class="form-control" name="temperature" type="number" step="0.1" placeholder="e.g. 98.6"></div>
+        <div><label class="form-label">Weight (kg)</label><input class="form-control" name="weight" type="number" placeholder="e.g. 62"></div>
+        <div><label class="form-label">Height (cm)</label><input class="form-control" name="height" type="number" placeholder="e.g. 165"></div>
+        <div><label class="form-label">Blood Sugar</label><input class="form-control" name="sugar" type="number" placeholder="e.g. 95"></div>
+        <div><label class="form-label">Systolic (mmHg)</label><input class="form-control" name="systolic" type="number" placeholder="e.g. 120"></div>
+        <div><label class="form-label">Diastolic (mmHg)</label><input class="form-control" name="diastolic" type="number" placeholder="e.g. 80"></div>
+        <div><label class="form-label">Pulse (bpm)</label><input class="form-control" name="pulse" type="number" placeholder="e.g. 72"></div>
+        <div><label class="form-label">SpO₂ (%)</label><input class="form-control" name="spo2" type="number" placeholder="e.g. 98"></div>
+        <div style="grid-column:1/-1;"><label class="form-label">Respiratory Rate</label><input class="form-control" name="respiratory" type="number" placeholder="e.g. 16"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn-submit">Save Vitals</button>
+      </div>
+    </form>
+  </div>
+</div></div></div>
+
+<!-- Add Note -->
+<div class="modal fade" id="notesModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+  <div class="modal-header-custom">
+    <div class="modal-title-custom">Add Clinical Note</div>
+    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body-custom">
+    <form method="post" action="{% url 'clinical_note' profile.patient_id %}">
+      {% csrf_token %}
+      <label class="form-label">Clinical Observations</label>
+      <textarea class="form-control" rows="5" name="note" placeholder="Enter clinical notes…" style="resize:vertical;"></textarea>
+      <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px;">
+        <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn-submit">Save Note</button>
+      </div>
+    </form>
+  </div>
+</div></div></div>
+
+<!-- Add Procedure -->
+<div class="modal fade" id="procedureModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+  <div class="modal-header-custom">
+    <div class="modal-title-custom">Add Procedure</div>
+    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body-custom">
+    <form method="post" action="{% url 'add_procedure' profile.patient_id %}">
+      {% csrf_token %}
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Date</label>
+        <input type="date" class="form-control" name="added_date" id="added_date">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Procedure</label>
+        <select class="form-select" name="procedure_id" id="procedureSelect">
+          <option value="">Select procedure</option>
+          {% for pl in procedures_list %}
+            <option value="{{ pl.id }}" data-price="{{ pl.price }}">{{ pl.prodecure }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Quantity</label><input type="number" class="form-control" name="quantity" value="1" min="1" id="ProcedureQuantity"></div>
+        <div><label class="form-label">Unit Price (₹)</label><input type="number" class="form-control" name="price" id="ProcedurePrice" placeholder="0"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Discount Type</label>
+          <select class="form-select" name="discount_type" id="discount_type">
+            <option value="amount">₹ Amount</option>
+            <option value="percentage">% Percentage</option>
+          </select></div>
+        <div><label class="form-label">Discount</label><input type="number" class="form-control" name="discount" value="0" id="ProcedureDiscount"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Notes</label>
+        <textarea class="form-control" rows="2" name="notes" style="resize:vertical;"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;">
+        <div><label class="form-label">Total (₹)</label>
+          <input type="number" class="form-control" name="total" id="ProcedureTotal" value="0" readonly style="font-weight:600;color:var(--mint);"></div>
+        <div><label class="form-label">Status</label>
+          <select class="form-select" name="status">
+            <option value="planned">Planned</option>
+            <option value="completed">Completed</option>
+          </select></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn-submit">Add Procedure</button>
+      </div>
+    </form>
+  </div>
+</div></div></div>
+
+<!-- Add Prescription -->
+<div class="modal fade" id="prescriptionModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+  <div class="modal-header-custom">
+    <div class="modal-title-custom">Add Prescription</div>
+    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body-custom">
+    <form method="post" action="#">
+      {% csrf_token %}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Added Date</label><input type="date" class="form-control" name="added_date"></div>
+        <div><label class="form-label">Next Review</label><input type="date" class="form-control" name="next_review"></div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <label class="form-label">Medicine</label>
+        <select class="form-select" name="medicine_id"><option value="">Select medicine</option></select>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Strength</label><input type="text" class="form-control" name="strength" placeholder="e.g. 500"></div>
+        <div><label class="form-label">Unit</label>
+          <select class="form-select" name="strength_unit">
+            <option value="mg">mg</option><option value="ml">ml</option><option value="g">g</option>
+          </select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Duration</label><input type="number" class="form-control" name="duration" placeholder="e.g. 5"></div>
+        <div><label class="form-label">Period</label>
+          <select class="form-select" name="duration_period">
+            <option>Day</option><option>Week</option><option>Month</option>
+          </select></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Morning</label><input type="number" class="form-control" name="morning" value="1"></div>
+        <div><label class="form-label">Noon</label><input type="number" class="form-control" name="noon" value="0"></div>
+        <div><label class="form-label">Night</label><input type="number" class="form-control" name="night" value="1"></div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label class="form-label">After Food</label>
+        <select class="form-select" name="after_food">
+          <option value="yes">Yes</option><option value="no">No</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn-submit">Add Prescription</button>
+      </div>
+    </form>
+  </div>
+</div></div></div>
+
+<!-- Invoice -->
+<div class="modal fade" id="invoiceModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+  <div class="modal-header-custom">
+    <div class="modal-title-custom">Generate Invoice</div>
+    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body-custom" style="text-align:center;padding-bottom:32px;">
+    <div style="width:64px;height:64px;border-radius:50%;background:var(--mint-light);display:flex;align-items:center;justify-content:center;margin:16px auto;">
+      <i class="bi bi-receipt" style="font-size:28px;color:var(--mint);"></i>
+    </div>
+    <div style="font-size:15px;font-weight:500;margin-bottom:8px;">Ready to generate bill</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">This will compile all completed procedures into a printable invoice.</div>
+    <a href="{% url 'patient_bill' profile.patient_id %}" class="btn-submit" style="display:inline-block;text-decoration:none;">Generate Bill</a>
+  </div>
+</div></div></div>
+
+<!-- Gallery -->
+<div class="modal fade" id="galleryModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered">
+<div class="modal-content">
+  <div class="modal-header-custom">
+    <div class="modal-title-custom">Upload Images</div>
+    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
+  </div>
+  <div class="modal-body-custom">
+    <div style="border:2px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;"
+         onclick="document.getElementById('modalUpload').click()">
+      <i class="bi bi-cloud-upload" style="font-size:36px;color:var(--text-muted);display:block;margin-bottom:10px;"></i>
+      <div style="font-weight:500;margin-bottom:4px;">Click to upload</div>
+      <div style="font-size:12px;color:var(--text-muted);">PNG, JPG, WEBP up to 10MB</div>
+      <input type="file" id="modalUpload" style="display:none;" accept="image/*" multiple>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
+      <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+      <button class="btn-submit">Upload</button>
+    </div>
+  </div>
+</div></div></div>
+
+<!-- Profile image zoom -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered modal-lg">
+<div class="modal-content" style="background:transparent;border:none !important;box-shadow:none !important;">
+  <div class="modal-body text-center p-0">
+    {% if profile.image_path %}
+      <img src="{{ profile.image_path.url }}" class="img-fluid rounded" style="max-height:85vh;">
+    {% endif %}
+  </div>
+</div></div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
 <script>
+// ─── TAB SWITCHING ───
+const panelMap = {
+  vital:'vitalModal', notes:'notesModal', procedure:'procedureModal',
+  prescription:'prescriptionModal', invoice:'invoiceModal', gallery:'galleryModal'
+};
+let activePanel = 'vital';
 
-let activeTab = "vital"; // default
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    // 1️⃣ Decide active tab on load
-    if (window.location.hash === "#tab-notes") {
-        activeTab = "notes";
-    }
-
-    if (window.location.hash === "#tab-procedure") {
-        activeTab = "procedure";
-    }
-
-    // 2️⃣ Activate correct tab + content
-    function activateTab(tabName) {
-        activeTab = tabName;
-
-        // nav buttons
-        document.querySelectorAll('#tabs .nav-link').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.tab === tabName);
-        });
-
-        // tab contents
-        document.querySelectorAll('.tab-content-box').forEach(box => {
-            box.classList.toggle('active', box.id === "tab-" + tabName);
-        });
-    }
-
-    // initial activation
-    activateTab(activeTab);
-
-    // 3️⃣ Handle tab click
-    document.querySelectorAll('#tabs .nav-link').forEach(btn => {
-        btn.addEventListener('click', function () {
-            activateTab(this.dataset.tab);
-        });
-    });
-
-    // 4️⃣ Add button → open modal of active tab
-    document.getElementById("addBtn").addEventListener('click', function () {
-        const modals = {
-            vital: "vitalModal",
-            notes: "notesModal",
-            procedure: "procedureModal",
-            prescription: "prescriptionModal",
-            invoice: "invoiceModal",
-            gallary: "gallaryModal"
-
-        };
-
-        const modalId = modals[activeTab];
-        if (modalId) {
-            new bootstrap.Modal(document.getElementById(modalId)).show();
-        }
-    });
-
-});
-
-document.getElementById('procedureSelect').addEventListener('change', function () {
-const selectedOption = this.options[this.selectedIndex];
-const price = selectedOption.getAttribute('data-price');
-
-
-document.getElementById('ProcedurePrice').value = price ? price : '';
-});
-
-
-function calculateTotal() {
-    let quantity = parseFloat(document.getElementById("ProcedureQuantity").value);
-    let price = parseFloat(document.getElementById("ProcedurePrice").value);
-    let discount = parseFloat(document.getElementById("ProcedureDiscount").value);
-    let discountType = document.getElementById("discount_type").value;
-
-    // Defaults if empty
-    quantity = isNaN(quantity) ? 0 : quantity;
-    price = isNaN(price) ? 0 : price;
-    discount = isNaN(discount) ? 0 : discount;
-
-    let base = quantity * price;
-    let discountAmount = 0;
-
-    if (discount > 0) {
-        if (discountType === "percentage") {
-            discountAmount = (base * discount) / 100;
-        } else {
-            discountAmount = discount;
-        }
-    }
-
-    let total = base - discountAmount;
-
-    // Safety
-    if (total < 0) total = 0;
-
-    document.getElementById("ProcedureTotal").value = total.toFixed(2);
+function activatePanel(name) {
+  activePanel = name;
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.panel === name));
+  document.querySelectorAll('.panel').forEach(p =>
+    p.classList.toggle('active', p.id === 'panel-' + name));
 }
 
-// Events
-["ProcedureQuantity","ProcedurePrice","ProcedureDiscount"].forEach(id => {
-    document.getElementById(id).addEventListener("input", calculateTotal);
+document.querySelectorAll('.tab-btn').forEach(btn =>
+  btn.addEventListener('click', () => activatePanel(btn.dataset.panel)));
+
+// Restore tab from URL hash (e.g. after redirect back)
+const hashPanel = window.location.hash.replace('#tab-', '');
+if (panelMap[hashPanel]) activatePanel(hashPanel);
+
+// ─── FAB ───
+document.getElementById('fabBtn').addEventListener('click', () => {
+  const mid = panelMap[activePanel];
+  if (mid) new bootstrap.Modal(document.getElementById(mid)).show();
 });
-document.getElementById("discount_type").addEventListener("change", calculateTotal);
-document.getElementById("procedureSelect").addEventListener("change", calculateTotal);
 
-document.addEventListener("DOMContentLoaded", function () {
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById("added_date").value = today;
+// ─── ADD PROCEDURE: price auto-fill & total calc ───
+document.getElementById('procedureSelect').addEventListener('change', function () {
+  const price = this.options[this.selectedIndex].getAttribute('data-price') || '';
+  document.getElementById('ProcedurePrice').value = price;
+  calcAddTotal();
 });
+function calcAddTotal() {
+  const q = parseFloat(document.getElementById('ProcedureQuantity').value) || 0;
+  const p = parseFloat(document.getElementById('ProcedurePrice').value) || 0;
+  const d = parseFloat(document.getElementById('ProcedureDiscount').value) || 0;
+  const dt = document.getElementById('discount_type').value;
+  const base = q * p;
+  const disc = dt === 'percentage' ? base * d / 100 : d;
+  document.getElementById('ProcedureTotal').value = Math.max(0, base - disc).toFixed(2);
+}
+['ProcedureQuantity','ProcedurePrice','ProcedureDiscount'].forEach(id =>
+  document.getElementById(id).addEventListener('input', calcAddTotal));
+document.getElementById('discount_type').addEventListener('change', calcAddTotal);
+document.getElementById('added_date').value = new Date().toISOString().split('T')[0];
 
+// ─── EDIT PROCEDURE: total calc per modal ───
+function calcEditTotal(formId) {
+  const qty   = parseFloat(document.querySelector(`.ep-qty[data-form="${formId}"]`).value) || 0;
+  const price = parseFloat(document.querySelector(`.ep-price[data-form="${formId}"]`).value) || 0;
+  const disc  = parseFloat(document.querySelector(`.ep-disc[data-form="${formId}"]`).value) || 0;
+  const dt    = document.querySelector(`.ep-dtype[data-form="${formId}"]`).value;
+  const base  = qty * price;
+  const discAmt = dt === 'percentage' ? base * disc / 100 : disc;
+  document.querySelector(`.ep-total[data-form="${formId}"]`).value =
+    Math.max(0, base - discAmt).toFixed(2);
+}
+document.querySelectorAll('.ep-qty, .ep-price, .ep-disc').forEach(el =>
+  el.addEventListener('input', () => calcEditTotal(el.dataset.form)));
+document.querySelectorAll('.ep-dtype').forEach(el =>
+  el.addEventListener('change', () => calcEditTotal(el.dataset.form)));
 
+  document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+});
 </script>
 
 </body>

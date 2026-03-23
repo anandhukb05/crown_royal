@@ -6,6 +6,7 @@ urlpatterns = [
     path("create/", create_patient, name="create_patient"),
     path("view/", view_patients, name="patient_view"),
     path("patients/edit/<int:pk>/", edit_patient, name="edit_patient"),
+    path("patients/delete/<int:pk>/", delete_patient, name="delete_patient"),
     path("view/<int:pk>/", patient_profile, name="patient_profile"),
     path("vital/<int:patient_id>", vital_view, name="vital"),
     path("vital/edit/<int:pk>/", vital_edit, name="vital_edit"),
@@ -16,6 +17,7 @@ urlpatterns = [
     path("procedure/<int:patient_id>/", add_procedure, name="add_procedure"),
     path("procedure/edit/<int:pk>/", patient_procedure_edit, name="patient_procedure_edit"),
     path("procedure/delete/<int:pk>/", patient_procedure_delete, name="patient_procedure_delete"),
-    path("invoice/bill/<int:patient_id>/", patient_bill, name="patient_bill")
+    path("invoice/bill/<int:patient_id>/", patient_bill, name="patient_bill"),
+    path("invoice/<int:patient_id>/", add_invoice, name="add_invoice")
 
 ]

@@ -3,183 +3,1049 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Panel</title>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Bootstrap Icons -->
+  <title>Clinic Services — Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    :root {
+      --navy: #0A1628;
+      --navy-mid: #132040;
+      --blue: #1E6FFF;
+      --blue-hover: #1660ee;
+      --teal: #00C9B1;
+      --gold: #F5A623;
+      --rose: #FF5C7A;
+      --surface: #F4F7FC;
+      --card: #FFFFFF;
+      --border: #E4EBF5;
+      --text-primary: #0A1628;
+      --text-secondary: #5A6A85;
+      --text-muted: #9AAAC0;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --shadow: 0 2px 16px rgba(10,22,40,0.07);
+      --shadow-md: 0 6px 28px rgba(10,22,40,0.11);
+      --shadow-modal: 0 24px 64px rgba(10,22,40,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface);
+      color: var(--text-primary);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1,h2,h3,h4,h5,h6,
+    .font-display { font-family: 'Sora', sans-serif; }
+
+    /* ── PAGE WRAPPER ── */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 36px 28px 60px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-header h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+
+    .page-header p {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── TAB NAVIGATION ── */
+    .tab-nav {
+      display: flex;
+      gap: 4px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+      width: fit-content;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn .tab-icon {
+      width: 26px; height: 26px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+
+    .tab-btn:hover {
+      color: var(--navy);
+      background: var(--surface);
+    }
+
+    .tab-btn.active {
+      background: var(--navy);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(10,22,40,0.2);
+    }
+
+    .tab-btn.active .tab-icon {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+
+    .tab-count {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 1px 7px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.2);
+      line-height: 1.6;
+    }
+
+    .tab-btn:not(.active) .tab-count {
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+
+    /* ── TAB PANES ── */
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeUp 0.25s ease; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── PANEL ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .icon-blue  { background: rgba(30,111,255,0.1);  color: var(--blue); }
+    .icon-teal  { background: rgba(0,201,177,0.1);   color: var(--teal); }
+    .icon-gold  { background: rgba(245,166,35,0.1);  color: var(--gold); }
+
+    /* ── ADD BUTTON ── */
+    .btn-add {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 18px;
+      border-radius: 50px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-add-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(30,111,255,0.25);
+    }
+    .btn-add-primary:hover {
+      background: var(--blue-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(30,111,255,0.35);
+    }
+
+    /* ── TABLE ── */
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table thead tr { background: #F8FAFD; }
+    .data-table thead th {
+      padding: 11px 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+    }
+    .data-table tbody tr:last-child { border-bottom: none; }
+    .data-table tbody tr:hover { background: #F8FBFF; }
+
+    .data-table td {
+      padding: 15px 20px;
+      font-size: 0.875rem;
+      vertical-align: middle;
+      color: var(--text-primary);
+    }
+
+    .row-number {
+      font-family: 'Sora', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 40px;
+    }
+
+    .item-name {
+      font-weight: 500;
+      color: var(--navy);
+    }
+
+    .item-desc {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── ACTION BUTTONS ── */
+    .btn-action {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.18s;
+      margin-left: 4px;
+      color: var(--text-secondary);
+    }
+
+    .btn-action:hover { transform: scale(1.1); }
+    .btn-action.edit:hover  { background: rgba(245,166,35,0.1); border-color: var(--gold); color: #b57a00; }
+    .btn-action.del:hover   { background: rgba(255,92,122,0.1); border-color: var(--rose); color: var(--rose); }
+
+    .actions-cell { text-align: right; white-space: nowrap; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 56px 24px;
+    }
+
+    .empty-state .empty-icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 1.6rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    .empty-state p {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(10,22,40,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .modal-box {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-modal);
+      width: 100%;
+      max-width: 460px;
+      animation: slideUp 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      overflow: hidden;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-head h5 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-icon {
+      width: 34px; height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+
+    .btn-close-modal {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+    }
+    .btn-close-modal:hover { background: var(--border); color: var(--navy); }
+
+    .modal-body { padding: 20px 24px; }
+
+    /* ── FORM FIELDS ── */
+    .form-group { margin-bottom: 16px; }
+
+    .form-label {
+      display: block;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 7px;
+    }
+
+    .form-input,
+    .form-textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      background: var(--surface);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .form-input:focus,
+    .form-textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(30,111,255,0.1);
+      background: #fff;
+    }
+
+    .form-textarea { min-height: 90px; resize: vertical; }
+
+    .modal-footer-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      padding: 16px 24px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-cancel {
+      padding: 9px 20px;
+      border-radius: 50px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover { background: var(--surface); color: var(--navy); }
+
+    .btn-save {
+      padding: 9px 24px;
+      border-radius: 50px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.83rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-save-blue {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(30,111,255,0.25);
+    }
+    .btn-save-blue:hover {
+      background: var(--blue-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-save-danger {
+      background: var(--rose);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(255,92,122,0.25);
+    }
+    .btn-save-danger:hover {
+      background: #e8445e;
+      transform: translateY(-1px);
+    }
+
+    .btn-save-success {
+      background: var(--teal);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0,201,177,0.25);
+    }
+    .btn-save-success:hover {
+      background: #00b09b;
+      transform: translateY(-1px);
+    }
+
+    /* ── DELETE CONFIRM ── */
+    .delete-confirm-body {
+      padding: 24px;
+      text-align: center;
+    }
+
+    .delete-icon-wrap {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: rgba(255,92,122,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: var(--rose);
+      margin: 0 auto 16px;
+    }
+
+    .delete-confirm-body h4 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 8px;
+    }
+
+    .delete-confirm-body p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* ── TOAST ── */
+    .toast-wrap {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--navy);
+      color: #fff;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 8px 28px rgba(10,22,40,0.22);
+      animation: toastIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: auto;
+      min-width: 220px;
+    }
+
+    .toast-item.removing {
+      animation: toastOut 0.25s ease forwards;
+    }
+
+    .toast-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.9); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes toastOut {
+      to { opacity: 0; transform: translateX(20px); }
+    }
+
+    /* ── SEARCH ── */
+    .search-wrap {
+      position: relative;
+      max-width: 260px;
+    }
+
+    .search-wrap i {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 34px;
+      border: 1.5px solid var(--border);
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-primary);
+      background: var(--surface);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(30,111,255,0.08);
+      background: #fff;
+    }
+
+    /* ── ROW TAG ── */
+    .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 2px 9px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+    }
+
+    .tag-blue { background: rgba(30,111,255,0.1); color: var(--blue); }
+    .tag-teal { background: rgba(0,201,177,0.1);  color: #00917f; }
+    .tag-gold { background: rgba(245,166,35,0.1); color: #b57a00; }
+  </style>
 </head>
-<body class="bg-light">
+<body>
 
-<div class="container py-4">
-  <div class="card shadow-sm">
-    <div class="card-body">
+<div class="page">
 
-      <!-- Tabs -->
-      <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item">
-          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#procedure">Procedure</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#prescription">Prescription Template</button>
-        </li>
-        <li class="nav-item">
-          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#medicine">Medicine</button>
-        </li>
-      </ul>
+  <!-- Header -->
+  <div class="page-header">
+    <h1>Clinic Services</h1>
+    <p>Manage procedures, prescription templates, and medicine catalogue.</p>
+  </div>
 
-      <div class="tab-content pt-3">
+  <!-- Tab Navigation -->
+  <div class="tab-nav">
+    <button class="tab-btn active" onclick="switchTab('procedure', this)">
+      <div class="tab-icon"><i class="bi bi-activity"></i></div>
+      Procedures
+      <span class="tab-count" id="count-procedure">1</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('prescription', this)">
+      <div class="tab-icon"><i class="bi bi-file-medical"></i></div>
+      Prescription Templates
+      <span class="tab-count" id="count-prescription">0</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('medicine', this)">
+      <div class="tab-icon"><i class="bi bi-capsule"></i></div>
+      Medicines
+      <span class="tab-count" id="count-medicine">0</span>
+    </button>
+  </div>
 
-        <!-- Procedure -->
-        <div class="tab-pane fade show active" id="procedure">
-          <div class="d-flex justify-content-between mb-2">
-            <h6>Procedure List</h6>
-            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#procedureModal">
-              <i class="bi bi-plus"></i> Add
-            </button>
-          </div>
-          <div class="table-responsive">
-            <table class="table table-bordered">
-              <thead class="table-light">
-                <tr>
-                  <th>#</th>
-                  <th>Name</th>
-                  <th>Description</th>
-                  <th class="text-end">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>Cleaning</td>
-                  <td>Dental cleaning</td>
-                  <td class="text-end">
-                    <button class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editModal"><i class="bi bi-pencil"></i></button>
-                    <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash"></i></button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+  <!-- PROCEDURE TAB -->
+  <div class="tab-pane active" id="tab-procedure">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon icon-blue"><i class="bi bi-activity"></i></div>
+          Procedure List
         </div>
-
-        <!-- Prescription -->
-        <div class="tab-pane fade" id="prescription">
-          <div class="d-flex justify-content-between mb-2">
-            <h6>Prescription Templates</h6>
-            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#prescriptionModal">
-              <i class="bi bi-plus"></i> Add
-            </button>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input class="search-input" placeholder="Search procedures…" oninput="filterTable('procedure-tbody', this.value)">
           </div>
+          <button class="btn-add btn-add-primary" onclick="openModal('add-procedure-modal')">
+            <i class="bi bi-plus-lg"></i> Add Procedure
+          </button>
         </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Procedure Name</th>
+              <th>Description</th>
+              <th>Type</th>
+              <th class="actions-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="procedure-tbody">
+            <tr data-name="cleaning">
+              <td class="row-number">01</td>
+              <td><span class="item-name">Dental Cleaning</span></td>
+              <td><span class="item-desc">Professional scaling and polishing of teeth surfaces</span></td>
+              <td><span class="tag tag-blue">Preventive</span></td>
+              <td class="actions-cell">
+                <button class="btn-action edit" onclick="openModal('edit-modal')" title="Edit"><i class="bi bi-pencil"></i></button>
+                <button class="btn-action del" onclick="openModal('delete-modal')" title="Delete"><i class="bi bi-trash"></i></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-        <!-- Medicine -->
-        <div class="tab-pane fade" id="medicine">
-          <div class="d-flex justify-content-between mb-2">
-            <h6>Medicine List</h6>
-            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#medicineModal">
-              <i class="bi bi-plus"></i> Add
-            </button>
+  <!-- PRESCRIPTION TAB -->
+  <div class="tab-pane" id="tab-prescription">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon icon-teal"><i class="bi bi-file-medical"></i></div>
+          Prescription Templates
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input class="search-input" placeholder="Search templates…" oninput="filterTable('prescription-tbody', this.value)">
           </div>
+          <button class="btn-add btn-add-primary" onclick="openModal('add-prescription-modal')">
+            <i class="bi bi-plus-lg"></i> Add Template
+          </button>
         </div>
-
       </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Template Name</th>
+              <th>Notes</th>
+              <th class="actions-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="prescription-tbody">
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <div class="empty-icon-wrap"><i class="bi bi-file-medical"></i></div>
+                  <h4>No templates yet</h4>
+                  <p>Add your first prescription template to get started.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDICINE TAB -->
+  <div class="tab-pane" id="tab-medicine">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <div class="panel-title-icon icon-gold"><i class="bi bi-capsule"></i></div>
+          Medicine Catalogue
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <div class="search-wrap">
+            <i class="bi bi-search"></i>
+            <input class="search-input" placeholder="Search medicines…" oninput="filterTable('medicine-tbody', this.value)">
+          </div>
+          <button class="btn-add btn-add-primary" onclick="openModal('add-medicine-modal')">
+            <i class="bi bi-plus-lg"></i> Add Medicine
+          </button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Medicine Name</th>
+              <th>Dosage</th>
+              <th class="actions-cell">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="medicine-tbody">
+            <tr>
+              <td colspan="4">
+                <div class="empty-state">
+                  <div class="empty-icon-wrap"><i class="bi bi-capsule"></i></div>
+                  <h4>No medicines yet</h4>
+                  <p>Add medicines to build your clinic catalogue.</p>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─────────── MODALS ─────────── -->
+
+<!-- Add Procedure -->
+<div class="modal-overlay" id="add-procedure-modal" onclick="overlayClose(event, 'add-procedure-modal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h5><div class="modal-icon icon-blue"><i class="bi bi-activity"></i></div> Add Procedure</h5>
+      <button class="btn-close-modal" onclick="closeModal('add-procedure-modal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Procedure Name</label>
+        <input class="form-input" placeholder="e.g. Root Canal Treatment" id="proc-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" placeholder="Briefly describe the procedure…" id="proc-desc"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <input class="form-input" placeholder="e.g. Preventive, Restorative…" id="proc-type">
+      </div>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn-cancel" onclick="closeModal('add-procedure-modal')">Cancel</button>
+      <button class="btn-save btn-save-blue" onclick="addProcedure()"><i class="bi bi-check-lg" style="margin-right:5px;"></i>Save Procedure</button>
     </div>
   </div>
 </div>
 
-<!-- ADD MODALS -->
-<div class="modal fade" id="procedureModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Procedure</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Add Prescription Template -->
+<div class="modal-overlay" id="add-prescription-modal" onclick="overlayClose(event, 'add-prescription-modal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h5><div class="modal-icon icon-teal"><i class="bi bi-file-medical"></i></div> Add Template</h5>
+      <button class="btn-close-modal" onclick="closeModal('add-prescription-modal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Template Name</label>
+        <input class="form-input" placeholder="e.g. Post-extraction care" id="pres-name">
       </div>
-      <div class="modal-body">
-        <input class="form-control mb-2" placeholder="Procedure name">
-        <textarea class="form-control" placeholder="Description"></textarea>
+      <div class="form-group">
+        <label class="form-label">Notes / Instructions</label>
+        <textarea class="form-textarea" placeholder="Enter template notes…" id="pres-notes"></textarea>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" onclick="showToast('Procedure added')">Save</button>
-      </div>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn-cancel" onclick="closeModal('add-prescription-modal')">Cancel</button>
+      <button class="btn-save btn-save-blue" onclick="addPrescription()"><i class="bi bi-check-lg" style="margin-right:5px;"></i>Save Template</button>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="prescriptionModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Prescription Template</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Add Medicine -->
+<div class="modal-overlay" id="add-medicine-modal" onclick="overlayClose(event, 'add-medicine-modal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h5><div class="modal-icon icon-gold"><i class="bi bi-capsule"></i></div> Add Medicine</h5>
+      <button class="btn-close-modal" onclick="closeModal('add-medicine-modal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Medicine Name</label>
+        <input class="form-input" placeholder="e.g. Amoxicillin" id="med-name">
       </div>
-      <div class="modal-body">
-        <input class="form-control mb-2" placeholder="Template name">
-        <textarea class="form-control" placeholder="Notes"></textarea>
+      <div class="form-group">
+        <label class="form-label">Dosage</label>
+        <input class="form-input" placeholder="e.g. 500mg, 3× daily" id="med-dosage">
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" onclick="showToast('Template added')">Save</button>
-      </div>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn-cancel" onclick="closeModal('add-medicine-modal')">Cancel</button>
+      <button class="btn-save btn-save-blue" onclick="addMedicine()"><i class="bi bi-check-lg" style="margin-right:5px;"></i>Save Medicine</button>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="medicineModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Add Medicine</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Edit -->
+<div class="modal-overlay" id="edit-modal" onclick="overlayClose(event, 'edit-modal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h5><div class="modal-icon icon-gold"><i class="bi bi-pencil"></i></div> Edit Item</h5>
+      <button class="btn-close-modal" onclick="closeModal('edit-modal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input class="form-input" placeholder="Name" value="Dental Cleaning">
       </div>
-      <div class="modal-body">
-        <input class="form-control mb-2" placeholder="Medicine name">
-        <input class="form-control" placeholder="Dosage">
+      <div class="form-group">
+        <label class="form-label">Description / Notes</label>
+        <textarea class="form-textarea">Professional scaling and polishing of teeth surfaces</textarea>
       </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary" onclick="showToast('Medicine added')">Save</button>
-      </div>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn-cancel" onclick="closeModal('edit-modal')">Cancel</button>
+      <button class="btn-save btn-save-success" onclick="closeModal('edit-modal');showToast('Item updated successfully','var(--teal)')"><i class="bi bi-check-lg" style="margin-right:5px;"></i>Update</button>
     </div>
   </div>
 </div>
 
-<!-- EDIT / DELETE -->
-<div class="modal fade" id="editModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header"><h5>Edit Item</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body"><input class="form-control mb-2"><textarea class="form-control"></textarea></div>
-      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success" onclick="showToast('Updated')">Update</button></div>
+<!-- Delete Confirm -->
+<div class="modal-overlay" id="delete-modal" onclick="overlayClose(event, 'delete-modal')">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h5><div class="modal-icon" style="background:rgba(255,92,122,0.1);color:var(--rose);"><i class="bi bi-trash"></i></div> Confirm Deletion</h5>
+      <button class="btn-close-modal" onclick="closeModal('delete-modal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="delete-confirm-body">
+      <div class="delete-icon-wrap"><i class="bi bi-exclamation-triangle-fill"></i></div>
+      <h4>Delete this item?</h4>
+      <p>This action cannot be undone. The item will be permanently removed from your clinic records.</p>
+    </div>
+    <div class="modal-footer-btns">
+      <button class="btn-cancel" onclick="closeModal('delete-modal')">Keep it</button>
+      <button class="btn-save btn-save-danger" onclick="closeModal('delete-modal');showToast('Item deleted','var(--rose)')"><i class="bi bi-trash" style="margin-right:5px;"></i>Yes, Delete</button>
     </div>
   </div>
 </div>
 
-<div class="modal fade" id="deleteModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header"><h5>Confirm Delete</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">Are you sure?</div>
-      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger" onclick="showToast('Deleted')">Delete</button></div>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast-container position-fixed top-0 end-0 p-3">
-  <div id="toast" class="toast text-bg-success"><div class="toast-body" id="toastMsg"></div></div>
-</div>
+<!-- Toast Container -->
+<div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-function showToast(msg){
-  document.getElementById('toastMsg').innerText = msg;
-  new bootstrap.Toast(document.getElementById('toast')).show();
-}
+  // ── Tab switching ──
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Modal ──
+  function openModal(id)  { document.getElementById(id).classList.add('open'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function overlayClose(e, id) { if (e.target === e.currentTarget) closeModal(id); }
+
+  // ── Toast ──
+  function showToast(msg, color = 'var(--blue)') {
+    const wrap = document.getElementById('toast-wrap');
+    const el = document.createElement('div');
+    el.className = 'toast-item';
+    el.innerHTML = `<span class="toast-dot" style="background:${color}"></span>${msg}`;
+    wrap.appendChild(el);
+    setTimeout(() => {
+      el.classList.add('removing');
+      setTimeout(() => el.remove(), 300);
+    }, 3000);
+  }
+
+  // ── Row counter ──
+  function padNum(n) { return n < 10 ? '0' + n : '' + n; }
+
+  // ── Add Procedure ──
+  function addProcedure() {
+    const name = document.getElementById('proc-name').value.trim();
+    const desc = document.getElementById('proc-desc').value.trim();
+    const type = document.getElementById('proc-type').value.trim();
+    if (!name) return;
+    const tbody = document.getElementById('procedure-tbody');
+    const rows = tbody.querySelectorAll('tr[data-name]');
+    const num = padNum(rows.length + 1);
+    const tag = type ? `<span class="tag tag-blue">${type}</span>` : '—';
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-name', name.toLowerCase());
+    tr.innerHTML = `
+      <td class="row-number">${num}</td>
+      <td><span class="item-name">${name}</span></td>
+      <td><span class="item-desc">${desc || '—'}</span></td>
+      <td>${tag}</td>
+      <td class="actions-cell">
+        <button class="btn-action edit" onclick="openModal('edit-modal')" title="Edit"><i class="bi bi-pencil"></i></button>
+        <button class="btn-action del"  onclick="openModal('delete-modal')" title="Delete"><i class="bi bi-trash"></i></button>
+      </td>`;
+    tbody.appendChild(tr);
+    updateCount('procedure', tbody.querySelectorAll('tr[data-name]').length);
+    document.getElementById('proc-name').value = '';
+    document.getElementById('proc-desc').value = '';
+    document.getElementById('proc-type').value = '';
+    closeModal('add-procedure-modal');
+    showToast('Procedure added successfully');
+  }
+
+  // ── Add Prescription ──
+  function addPrescription() {
+    const name  = document.getElementById('pres-name').value.trim();
+    const notes = document.getElementById('pres-notes').value.trim();
+    if (!name) return;
+    const tbody = document.getElementById('prescription-tbody');
+    // Remove empty state
+    const empty = tbody.querySelector('tr td[colspan]');
+    if (empty) empty.closest('tr').remove();
+    const rows = tbody.querySelectorAll('tr[data-name]');
+    const num  = padNum(rows.length + 1);
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-name', name.toLowerCase());
+    tr.innerHTML = `
+      <td class="row-number">${num}</td>
+      <td><span class="item-name">${name}</span></td>
+      <td><span class="item-desc">${notes || '—'}</span></td>
+      <td class="actions-cell">
+        <button class="btn-action edit" onclick="openModal('edit-modal')" title="Edit"><i class="bi bi-pencil"></i></button>
+        <button class="btn-action del"  onclick="openModal('delete-modal')" title="Delete"><i class="bi bi-trash"></i></button>
+      </td>`;
+    tbody.appendChild(tr);
+    updateCount('prescription', tbody.querySelectorAll('tr[data-name]').length);
+    document.getElementById('pres-name').value  = '';
+    document.getElementById('pres-notes').value = '';
+    closeModal('add-prescription-modal');
+    showToast('Template added', 'var(--teal)');
+  }
+
+  // ── Add Medicine ──
+  function addMedicine() {
+    const name   = document.getElementById('med-name').value.trim();
+    const dosage = document.getElementById('med-dosage').value.trim();
+    if (!name) return;
+    const tbody = document.getElementById('medicine-tbody');
+    const empty = tbody.querySelector('tr td[colspan]');
+    if (empty) empty.closest('tr').remove();
+    const rows = tbody.querySelectorAll('tr[data-name]');
+    const num  = padNum(rows.length + 1);
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-name', name.toLowerCase());
+    tr.innerHTML = `
+      <td class="row-number">${num}</td>
+      <td><span class="item-name">${name}</span></td>
+      <td><span class="item-desc">${dosage || '—'}</span></td>
+      <td class="actions-cell">
+        <button class="btn-action edit" onclick="openModal('edit-modal')" title="Edit"><i class="bi bi-pencil"></i></button>
+        <button class="btn-action del"  onclick="openModal('delete-modal')" title="Delete"><i class="bi bi-trash"></i></button>
+      </td>`;
+    tbody.appendChild(tr);
+    updateCount('medicine', tbody.querySelectorAll('tr[data-name]').length);
+    document.getElementById('med-name').value   = '';
+    document.getElementById('med-dosage').value = '';
+    closeModal('add-medicine-modal');
+    showToast('Medicine added', 'var(--gold)');
+  }
+
+  // ── Count badge ──
+  function updateCount(tab, n) {
+    document.getElementById('count-' + tab).textContent = n;
+  }
+
+  // ── Live search ──
+  function filterTable(tbodyId, query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('#' + tbodyId + ' tr[data-name]').forEach(row => {
+      row.style.display = row.getAttribute('data-name').includes(q) ? '' : 'none';
+    });
+  }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

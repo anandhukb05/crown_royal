@@ -5,122 +5,512 @@
 
 {% block content %}
 
+<style>
+  /* ── DESIGN TOKENS (matches service.html palette) ── */
+  :root {
+    --bg:         #F0F2F5;
+    --surface:    #FFFFFF;
+    --surface-2:  #F8F9FB;
+    --navy:       #1B2B4B;
+    --navy-lt:    #2C3E63;
+    --navy-xs:    #EEF1F7;
+    --slate:      #475569;
+    --slate-lt:   #94A3B8;
+    --accent:     #2563EB;
+    --accent-lt:  #EFF4FF;
+    --emerald:    #059669;
+    --emerald-lt: #ECFDF5;
+    --amber:      #D97706;
+    --amber-lt:   #FFFBEB;
+    --rose:       #E11D48;
+    --rose-lt:    #FFF1F4;
+    --border:     #E2E8F0;
+    --radius-sm:  8px;
+    --radius:     12px;
+    --radius-lg:  16px;
+    --shadow-xs:  0 1px 3px rgba(0,0,0,.06);
+    --shadow:     0 4px 16px rgba(27,43,75,.08);
+    --shadow-lg:  0 12px 40px rgba(27,43,75,.12);
+  }
 
-<div class="container mt-4">
-<div class="card shadow-lg p-4">
-<h4 class="mb-4 text-center">Appointment Booking</h4>
+  body { background: var(--bg); font-family: 'Outfit', sans-serif; }
 
-<form method="POST">
-    {% csrf_token %}
+  /* ── PAGE WRAP ── */
+  .appt-wrap {
+    max-width: 780px;
+    margin: 40px auto 64px;
+    padding: 0 20px;
+  }
 
-    <div class="row g-3">
+  /* ── PAGE HEADER ── */
+  .appt-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .appt-header h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--navy);
+    letter-spacing: -.3px;
+    line-height: 1.2;
+  }
+  .appt-header h1 em { font-style: italic; color: var(--accent); }
+  .appt-header p { font-size: 13px; color: var(--slate-lt); margin-top: 4px; }
+  .cancel-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 500; color: var(--slate);
+    text-decoration: none;
+    box-shadow: var(--shadow-xs);
+    transition: all .18s;
+    white-space: nowrap;
+  }
+  .cancel-link:hover { border-color: var(--navy); color: var(--navy); }
 
+  /* ── MAIN FORM CARD ── */
+  .appt-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
 
+  /* ── CARD HEADER BAND ── */
+  .appt-card-header {
+    background: var(--navy);
+    padding: 18px 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .appt-card-header .hd-icon {
+    width: 36px; height: 36px;
+    background: rgba(255,255,255,.12);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: rgba(255,255,255,.85);
+  }
+  .appt-card-header .hd-text {
+    font-size: 15px; font-weight: 700; color: #fff; letter-spacing: -.1px;
+  }
+  .appt-card-header .hd-sub {
+    font-size: 12px; color: rgba(255,255,255,.5); margin-top: 1px;
+  }
 
-       <div class="col-md-6 position-relative">
-            <label>Patient</label>
+  /* ── FORM SECTIONS ── */
+  .form-section {
+    padding: 24px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-section:last-of-type { border-bottom: none; }
+  .section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--slate-lt);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
-            <input type="text"
-                id="patientSearch"
-                class="form-control"
-                value="{{ selected_patient_name|default:'' }}"
-                >
+  /* ── FORM CONTROLS ── */
+  .f-row { display: grid; gap: 18px; }
+  .f-row.col-2 { grid-template-columns: 1fr 1fr; }
+  .f-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .f-row.col-1 { grid-template-columns: 1fr; }
 
-            <input type="hidden"
-                name="patient"
-                id="patientId"
-                value="{{ selected_patient_id|default:'' }}">
-            <div id="suggestions" class="list-group position-absolute w-100"></div>
-        </div>
+  .f-group { display: flex; flex-direction: column; }
+  .f-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    color: var(--slate);
+    margin-bottom: 7px;
+  }
 
-        <div class="col-md-6">
-            <label>Phone</label>
-            <input type="text"
-                name="phone"
-                id="phoneField"
-                class="form-control"
-                value="{{ selected_phone|default:'' }}">
-        </div>
+  /* override Django widget + input styles uniformly */
+  .f-group input[type="text"],
+  .f-group input[type="date"],
+  .f-group input[type="time"],
+  .f-group select,
+  .f-group textarea,
+  .f-ctrl {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-family: 'Outfit', sans-serif;
+    color: var(--navy);
+    background: var(--surface);
+    transition: border-color .18s, box-shadow .18s;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .f-group input[type="text"]:focus,
+  .f-group input[type="date"]:focus,
+  .f-group input[type="time"]:focus,
+  .f-group select:focus,
+  .f-group textarea:focus,
+  .f-ctrl:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(37,99,235,.1);
+  }
+  .f-group input::placeholder,
+  .f-ctrl::placeholder { color: var(--slate-lt); }
 
-      
+  /* select arrow */
+  .f-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%2394A3B8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 36px;
+    cursor: pointer;
+  }
 
-        <div class="col-md-6">
-            <label>Doctor</label>
-             {{ form.doctor}}
-          
-        </div>
+  /* textarea */
+  .f-group textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 
-        <div class="col-md-6">
-            <label>Date</label>
-            {{ form.date }}
-        </div>
+  /* ── PATIENT SEARCH ── */
+  .patient-search-wrap { position: relative; }
+  .patient-input-inner {
+    position: relative;
+    display: flex; align-items: center;
+  }
+  .patient-input-inner .search-ic {
+    position: absolute; left: 13px;
+    font-size: 14px; color: var(--slate-lt);
+    pointer-events: none;
+  }
+  .patient-input-inner input {
+    padding-left: 36px !important;
+  }
+  .suggestion-box {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-lg);
+    z-index: 200;
+    max-height: 220px;
+    overflow-y: auto;
+    display: none;
+  }
+  .suggestion-box.open { display: block; }
+  .suggestion-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    cursor: pointer;
+    transition: background .14s;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+  }
+  .suggestion-item:last-child { border-bottom: none; }
+  .suggestion-item:hover { background: var(--accent-lt); }
+  .suggestion-item .s-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--navy-xs);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; color: var(--navy);
+    flex-shrink: 0;
+  }
+  .suggestion-item .s-name { font-size: 13.5px; font-weight: 600; color: var(--navy); }
+  .suggestion-item .s-phone { font-size: 12px; color: var(--slate-lt); }
 
-        <div class="col-md-6">
-            <label>Time</label>
-            {{ form.time }}
-        </div>
+  /* ── PHONE FIELD LOCKED ── */
+  .phone-wrap { position: relative; }
+  .phone-wrap .phone-ic {
+    position: absolute; left: 13px; top: 50%; transform: translateY(-50%);
+    font-size: 14px; color: var(--slate-lt);
+  }
+  .phone-wrap input { padding-left: 36px !important; background: var(--surface-2) !important; }
 
-        <div class="col-md-6">
-            <label>Status</label>
-            {{ form.status }}
-        </div>
+  /* ── STATUS CHIPS ── */
+  .status-options {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .status-options label {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--slate);
+    transition: all .16s;
+    user-select: none;
+  }
+  .status-options input[type="radio"] { display: none; }
+  .status-options label .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .status-options label:has(input:checked) { border-color: currentColor; }
+  .status-options label[data-val="Scheduled"]:has(input:checked)  { background: var(--accent-lt);  color: var(--accent);  border-color: var(--accent); }
+  .status-options label[data-val="Completed"]:has(input:checked)  { background: var(--emerald-lt); color: var(--emerald); border-color: var(--emerald); }
+  .status-options label[data-val="Cancelled"]:has(input:checked)  { background: var(--rose-lt);    color: var(--rose);    border-color: var(--rose); }
+  .status-options label[data-val="Pending"]:has(input:checked)    { background: var(--amber-lt);   color: var(--amber);   border-color: var(--amber); }
 
-        <div class="col-12">
-            <label>Reason</label>
-            {{ form.reason }}
-        </div>
-        
+  /* ── FORM FOOTER ── */
+  .form-footer {
+    padding: 20px 28px;
+    background: var(--surface-2);
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+  }
+  .btn-cancel-footer {
+    padding: 11px 20px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 600;
+    font-family: 'Outfit', sans-serif; color: var(--slate);
+    text-decoration: none;
+    cursor: pointer; transition: all .16s;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .btn-cancel-footer:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-submit {
+    padding: 11px 28px;
+    background: var(--navy); color: #fff;
+    border: none; border-radius: var(--radius-sm);
+    font-size: 13px; font-weight: 700;
+    font-family: 'Outfit', sans-serif;
+    cursor: pointer; transition: all .18s;
+    display: inline-flex; align-items: center; gap: 8px;
+    letter-spacing: .1px;
+  }
+  .btn-submit:hover {
+    background: var(--navy-lt);
+    box-shadow: 0 4px 16px rgba(27,43,75,.22);
+    transform: translateY(-1px);
+  }
+  .btn-submit i { font-size: 15px; }
 
-        <div class="col-12 text-center mt-3">
-            <button class="btn btn-primary px-5">Save Appointment</button>
-        </div>
-        <div class="col-12 text-center mt-3">
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .f-row.col-2, .f-row.col-3 { grid-template-columns: 1fr; }
+    .appt-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  }
 
+  /* ── FADE IN ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .appt-card { animation: fadeUp .24s ease; }
+</style>
 
-    <a href="{% url 'appointment_list' %}" 
-       class="btn btn-outline-secondary px-4">
-        Cancel
-    </a>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-</div>
+<div class="appt-wrap">
 
+  <!-- PAGE HEADER -->
+  <div class="appt-header">
+    <div>
+      <h1>Book an <em>Appointment</em></h1>
+      <p>Fill in the details below to schedule a visit</p>
     </div>
-</form>
-</div>
-</div>
+    <a href="{% url 'appointment_list' %}" class="cancel-link">
+      <i class="bi bi-arrow-left-short" style="font-size:16px"></i> Back to List
+    </a>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="appt-card">
+
+    <!-- Card Header Band -->
+    <div class="appt-card-header">
+      <div class="hd-icon"><i class="bi bi-calendar2-plus"></i></div>
+      <div>
+        <div class="hd-text">Appointment Details</div>
+        <div class="hd-sub">All fields marked are required</div>
+      </div>
+    </div>
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <!-- ── SECTION 1: Patient Info ── -->
+      <div class="form-section">
+        <div class="section-label"><i class="bi bi-person" style="font-size:13px"></i> Patient Information</div>
+        <div class="f-row col-2">
+
+          <!-- Patient Search -->
+          <div class="f-group">
+            <span class="f-label">Patient Name</span>
+            <div class="patient-search-wrap">
+              <div class="patient-input-inner">
+                <i class="bi bi-search search-ic"></i>
+                <input type="text"
+                       id="patientSearch"
+                       class="f-ctrl"
+                       value="{{ selected_patient_name|default:'' }}"
+                       placeholder="Search patient name…"
+                       autocomplete="off">
+              </div>
+              <input type="hidden" name="patient" id="patientId" value="{{ selected_patient_id|default:'' }}">
+              <div id="suggestions" class="suggestion-box"></div>
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div class="f-group">
+            <span class="f-label">Phone Number</span>
+            <div class="phone-wrap">
+              <i class="bi bi-telephone phone-ic"></i>
+              <input type="text"
+                     name="phone"
+                     id="phoneField"
+                     class="f-ctrl"
+                     value="{{ selected_phone|default:'' }}"
+                     placeholder="Auto-filled on selection"
+                     readonly>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── SECTION 2: Schedule ── -->
+      <div class="form-section">
+        <div class="section-label"><i class="bi bi-calendar3" style="font-size:13px"></i> Schedule</div>
+        <div class="f-row col-3">
+          <div class="f-group">
+            <span class="f-label">Doctor</span>
+            {{ form.doctor }}
+          </div>
+          <div class="f-group">
+            <span class="f-label">Date</span>
+            {{ form.date }}
+          </div>
+          <div class="f-group">
+            <span class="f-label">Time</span>
+            {{ form.time }}
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SECTION 3: Status ── -->
+      <div class="form-section">
+        <div class="section-label"><i class="bi bi-flag" style="font-size:13px"></i> Status</div>
+
+        {% if form.status.field.widget.input_type == "select" %}
+        <!-- If Django renders a <select>, style it cleanly -->
+        <div class="f-group" style="max-width:260px">
+          {{ form.status }}
+        </div>
+        {% else %}
+        <!-- Custom radio chips -->
+        <div class="status-options">
+          {% for val, label in form.status.field.choices %}
+          <label data-val="{{ val }}">
+            <input type="radio" name="status" value="{{ val }}"
+              {% if form.status.value == val %}checked{% endif %}>
+            <span class="dot" style="background:
+              {% if val == 'Scheduled' %}#2563EB
+              {% elif val == 'Completed' %}#059669
+              {% elif val == 'Cancelled' %}#E11D48
+              {% else %}#D97706{% endif %}">
+            </span>
+            {{ label }}
+          </label>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- ── SECTION 4: Reason ── -->
+      <div class="form-section">
+        <div class="section-label"><i class="bi bi-chat-left-text" style="font-size:13px"></i> Reason for Visit</div>
+        <div class="f-group">
+          {{ form.reason }}
+        </div>
+      </div>
+
+      <!-- ── FOOTER ACTIONS ── -->
+      <div class="form-footer">
+        <a href="{% url 'appointment_list' %}" class="btn-cancel-footer">
+          <i class="bi bi-x-lg" style="font-size:12px"></i> Cancel
+        </a>
+        <button type="submit" class="btn-submit">
+          <i class="bi bi-calendar2-check"></i> Save Appointment
+        </button>
+      </div>
+
+    </form>
+  </div><!-- /appt-card -->
+</div><!-- /appt-wrap -->
 
 
 <script>
-const searchInput = document.getElementById('patientSearch');
+const searchInput   = document.getElementById('patientSearch');
 const suggestionBox = document.getElementById('suggestions');
+const patientId     = document.getElementById('patientId');
+const phoneField    = document.getElementById('phoneField');
 
-searchInput.addEventListener('keyup', function() {
-    fetch(`/appointment/patient_search/?term=${this.value}`)
+searchInput.addEventListener('input', function () {
+  const term = this.value.trim();
+  if (!term) { suggestionBox.classList.remove('open'); return; }
+
+  fetch(`/appointment/patient_search/?term=${encodeURIComponent(term)}`)
     .then(res => res.json())
     .then(data => {
-        suggestionBox.innerHTML = '';
-        data.forEach(item => {
-            const div = document.createElement('a');
-            div.classList.add('list-group-item','list-group-item-action');
-            div.textContent = item.name + ' - ' + item.phone;
+      suggestionBox.innerHTML = '';
+      if (!data.length) { suggestionBox.classList.remove('open'); return; }
 
-            div.onclick = function(){
-                document.getElementById('patientId').value = item.id;
-                document.getElementById('phoneField').value = item.phone;
-                searchInput.value = item.name;
-                suggestionBox.innerHTML = '';
-            }
+      data.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'suggestion-item';
 
-            suggestionBox.appendChild(div);
+        // initials avatar
+        const initials = item.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+        row.innerHTML = `
+          <div class="s-avatar">${initials}</div>
+          <div>
+            <div class="s-name">${item.name}</div>
+            <div class="s-phone"><i class="bi bi-telephone" style="font-size:10px;margin-right:3px"></i>${item.phone}</div>
+          </div>
+        `;
+        row.addEventListener('click', () => {
+          patientId.value   = item.id;
+          phoneField.value  = item.phone;
+          searchInput.value = item.name;
+          suggestionBox.classList.remove('open');
         });
+        suggestionBox.appendChild(row);
+      });
+
+      suggestionBox.classList.add('open');
     });
 });
 
+// close dropdown on outside click
+document.addEventListener('click', e => {
+  if (!searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
+    suggestionBox.classList.remove('open');
+  }
+});
 </script>
-
 
 {% endblock %}
 
 {% block footer %}
-    {% include "includes/footer.html" %}
+  {% include "includes/footer.html" %}
 {% endblock %}

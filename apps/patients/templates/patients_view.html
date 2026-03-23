@@ -114,9 +114,11 @@ ID : {{ patient.patient_id }}
 <i class="bi bi-pencil"></i>
 </button>
 
-<a href="#" class="btn btn-sm btn-danger">
-<i class="bi bi-trash"></i>
-</a>
+<button class="btn btn-danger btn-sm"
+        data-bs-toggle="modal"
+        data-bs-target="#deletePatientModal{{ patient.patient_id }}">
+    <i class="bi bi-trash"></i>
+</button>
 
 </div>
 
@@ -128,13 +130,64 @@ ID : {{ patient.patient_id }}
 
 </div>
 
+<!-- DELETE MODAL -->
+<div class="modal fade" id="deletePatientModal{{ patient.patient_id }}">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <form method="POST" action="{% url 'delete_patient' patient.patient_id %}">
+                {% csrf_token %}
+
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        Confirm Delete
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body text-center">
+
+                    <div class="mb-3">
+                        <i class="bi bi-trash fs-1 text-danger"></i>
+                    </div>
+
+                    <h6>Are you sure?</h6>
+                    <p class="text-muted mb-0">
+                        You are about to delete
+                        <strong>{{ patient.name }}</strong>.
+                    </p>
+
+                    <small class="text-danger">
+                        This action cannot be undone.
+                    </small>
+
+                </div>
+
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-light"
+                            data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-danger">
+                        Yes, Delete
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
 
 <!-- EDIT MODAL -->
 <div class="modal fade" id="editPatientModal{{ patient.patient_id }}">
 <div class="modal-dialog modal-lg modal-dialog-centered">
 <div class="modal-content">
 
-<form method="post" action="{% url 'edit_patient' patient.patient_id %}">
+<form method="post" action="{% url 'edit_patient' patient.patient_id %}" enctype="multipart/form-data">
 {% csrf_token %}
 
 <div class="modal-header">
@@ -146,61 +199,92 @@ ID : {{ patient.patient_id }}
 
 <div class="row g-3">
 
+<!-- IMAGE SECTION -->
+<div class="col-md-4 text-center">
+
+    <div id="editPreviewBox{{ patient.patient_id }}"
+         style="width:100%;min-height:150px;background:#f5f5f5;
+         display:flex;align-items:center;justify-content:center;
+         border-radius:10px;overflow:hidden;">
+
+        {% if patient.image_path %}
+            <img src="{{ patient.image_path.url }}" 
+                 style="width:100%;height:auto;">
+        {% else %}
+            <span class="text-muted">No Image</span>
+        {% endif %}
+    </div>
+
+    <input type="file"
+           name="image_file"
+           class="form-control mt-2 editImageInput"
+           data-id="{{ patient.patient_id }}">
+
+</div>
+
+<!-- FORM FIELDS -->
+<div class="col-md-8">
+
+<div class="row g-3">
+
 <div class="col-md-6">
-<label class="form-label">Name</label>
+<label>Name</label>
 <input type="text" name="name" value="{{ patient.name }}" class="form-control">
 </div>
 
 <div class="col-md-6">
-<label class="form-label">Email</label>
+<label>Email</label>
 <input type="email" name="email" value="{{ patient.email }}" class="form-control">
 </div>
 
 <div class="col-md-3">
-<label class="form-label">Age</label>
+<label>Age</label>
 <input type="number" name="age" value="{{ patient.age }}" class="form-control">
 </div>
 
 <div class="col-md-3">
-<label class="form-label">Gender</label>
-<select name="gender" class="form-control">
-<option {% if patient.gender == "Male" %}selected{% endif %}>Male</option>
-<option {% if patient.gender == "Female" %}selected{% endif %}>Female</option>
+<label>Gender</label>
+<select name="gender" class="form-select">
+<option value="Male" {% if patient.gender == "Male" %}selected{% endif %}>Male</option>
+<option value="Female" {% if patient.gender == "Female" %}selected{% endif %}>Female</option>
+<option value="Other" {% if patient.gender == "Other" %}selected{% endif %}>Other</option>
 </select>
 </div>
 
 <div class="col-md-6">
-<label class="form-label">Phone</label>
+<label>Phone</label>
 <input type="text" name="phno" value="{{ patient.phno }}" class="form-control">
 </div>
+
 <div class="col-md-6">
-    <label class="form-label">Aadhaar Number</label>
-    <input type="text" name="aadhaar_id" class="form-control" maxlength="12" value="{{ patient.aadhaar_id }}">
+<label>Aadhaar</label>
+<input type="text" name="aadhaar_id" value="{{ patient.aadhaar_id }}" class="form-control">
 </div>
 
-
 <div class="col-md-6">
-<label class="form-label">Country</label>
+<label>Country</label>
 <input type="text" name="country" value="{{ patient.country }}" class="form-control">
 </div>
 
 <div class="col-md-6">
-<label class="form-label">State</label>
+<label>State</label>
 <input type="text" name="state" value="{{ patient.state }}" class="form-control">
 </div>
 
 <div class="col-md-8">
-<label class="form-label">Address</label>
+<label>Address</label>
 <input type="text" name="address" value="{{ patient.address }}" class="form-control">
 </div>
 
 <div class="col-md-4">
-<label class="form-label">Pincode</label>
+<label>Pincode</label>
 <input type="text" name="pincode" value="{{ patient.pincode }}" class="form-control">
 </div>
 
 </div>
+</div>
 
+</div>
 </div>
 
 <div class="modal-footer">
@@ -222,4 +306,25 @@ No patients found
 {% endfor %}
 
 </div>
+
+<script>
+    document.querySelectorAll(".editImageInput").forEach(input => {
+
+    input.addEventListener("change", function(e){
+        const file = e.target.files[0];
+        if(!file) return;
+
+        const patientId = this.getAttribute("data-id");
+        const previewBox = document.getElementById("editPreviewBox" + patientId);
+
+        const reader = new FileReader();
+        reader.onload = function(evt){
+            previewBox.innerHTML = `<img src="${evt.target.result}" 
+                style="width:100%;height:auto;">`;
+        };
+        reader.readAsDataURL(file);
+    });
+
+});
+</script>
 {% endblock %}

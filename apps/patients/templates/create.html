@@ -2,126 +2,277 @@
 {% load static %}
 {% block title %}Register{% endblock %}
 
+{% block style %}
+.form-wrapper {
+    max-width: 900px;
+    margin: auto;
+}
 
- {% block style %}
-        body {
-            background-color: #f4f6f9;
-        }
-        .form-container {
-            max-width: 800px;
-            background: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .form-title {
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        @media (max-width: 576px) {
-            .form-container {
-                padding: 15px;
-            }
-        }
-    </style>
+.form-card {
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    padding: 28px;
+}
+
+.form-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.form-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--primary-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 18px;
+}
+
+.form-title {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.form-section {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+}
+
+/* Inputs */
+.form-control, .form-select {
+    border-radius: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(26,92,138,.1);
+}
+
+/* Photo preview */
+.image-preview {
+    width: 100%;
+    height: 140px;
+    border-radius: 10px;
+    border: 1px dashed var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+.image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Button */
+.submit-btn {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border: none;
+    border-radius: 30px;
+    padding: 10px 30px;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(26,92,138,.25);
+}
+
+.submit-btn:hover {
+    opacity: 0.9;
+}
 {% endblock %}
+
+
 {% block content %}
 
+{% if messages %}
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index:1080; margin-top:70px;">
+    
+    {% for message in messages %}
+    <div class="toast show align-items-center text-white 
+        {% if message.tags == 'success' %}bg-success
+        {% elif message.tags == 'error' %}bg-danger
+        {% else %}bg-primary{% endif %}
+        border-0 mb-2" role="alert">
+
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi 
+                    {% if message.tags == 'success' %}bi-check-circle
+                    {% elif message.tags == 'error' %}bi-x-circle
+                    {% else %}bi-info-circle{% endif %}
+                me-2"></i>
+
+                {{ message }}
+            </div>
+
+            <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                    data-bs-dismiss="toast"></button>
+        </div>
+
+    </div>
+    {% endfor %}
+
+</div>
+{% endif %}
 
 <div class="container my-4">
-    <div class="form-container mx-auto">
-        <h4 class="form-title">Patient Registration</h4>
 
-        <form method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
+    <!-- TOP HERO -->
+    <div class="p-4 mb-4 rounded-4 text-white"
+         style="background: linear-gradient(135deg, var(--primary), var(--accent)); box-shadow: var(--shadow-md);">
 
-            <div class="row g-3">
+        <div class="d-flex align-items-center gap-3">
+            <div style="width:50px;height:50px;background:rgba(255,255,255,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-person-plus-fill fs-4"></i>
+            </div>
+            <div>
+                <h5 class="mb-0">Register Patient</h5>
+                <small style="opacity:.8;">Add new patient details to the system</small>
+            </div>
+        </div>
+    </div>
 
-                <!-- Name -->
-                <div class="col-md-6">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" name="name" class="form-control" placeholder="Enter full name" required>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="row g-4">
+
+            <!-- LEFT: PHOTO -->
+            <div class="col-lg-4">
+                <div class="p-3 rounded-4 bg-white shadow-sm text-center">
+
+                    <div id="previewBox"
+     style="width:100%;border-radius:14px;background:var(--bg);display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:120px;max-height:400px;">
+    <span class="text-muted">Photo Preview</span>
+</div>
+
+                    <input type="file" id="imageInput" name="image_file"
+                           class="form-control mt-3">
+
+                </div>
+            </div>
+
+            <!-- RIGHT: FORM -->
+            <div class="col-lg-8">
+
+                <div class="p-4 rounded-4 bg-white shadow-sm">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Full Name</label>
+                            <input type="text" name="name"
+                                    class="form-control {% if form.name.errors %}is-invalid{% endif %}">
+
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                                {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Gender</label>
+                            <select name="gender" class="form-select">
+                                <option>Select</option>
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Age</label>
+                            <input type="number" name="age" class="form-control">
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label small text-muted">Aadhaar</label>
+                            <input type="text" name="aadhaar_id" class="form-control">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Phone</label>
+                            <input type="tel" name="phno"
+                                    class="form-control {% if form.phno.errors %}is-invalid{% endif %}">
+
+                                {% if form.phno.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.phno.errors.0 }}
+                                </div>
+                                {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Email</label>
+                            <input type="email" name="email"
+                                    class="form-control {% if form.email.errors %}is-invalid{% endif %}">
+
+                                {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                                {% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">Country</label>
+                            <select id="country" name="country" class="form-select"></select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small text-muted">State</label>
+                            <select id="state" name="state" class="form-select"></select>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-muted">Address</label>
+                            <textarea name="address" class="form-control" rows="2"></textarea>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label small text-muted">Pincode</label>
+                            <input type="text" name="pincode" class="form-control">
+                        </div>
+
+                    </div>
+
                 </div>
 
-                <!-- Gender -->
-                <div class="col-md-6">
-                    <label class="form-label">Gender</label>
-                    <select name="gender" class="form-select" required>
-                        <option value="">Select</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                <!-- Age -->
-                <div class="col-md-4">
-                    <label class="form-label">Age</label>
-                    <input type="number" name="age" class="form-control" min="1" max="120" required>
-                </div>
-
-                <!-- Aadhaar -->
-                <div class="col-md-8">
-                    <label class="form-label">Aadhaar Number</label>
-                    <input type="text" name="aadhaar_id" class="form-control" maxlength="12" required>
-                </div>
-
-                <!-- Phone -->
-                <div class="col-md-6">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" name="phno" class="form-control" required>
-                </div>
-
-                <!-- Email -->
-                <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control" required>
-                </div>
-
-                <!-- Country -->
-                <div class="col-md-6">
-                    <label class="form-label">Country</label>
-                    <select id="country" name="country" class="form-select" required>
-                        <option value="">select country</option>
-                    </select>
-                </div>
-
-                <!-- State -->
-                <div class="col-md-6">
-                    <label class="form-label">State</label>
-                    <select id="state" name="state" class="form-select" required>
-                        <option value="">select state</option>
-                    </select>
-                </div>
-
-                <!-- Address -->
-                <div class="col-8">
-                    <label class="form-label">Address</label>
-                    <textarea name="address" class="form-control" rows="4" required></textarea>
-                </div>
-
-                <!-- Pincode + Photo -->
-                <div class="col-4">
-                    <label class="form-label">Pincode</label>
-                    <input type="text" name="pincode" class="form-control mb-2" required>
-
-                    <label class="form-label">Photo</label>
-                    <input type="file" name="image_file" class="form-control">
-                </div>
-
-                <!-- Submit -->
-                <div class="col-12 text-center">
-                    <button type="submit" class="btn btn-primary px-5 mt-3">
-                        Submit
+                <!-- SUBMIT -->
+                <div class="text-end mt-3">
+                    <button class="btn px-4"
+                            style="background:linear-gradient(135deg,var(--primary),var(--accent));color:white;border-radius:25px;">
+                        Save Patient
                     </button>
                 </div>
 
             </div>
-        </form>
-    </div>
+
+        </div>
+    </form>
+
 </div>
-    
+
 <script src="{% static 'js/patients/country-states.js' %}"></script>
 
 <script>
@@ -164,6 +315,80 @@ var user_country_code = "IN";
     create_country_selection();
     create_states_selection();
 })();
+
+/* IMAGE PREVIEW */
+
+/* IMAGE PREVIEW + RESIZE/COMPRESS */
+document.getElementById("imageInput").addEventListener("change", function(e){
+    const file = e.target.files[0];
+    const previewBox = document.getElementById("previewBox");
+
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(evt){
+
+        const img = new Image();
+        img.onload = function(){
+
+            // Calculate aspect ratio
+            const aspectRatio = img.height / img.width;
+            const boxWidth = previewBox.offsetWidth;
+            const dynamicHeight = Math.min(Math.round(boxWidth * aspectRatio), 400); // cap at 400px
+
+            // Resize via canvas
+            const canvas = document.createElement("canvas");
+            const MAX_WIDTH = 400;
+            const MAX_HEIGHT = 400;
+
+            let width = img.width;
+            let height = img.height;
+
+            if(width > height){
+                if(width > MAX_WIDTH){
+                    height = Math.round(height * MAX_WIDTH / width);
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if(height > MAX_HEIGHT){
+                    width = Math.round(width * MAX_HEIGHT / height);
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
+
+            // Set dynamic height on preview box
+            previewBox.style.height = dynamicHeight + "px";
+
+            // Show preview — no cropping, full image visible
+            previewBox.innerHTML = `<img src="${resizedDataUrl}" 
+                style="width:100%;height:100%;object-fit:contain;">`;
+
+            // Replace file with compressed blob
+            canvas.toBlob(function(blob){
+                const resizedFile = new File([blob], file.name, { type: "image/jpeg" });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(resizedFile);
+                document.getElementById("imageInput").files = dataTransfer.files;
+            }, "image/jpeg", 0.8);
+        };
+
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+document.querySelectorAll('.toast').forEach(toastEl => {
+    new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+});
+
 </script>
 
 {% endblock %}
