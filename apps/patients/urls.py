@@ -17,6 +17,9 @@ urlpatterns = [
     path("procedure/<int:patient_id>/", add_procedure, name="add_procedure"),
     path("procedure/edit/<int:pk>/", patient_procedure_edit, name="patient_procedure_edit"),
     path("procedure/delete/<int:pk>/", patient_procedure_delete, name="patient_procedure_delete"),
+    path("prescription/add/<str:patient_id>/", add_prescription, name="add_prescription"),
+    path("prescription/edit/<int:pk>/", prescription_edit, name="prescription_edit"),
+    path("prescription/delete/<int:pk>/", prescription_delete, name="prescription_delete"),
     path("invoice/bill/<int:patient_id>/", patient_bill, name="patient_bill"),
     path("invoice/<int:patient_id>/", add_invoice, name="add_invoice")
 

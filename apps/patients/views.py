@@ -10,6 +10,7 @@ from .models import Vital, ClinicalNotes, PatientProcedure, Prescription
 from apps.services.models import Procedures, Medicine
 from django.urls import reverse
 from django.utils import timezone
+from datetime import datetime
 
 
 def create_patient(request):
@@ -85,7 +86,7 @@ def edit_patient(request, pk):
 
             image_file = request.FILES.get("image_file")
 
-            # ✅ HANDLE IMAGE UPDATE
+            # HANDLE IMAGE UPDATE
             if image_file:
                 patient_folder = os.path.join(
                     settings.MEDIA_ROOT, "patients", str(patient.patient_id)
@@ -112,16 +113,17 @@ def edit_patient(request, pk):
             print(form.errors)  # debug
             messages.error(request, "Please fix the errors")
 
-            # ❗ IMPORTANT: DON'T REDIRECT HERE
+            # IMPORTANT: DON'T REDIRECT HERE
             return redirect("patient_view")  # (see note below)
 
     return redirect("patient_view")
+
 
 def delete_patient(request, pk):
     patient = get_object_or_404(PatientProfile, pk=pk)
 
     if request.method == "POST":
-        # 🔥 Delete image folder (optional but recommended)
+        # Delete image folder (optional but recommended)
         patient_folder = os.path.join(
             settings.MEDIA_ROOT, "patients", str(patient.patient_id)
         )
@@ -137,13 +139,16 @@ def delete_patient(request, pk):
 
     return redirect("patient_view")
 
+
 def patient_profile(request, pk):
     profile = PatientProfile.objects.get(patient_id=pk)
     vital = Vital.objects.filter(patient_id=profile).order_by('-created_at')
     notes = ClinicalNotes.objects.filter(patient_id=profile).order_by('-created_at')
     procedures = PatientProcedure.objects.filter(patient_id=profile).order_by('-created_at')
+    prescription = Prescription.objects.filter(patient_id=profile).order_by('-created_at')
 
     procedures_list = Procedures.objects.all()
+    medicine_list = Medicine.objects.all()
     return render(
             request,
             "profile_view.html",
@@ -152,7 +157,9 @@ def patient_profile(request, pk):
                 'vitals': vital,
                 'notes': notes,
                 'procedures': procedures,
-                'procedures_list': procedures_list
+                'procedures_list': procedures_list,
+                'medicine_list': medicine_list,
+                'prescriptions': prescription
             })
 
 
@@ -297,33 +304,101 @@ def patient_procedure_delete(request, pk):
 
 
 def add_prescription(request, patient_id):
+
     patient = get_object_or_404(PatientProfile, patient_id=patient_id)
 
-    if request.method == 'POST':
+    if request.method == "POST":
+
+        next_review = request.POST.get("next_review")
+        next_review_date = None
+
+        if next_review:
+            next_review_date = timezone.make_aware(
+                datetime.strptime(next_review, "%Y-%m-%d")
+            )
+
+        medicine_obj = get_object_or_404(Medicine, id=request.POST.get("medicine_id"))
+
+        after_food = request.POST.get("after_food") == "True"
 
         Prescription.objects.create(
             patient=patient,
-            next_review_date=request.POST.get('next_review', 0),
-            medicine=get_object_or_404(
-                        Medicine, id=request.POST.get('medicine_id')
-                    ),
-            srength=request.POST.get('strength', 0),
-            unit=request.POST.get('quantity', 0),
-            duration=request.POST.get('quantity', 0),
-            duration_period=request.POST.get('quantity', 0),
-            morning=int(request.POST.get('quantity', 0)),
-            noon=int(request.POST.get('quantity', 0)),
-            night=int(request.POST.get('quantity', 0)),
-            after_food=request.POST.get('quantity', 0),
-            usage=request.POST.get('quantity', 0)
+
+            medicine=medicine_obj,
+
+            next_review_date=next_review_date,
+
+            strength=request.POST.get("strength"),
+            strength_unit=request.POST.get("strength_unit"),
+
+            duration=request.POST.get("duration"),
+            duration_period=request.POST.get("duration_period"),
+
+            morning=request.POST.get("morning") or 0,
+            noon=request.POST.get("noon") or 0,
+            night=request.POST.get("night") or 0,
+
+            after_food=after_food,
+            usage=request.POST.get("usage"),
         )
 
-    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription")
+    return redirect(
+        f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription"
+    )
+
+
+def prescription_edit(request, pk):
+
+    prescription = get_object_or_404(Prescription, pk=pk)
+
+    if request.method == "POST":
+
+        prescription.medicine = get_object_or_404(
+            Medicine, id=request.POST.get("medicine_id")
+        )
+
+        prescription.strength = request.POST.get("strength")
+        prescription.strength_unit = request.POST.get("strength_unit")
+
+        prescription.duration = request.POST.get("duration")
+        prescription.duration_period = request.POST.get("duration_period")
+
+        prescription.morning = request.POST.get("morning", 0)
+        prescription.noon = request.POST.get("noon", 0)
+        prescription.night = request.POST.get("night", 0)
+
+        prescription.after_food = request.POST.get("after_food")
+
+        prescription.save()
+
+        messages.success(request, "Prescription updated successfully")
+
+    patient_id = prescription.patient.patient_id
+
+    return redirect(
+        f"{reverse('patient_profile', kwargs={'pk': patient_id})}#tab-prescription"
+    )
+
+
+def prescription_delete(request, pk):
+
+    prescription = get_object_or_404(Prescription, pk=pk)
+
+    patient_id = prescription.patient.patient_id
+
+    if request.method == "POST":
+        prescription.delete()
+        messages.success(request, "Prescription deleted successfully")
+
+    return redirect(
+        f"{reverse('patient_profile', kwargs={'pk': patient_id})}#tab-prescription"
+    )
 
 
 def patient_bill(request, patient_id):
     patient = get_object_or_404(PatientProfile, patient_id=patient_id)
     return render(request, "bill.html",{"patient": patient})
+
 
 def add_invoice(request, patient_id):
     patient = get_object_or_404(PatientProfile, patient_id=patient_id)

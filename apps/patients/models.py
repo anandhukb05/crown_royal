@@ -1,5 +1,5 @@
 from django.db import models
-from apps.services.models import Procedures
+from apps.services.models import Procedures, Medicine
 # Create your models here.
 
 
@@ -61,9 +61,9 @@ class PatientProcedure(models.Model):
 class Prescription(models.Model):
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     next_review_date = models.DateTimeField(null=True, blank=True)
-    medicine = models.CharField(max_length=150)
-    srength = models.CharField(max_length=150)
-    unit = models.CharField(max_length=100)
+    medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    strength = models.CharField(max_length=150)
+    strength_unit = models.CharField(max_length=100)
     duration = models.IntegerField(null=True, blank=True)
     duration_period = models.CharField(max_length=50)
     morning = models.IntegerField(null=True, blank=True)
