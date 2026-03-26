@@ -287,6 +287,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
     <button class="tab-btn" data-panel="prescription">
       <i class="bi bi-capsule"></i>
       <span class="tab-label">Prescription</span>
+      {% if prescriptions %}<span class="tab-count">{{ prescriptions|length }}</span>{% endif %}
     </button>
     <button class="tab-btn" data-panel="invoice">
       <i class="bi bi-receipt"></i>
@@ -926,23 +927,81 @@ Yes, Delete
 
 {% endif %}
 </div>
-</div>
+
  
 
 
   <!-- ═══ INVOICE ═══ -->
-  <div class="panel" id="panel-invoice">
-    <div class="panel-header">
-      <div><div class="panel-title">Invoices &amp; Billing</div><div class="panel-subtitle">Payment records</div></div>
-    </div>
-    <div class="card-base">
-      <div class="empty-state">
-        <div class="empty-icon"><i class="bi bi-receipt"></i></div>
-        <div class="empty-title">No invoices generated</div>
-        <div class="empty-sub">Tap the + button to generate an invoice</div>
-      </div>
-    </div>
-  </div>
+
+<div class="panel" id="panel-invoice">
+
+{% if invoices %}
+
+<div class="card-base">
+<div style="overflow-x:auto;">
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>Invoice No</th>
+<th>Patient</th>
+<th>Date</th>
+<th>Total</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for invoice in invoices %}
+
+<tr class="clickable-row"
+    data-href="{% url 'invoice_detail' invoice.id %}">
+
+<td>{{ invoice.invoice_no }}</td>
+
+<td style="font-weight:500;">
+{{ invoice.patient.name }}
+</td>
+
+<td class="muted">
+{{ invoice.date|date:"d M Y" }}
+</td>
+
+<td style="font-weight:600;">
+₹{{ invoice.total }}
+</td>
+
+<td>
+<span class="badge-status badge-completed">Paid</span>
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+</div>
+
+{% else %}
+
+<div class="card-base">
+<div class="empty-state">
+<div class="empty-icon"><i class="bi bi-receipt"></i></div>
+<div class="empty-title">No invoices yet</div>
+<div class="empty-sub">Invoices will appear here after billing</div>
+</div>
+</div>
+
+{% endif %}
+
+</div>
+
+
 
   <!-- ═══ GALLERY ═══ -->
   <div class="panel" id="panel-gallery">
@@ -1263,6 +1322,17 @@ document.addEventListener("DOMContentLoaded", function () {
     })
 
 });
+
+document.querySelectorAll(".clickable-row").forEach(row => {
+
+row.addEventListener("click", () => {
+
+window.location = row.dataset.href
+
+})
+
+})
+
 
 </script>
 
