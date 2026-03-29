@@ -37,7 +37,7 @@
 
   /* ── PAGE WRAP ── */
   .appt-wrap {
-    max-width: 780px;
+    max-width: 980px;
     margin: 40px auto 64px;
     padding: 0 20px;
   }
@@ -127,7 +127,9 @@
   /* ── FORM CONTROLS ── */
   .f-row { display: grid; gap: 18px; }
   .f-row.col-2 { grid-template-columns: 1fr 1fr; }
+  .f-row.col-2-wide { grid-template-columns: 2fr 1.2fr; }
   .f-row.col-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .f-row.col-3-wide { grid-template-columns: 2fr 1fr 1fr; }
   .f-row.col-1 { grid-template-columns: 1fr; }
 
   .f-group { display: flex; flex-direction: column; }
@@ -304,7 +306,8 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
-    .f-row.col-2, .f-row.col-3 { grid-template-columns: 1fr; }
+    .f-row.col-2, .f-row.col-2-wide,
+    .f-row.col-3, .f-row.col-3-wide { grid-template-columns: 1fr; }
     .appt-header { flex-direction: column; align-items: flex-start; gap: 12px; }
   }
 
@@ -350,7 +353,7 @@
       <!-- ── SECTION 1: Patient Info ── -->
       <div class="form-section">
         <div class="section-label"><i class="bi bi-person" style="font-size:13px"></i> Patient Information</div>
-        <div class="f-row col-2">
+        <div class="f-row col-2-wide">
 
           <!-- Patient Search -->
           <div class="f-group">
@@ -391,7 +394,7 @@
       <!-- ── SECTION 2: Schedule ── -->
       <div class="form-section">
         <div class="section-label"><i class="bi bi-calendar3" style="font-size:13px"></i> Schedule</div>
-        <div class="f-row col-3">
+        <div class="f-row col-3-wide">
           <div class="f-group">
             <span class="f-label">Doctor</span>
             {{ form.doctor }}
