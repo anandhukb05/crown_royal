@@ -1,4 +1,5 @@
 from django.db import models
+import os
 from apps.services.models import Procedures, Medicine
 # Create your models here.
 
@@ -73,3 +74,22 @@ class Prescription(models.Model):
     usage = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True, blank=True)
+
+
+def patient_gallery_path(instance, filename):
+    return f"patients/{instance.patient.patient_id}/{filename}"
+
+
+class Gallery(models.Model):
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
+    file = models.FileField(upload_to=patient_gallery_path)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True, blank=True)
+
+    def filename(self):
+        return os.path.basename(self.file.name)
+
+    def is_image(self):
+        return self.file.name.lower().endswith(
+            (".png", ".jpg", ".jpeg", ".gif", ".webp")
+        )

@@ -174,6 +174,156 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
 @media (max-width: 480px) {
   .tab-btn .tab-label { display: none; }
 }
+
+/* ── Gallery grid ─────────────────────────────── */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+ 
+/* ── Upload tile ──────────────────────────────── */
+.upload-tile {
+  border: 2px dashed var(--border, #d1d5db);
+  border-radius: 12px;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--text-muted, #9ca3af);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s, color .2s;
+}
+.upload-tile:hover {
+  border-color: var(--primary, #2563eb);
+  background: color-mix(in srgb, var(--primary, #2563eb) 6%, transparent);
+  color: var(--primary, #2563eb);
+}
+.upload-tile i { font-size: 28px; }
+ 
+/* ── Gallery item ─────────────────────────────── */
+.gallery-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface-alt, #f3f4f6);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,.08);
+  transition: transform .18s, box-shadow .18s;
+}
+.gallery-item:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.14); }
+.gallery-item img  { width:100%; height:100%; object-fit:cover; border-radius:10px; display:block; }
+ 
+.gallery-item .file-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 40px;
+  color: var(--text-muted, #9ca3af);
+}
+ 
+/* ── Delete button ────────────────────────────── */
+.delete-btn {
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .18s, background .18s;
+  z-index: 2;
+}
+.gallery-item:hover .delete-btn { opacity: 1; }
+.delete-btn:hover { background: #dc2626; }
+ 
+/* ── Modal overlay ────────────────────────────── */
+.gallery-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.gallery-modal.active { display: flex; }
+ 
+/* ── Modal image ──────────────────────────────── */
+.gallery-content {
+  max-width: min(90vw, 860px);
+  max-height: 82vh;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 24px 64px rgba(0,0,0,.6);
+  animation: zoomIn .22s ease;
+}
+@keyframes zoomIn {
+  from { transform: scale(.92); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+ 
+/* ── Close btn ────────────────────────────────── */
+.gallery-modal .close {
+  position: fixed;
+  top: 18px; right: 24px;
+  font-size: 34px;
+  color: rgba(255,255,255,.8);
+  cursor: pointer;
+  line-height: 1;
+  transition: color .15s, transform .15s;
+  user-select: none;
+}
+.gallery-modal .close:hover { color: #fff; transform: scale(1.15); }
+ 
+/* ── Prev / Next arrows ───────────────────────── */
+.gallery-modal .prev,
+.gallery-modal .next {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 14px 18px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .18s, transform .18s;
+  line-height: 1;
+}
+.gallery-modal .prev { left: 18px; }
+.gallery-modal .next { right: 18px; }
+.gallery-modal .prev:hover,
+.gallery-modal .next:hover {
+  background: rgba(255,255,255,.28);
+  transform: translateY(-50%) scale(1.1);
+}
+ 
+/* ── Counter badge ────────────────────────────── */
+.gallery-counter {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,.15);
+  color: #fff;
+  font-size: 13px;
+  padding: 4px 14px;
+  border-radius: 20px;
+  letter-spacing: .04em;
+}
 </style>
 </head>
 <body>
@@ -296,6 +446,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
     <button class="tab-btn" data-panel="gallery">
       <i class="bi bi-images"></i>
       <span class="tab-label">Gallery</span>
+      {% if gallery %}<span class="tab-count">{{ gallery|length }}</span>{% endif %}
     </button>
   </div>
 
@@ -1004,23 +1155,49 @@ Yes, Delete
 
 
   <!-- ═══ GALLERY ═══ -->
-  <div class="panel" id="panel-gallery">
-    <div class="panel-header">
-      <div><div class="panel-title">Image Gallery</div><div class="panel-subtitle">X-rays, photos &amp; documents</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;">
-      <div style="border:2px dashed var(--border);border-radius:12px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text-muted);font-size:12px;cursor:pointer;transition:.2s;"
-           onclick="document.getElementById('galleryUpload').click()"
-           onmouseover="this.style.borderColor='var(--mint)';this.style.color='var(--mint)'"
-           onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
-        <i class="bi bi-plus-circle" style="font-size:28px;"></i>
-        <span>Upload Image</span>
-        <input type="file" id="galleryUpload" style="display:none;" accept="image/*" multiple>
-      </div>
+<div class="panel" id="panel-gallery">
+ 
+  <div class="panel-header">
+    <div>
+      <div class="panel-title">Image Gallery</div>
+      <div class="panel-subtitle">X-rays, photos &amp; documents</div>
     </div>
   </div>
+  
+    <div class="gallery-grid">
+ 
+      {% for g in gallery %}
+      <div class="gallery-item" data-index="{{ forloop.counter0 }}">
+ 
+        {% if g.is_image %}
+          <img src="{{ g.file.url }}" alt="Gallery image {{ forloop.counter }}">
+        {% else %}
+          <div class="file-icon"><i class="bi bi-file-earmark"></i></div>
+        {% endif %}
+ 
+        <button type="button" class="delete-btn" onclick="deleteImage({{ g.id }})">
+          <i class="bi bi-trash"></i>
+        </button>
+ 
+      </div>
+      {% endfor %}
+ 
+    </div>
+  </form>
+</div>
+ 
+<!-- ── Modal ─────────────────────────────────────────────── -->
+<div id="galleryZoom" class="gallery-modal" onclick="handleModalClick(event)">
+  <span class="close" onclick="closeGallery()">&times;</span>
+  <img class="gallery-content" id="galleryImage" alt="Preview">
+  <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+  <a class="next" onclick="changeSlide(1)">&#10095;</a>
+  <div class="gallery-counter" id="galleryCounter"></div>
+</div>
 
 </div><!-- /main-wrap -->
+
+
 
 <!-- FAB -->
 <button class="fab" id="fabBtn">+</button>
@@ -1215,23 +1392,23 @@ Yes, Delete
 <div class="modal fade" id="galleryModal" tabindex="-1">
 <div class="modal-dialog modal-dialog-centered">
 <div class="modal-content">
-  <div class="modal-header-custom">
-    <div class="modal-title-custom">Upload Images</div>
-    <button class="btn-close-custom" data-bs-dismiss="modal">×</button>
-  </div>
-  <div class="modal-body-custom">
-    <div style="border:2px dashed var(--border);border-radius:12px;padding:40px 20px;text-align:center;cursor:pointer;"
-         onclick="document.getElementById('modalUpload').click()">
-      <i class="bi bi-cloud-upload" style="font-size:36px;color:var(--text-muted);display:block;margin-bottom:10px;"></i>
-      <div style="font-weight:500;margin-bottom:4px;">Click to upload</div>
-      <div style="font-size:12px;color:var(--text-muted);">PNG, JPG, WEBP up to 10MB</div>
-      <input type="file" id="modalUpload" style="display:none;" accept="image/*" multiple>
+  <form method="POST" action="{% url 'upload_gallery' profile.patient_id %}" enctype="multipart/form-data">
+    {% csrf_token %}
+ 
+    <div class="gallery-grid">
+ 
+      <!-- Upload tile -->
+      <div class="upload-tile" onclick="document.getElementById('galleryUpload').click()">
+        <i class="bi bi-plus-circle"></i>
+        <span>Upload</span>
+        <input type="file" id="galleryUpload" name="files"
+               style="display:none;" multiple onchange="this.form.submit()">
+      </div>
+
+ 
     </div>
-    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:16px;">
-      <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-      <button class="btn-submit">Upload</button>
-    </div>
-  </div>
+  </form>
+  
 </div></div></div>
 
 <!-- Profile image zoom -->
@@ -1312,16 +1489,6 @@ document.querySelectorAll('.ep-dtype').forEach(el =>
   el.addEventListener('change', () => calcEditTotal(el.dataset.form)));
 
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
-    var toastList = toastElList.map(function (toastEl) {
-        return new bootstrap.Toast(toastEl, {
-            delay: 4000
-        }).show()
-    })
-
-});
 
 document.querySelectorAll(".clickable-row").forEach(row => {
 
@@ -1333,6 +1500,69 @@ window.location = row.dataset.href
 
 })
 
+
+document.addEventListener("DOMContentLoaded", function () {
+ 
+  // Collect only image items (skip file icons)
+  const items = Array.from(document.querySelectorAll(".gallery-item"));
+  const imgItems = items.filter(el => el.querySelector("img"));
+ 
+  let currentIndex = 0;
+ 
+  // Attach click to each image item
+  imgItems.forEach(function (item, index) {
+    item.querySelector("img").addEventListener("click", function (e) {
+      e.stopPropagation();
+      currentIndex = index;
+      openGallery();
+    });
+  });
+ 
+  function openGallery() {
+    showSlide();
+    document.getElementById("galleryZoom").classList.add("active");
+    document.getElementById("galleryZoom").style.display = "flex";
+  }
+ 
+  window.closeGallery = function () {
+    document.getElementById("galleryZoom").classList.remove("active");
+    document.getElementById("galleryZoom").style.display = "none";
+  };
+ 
+  window.showSlide = function () {
+    const img  = imgItems[currentIndex].querySelector("img");
+    document.getElementById("galleryImage").src = img.src;
+    document.getElementById("galleryCounter").textContent =
+      (currentIndex + 1) + " / " + imgItems.length;
+  };
+ 
+  window.changeSlide = function (n) {
+    currentIndex = (currentIndex + n + imgItems.length) % imgItems.length;
+    showSlide();
+  };
+ 
+  // Close on backdrop click
+  window.handleModalClick = function (e) {
+    if (e.target === document.getElementById("galleryZoom")) closeGallery();
+  };
+ 
+  // Keyboard navigation
+  document.addEventListener("keydown", function (e) {
+    if (document.getElementById("galleryZoom").style.display !== "flex") return;
+    if (e.key === "ArrowRight") changeSlide(1);
+    if (e.key === "ArrowLeft")  changeSlide(-1);
+    if (e.key === "Escape")     closeGallery();
+  });
+ 
+});
+ 
+// Delete helper (outside DOMContentLoaded so it's global)
+function deleteImage(id) {
+  if (!confirm("Delete this file?")) return;
+  fetch("/patients/gallery/delete/" + id + "/")
+    .then(res => res.json())
+    .then(() => location.reload());
+}
 
 </script>
 

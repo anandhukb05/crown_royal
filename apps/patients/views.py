@@ -6,11 +6,12 @@ from .forms import PatientProfileForm
 from .models import PatientProfile
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Vital, ClinicalNotes, PatientProcedure, Prescription
+from .models import Vital, ClinicalNotes, PatientProcedure, Prescription, Gallery
 from apps.services.models import Procedures, Medicine
 from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime
+from django.http import JsonResponse
 
 
 def create_patient(request):
@@ -146,6 +147,7 @@ def patient_profile(request, pk):
     notes = ClinicalNotes.objects.filter(patient_id=profile).order_by('-created_at')
     procedures = PatientProcedure.objects.filter(patient_id=profile).order_by('-created_at')
     prescription = Prescription.objects.filter(patient_id=profile).order_by('-created_at')
+    gallery_items = Gallery.objects.filter(patient_id=profile).order_by("-created_at")
 
     procedures_list = Procedures.objects.all()
     medicine_list = Medicine.objects.all()
@@ -159,7 +161,8 @@ def patient_profile(request, pk):
                 'procedures': procedures,
                 'procedures_list': procedures_list,
                 'medicine_list': medicine_list,
-                'prescriptions': prescription
+                'prescriptions': prescription,
+                "gallery": gallery_items
             })
 
 
@@ -406,3 +409,32 @@ def add_invoice(request, patient_id):
     if request.method == 'POST':
         pass
     return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription")
+
+
+def upload_gallery(request, patient_id):
+
+    patient = get_object_or_404(PatientProfile, pk=patient_id)
+
+    if request.method == "POST":
+
+        files = request.FILES.getlist("files")
+
+        for f in files:
+            Gallery.objects.create(
+                patient=patient,
+                file=f
+            )
+
+        messages.success(request, "Files uploaded successfully")
+
+    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-gallery")
+
+
+def delete_gallery(request, pk):
+
+    gallery = get_object_or_404(Gallery, pk=pk)
+
+    gallery.file.delete()
+    gallery.delete()
+
+    return JsonResponse({"status": "success"})

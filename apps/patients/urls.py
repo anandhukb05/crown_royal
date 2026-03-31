@@ -21,6 +21,8 @@ urlpatterns = [
     path("prescription/edit/<int:pk>/", prescription_edit, name="prescription_edit"),
     path("prescription/delete/<int:pk>/", prescription_delete, name="prescription_delete"),
     path("invoice/bill/<int:patient_id>/", patient_bill, name="patient_bill"),
-    path("invoice/<int:patient_id>/", add_invoice, name="add_invoice")
+    path("invoice/<int:patient_id>/", add_invoice, name="add_invoice"),
+    path("gallery/upload/<int:patient_id>/", upload_gallery, name="upload_gallery"),
+    path("gallery/delete/<int:pk>/", delete_gallery, name="delete_gallery"),
 
 ]
