@@ -36,8 +36,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
 .topnav-actions { display: flex; align-items: center; gap: 10px; }
 .btn-nav { background: rgba(255,255,255,.1); border: none; color: rgba(255,255,255,.85); font-size: 13px; font-family: inherit; padding: 7px 16px; border-radius: 8px; cursor: pointer; transition: .2s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
 .btn-nav:hover { background: rgba(255,255,255,.2); color: #fff; }
-.btn-nav-mint { background: var(--mint); color: var(--navy); font-weight: 600; }
-.btn-nav-mint:hover { background: #00b899; color: var(--navy); }
 
 /* BREADCRUMB */
 .breadcrumb-bar { padding: 12px 24px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
@@ -371,9 +369,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
     <a class="btn-nav" href="{% url 'patient_view' %}">
       <i class="bi bi-arrow-left"></i> Patients
     </a>
-    <button class="btn-nav btn-nav-mint">
-      <i class="bi bi-pencil"></i> Edit
-    </button>
   </div>
 </nav>
 
@@ -1560,7 +1555,6 @@ document.addEventListener("DOMContentLoaded", function () {
 function deleteImage(id) {
   if (!confirm("Delete this file?")) return;
   fetch("/patients/gallery/delete/" + id + "/")
-    .then(res => res.json())
     .then(() => location.reload());
 }
 

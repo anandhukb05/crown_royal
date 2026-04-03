@@ -437,4 +437,4 @@ def delete_gallery(request, pk):
     gallery.file.delete()
     gallery.delete()
 
-    return JsonResponse({"status": "success"})
+    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-gallery")
