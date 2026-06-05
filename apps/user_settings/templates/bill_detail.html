@@ -1,0 +1,457 @@
+{% extends 'layout.html' %}
+
+{% block title %}Bill #{{ bill.bill_number }} | Crown Royal Dental{% endblock %}
+{% block page_heading %}Bill #{{ bill.bill_number }}{% endblock %}
+{% block page_description %}{{ bill.vendor_name }} — {{ bill.bill_date|date:"d M Y" }}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Header bar */
+.detail-header {
+    background:#fff; border-radius:18px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+    padding:24px 28px; margin-bottom:20px;
+    display:flex; align-items:center; gap:20px; flex-wrap:wrap;
+}
+.detail-header .dh-main { flex:1; min-width:200px; }
+.dh-title { font-size:20px; font-weight:700; color:#111827; }
+.dh-sub   { color:#9ca3af; font-size:13px; margin-top:3px; }
+
+/* Status badge */
+.s-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 14px; border-radius:20px;
+    font-size:13px; font-weight:700; letter-spacing:.02em;
+}
+.s-badge.pending  { background:#fef3c7; color:#92400e; }
+.s-badge.paid     { background:#d1fae5; color:#065f46; }
+.s-badge.partial  { background:#dbeafe; color:#1e40af; }
+.s-badge.overdue  { background:#fee2e2; color:#991b1b; }
+
+/* Meta info grid */
+.meta-grid {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(160px, 1fr));
+    gap:12px; margin-bottom:20px;
+}
+.meta-card {
+    background:#fff; border-radius:14px;
+    padding:14px 16px; box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+.meta-card .m-label { font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:#9ca3af; margin-bottom:4px; }
+.meta-card .m-val { font-size:15px; font-weight:700; color:#111827; }
+.meta-card .m-val.green  { color:#16a34a; }
+.meta-card .m-val.amber  { color:#d97706; }
+.meta-card .m-val.red    { color:#dc2626; }
+
+/* Items card */
+.items-card {
+    background:#fff; border-radius:18px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05);
+    overflow:hidden; margin-bottom:20px;
+}
+.items-card .ic-header {
+    padding:18px 24px 14px; border-bottom:1px solid #f3f4f6;
+    display:flex; align-items:center; justify-content:space-between;
+}
+.ic-title { font-size:15px; font-weight:700; color:#111827; }
+
+/* Items table */
+.items-tbl { width:100%; border-collapse:collapse; }
+.items-tbl th {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:#9ca3af;
+    padding:10px 20px; border-bottom:1px solid #f3f4f6;
+    background:#fff;
+}
+.items-tbl td { padding:14px 20px; border-bottom:1px solid #f9fafb; vertical-align:middle; }
+.items-tbl tbody tr:hover { background:#f9fafb; }
+
+/* Checkbox styling */
+.pay-check {
+    width:20px; height:20px; border-radius:6px; cursor:pointer;
+    accent-color:#2563eb;
+}
+
+.item-name-cell { font-weight:500; color:#111827; }
+.item-name-cell.paid-item { text-decoration:line-through; color:#9ca3af; }
+
+.paid-chip {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#d1fae5; color:#065f46;
+    border-radius:10px; font-size:11px; font-weight:700;
+    padding:2px 8px; margin-left:8px;
+}
+.pending-chip {
+    display:inline-flex; align-items:center; gap:4px;
+    background:#fef3c7; color:#92400e;
+    border-radius:10px; font-size:11px; font-weight:700;
+    padding:2px 8px; margin-left:8px;
+}
+
+.amount-col { font-weight:700; color:#111827; text-align:right; }
+.amount-col.muted { color:#9ca3af; }
+
+/* Totals footer */
+.totals-section {
+    padding:16px 20px; border-top:2px solid #f3f4f6; background:#f9fafb;
+}
+.total-row {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:6px 0;
+}
+.total-row .t-label { font-size:13px; color:#6b7280; }
+.total-row .t-val   { font-size:14px; font-weight:700; color:#111827; }
+.total-row.grand    { border-top:1px solid #e5e7eb; margin-top:6px; padding-top:12px; }
+.total-row.grand .t-label { font-size:14px; font-weight:700; color:#111827; }
+.total-row.grand .t-val   { font-size:18px; color:#111827; }
+.total-row .green { color:#16a34a; }
+.total-row .red   { color:#ef4444; }
+
+/* Info cards row */
+.info-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;
+}
+.info-card {
+    background:#fff; border-radius:18px;
+    box-shadow:0 4px 20px rgba(0,0,0,.05); padding:20px 24px;
+}
+.info-card .ic-sec-title {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.08em; color:#9ca3af; margin-bottom:14px;
+    display:flex; align-items:center; gap:7px;
+}
+.info-card .ic-sec-title i { color:#2563eb; font-size:13px; }
+.kv-row { display:flex; justify-content:space-between; padding:6px 0;
+    border-bottom:1px solid #f9fafb; font-size:13px; }
+.kv-row:last-child { border-bottom:none; }
+.kv-key { color:#9ca3af; font-weight:500; }
+.kv-val { color:#111827; font-weight:600; text-align:right; }
+
+/* Attachment preview */
+.attach-preview-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:#eff6ff; color:#2563eb; border-radius:10px;
+    padding:10px 16px; font-size:13px; font-weight:600;
+    text-decoration:none; transition:.2s;
+}
+.attach-preview-btn:hover { background:#2563eb; color:#fff; }
+.attach-preview-btn.pdf-btn { background:#fef2f2; color:#dc2626; }
+.attach-preview-btn.pdf-btn:hover { background:#dc2626; color:#fff; }
+
+@media(max-width:768px){
+    .info-row { grid-template-columns:1fr; }
+    .detail-header { flex-direction:column; align-items:flex-start; }
+}
+</style>
+{% endblock %}
+
+{% block settings_content %}
+
+<!-- Flash -->
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-success alert-dismissible fade show mb-3">
+    <i class="bi bi-check-circle me-2"></i>{{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+<!-- Header -->
+<div class="detail-header">
+    <div class="dh-main">
+        <div class="dh-title">Bill #{{ bill.bill_number }}</div>
+        <div class="dh-sub">
+            <i class="bi bi-shop me-1"></i>{{ bill.vendor_name }}
+            {% if bill.branch %} &bull; {{ bill.branch.name }}{% endif %}
+            &bull; {{ bill.bill_date|date:"d M Y" }}
+        </div>
+    </div>
+
+    <span class="s-badge {{ bill.status }}{% if bill.is_overdue %} overdue{% endif %}" id="status-badge">
+        {% if bill.status == 'paid' %}<i class="bi bi-check-circle-fill"></i>
+        {% elif bill.status == 'partial' %}<i class="bi bi-pie-chart-fill"></i>
+        {% else %}<i class="bi bi-hourglass-split"></i>{% endif %}
+        <span id="status-text">{{ bill.status_display }}</span>
+    </span>
+
+    <div class="d-flex gap-2">
+        <a href="{% url 'bill_edit' bill.pk %}" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <a href="{% url 'bill_list' %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<!-- Summary numbers -->
+<div class="meta-grid">
+    <div class="meta-card">
+        <div class="m-label">Total Amount</div>
+        <div class="m-val" id="meta-total">₹{{ bill.total_amount|floatformat:2 }}</div>
+    </div>
+    <div class="meta-card">
+        <div class="m-label">Paid Amount</div>
+        <div class="m-val green" id="meta-paid">₹{{ bill.paid_amount|floatformat:2 }}</div>
+    </div>
+    <div class="meta-card">
+        <div class="m-label">Pending Amount</div>
+        <div class="m-val {% if bill.pending_amount > 0 %}red{% else %}green{% endif %}" id="meta-pending">
+            ₹{{ bill.pending_amount|floatformat:2 }}
+        </div>
+    </div>
+    <div class="meta-card">
+        <div class="m-label">Items Paid</div>
+        <div class="m-val" id="meta-items">
+            {{ bill.paid_items_count }} / {{ bill.total_items_count }}
+        </div>
+    </div>
+    {% if bill.due_date %}
+    <div class="meta-card">
+        <div class="m-label">Due Date</div>
+        <div class="m-val {% if bill.is_overdue %}red{% endif %}">
+            {{ bill.due_date|date:"d M Y" }}
+            {% if bill.is_overdue %}<div style="font-size:11px">Overdue</div>{% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Line Items — with checkboxes to mark paid -->
+<div class="items-card">
+    <div class="ic-header">
+        <div class="ic-title"><i class="bi bi-list-check me-2 text-primary"></i>Line Items</div>
+        <button class="btn btn-primary btn-sm" id="save-payments-btn" onclick="savePayments()">
+            <i class="bi bi-check-lg me-1"></i>Save Payment Status
+        </button>
+    </div>
+
+    <form id="payment-form">
+        {% csrf_token %}
+        <table class="items-tbl">
+            <thead>
+                <tr>
+                    <th style="width:48px">Paid</th>
+                    <th>Item</th>
+                    <th style="width:80px" class="text-center">Qty</th>
+                    <th style="width:120px" class="text-right" style="text-align:right">Unit Price</th>
+                    <th style="width:120px; text-align:right">Amount</th>
+                </tr>
+            </thead>
+            <tbody id="items-body">
+                {% for item in bill.items.all %}
+                <tr id="item-tr-{{ item.pk }}">
+                    <td class="text-center">
+                        <input type="checkbox"
+                               class="pay-check"
+                               name="paid_items"
+                               value="{{ item.pk }}"
+                               id="chk-{{ item.pk }}"
+                               {% if item.is_paid %}checked{% endif %}
+                               onchange="onCheckChange()">
+                    </td>
+                    <td>
+                        <label for="chk-{{ item.pk }}"
+                               class="item-name-cell {% if item.is_paid %}paid-item{% endif %} mb-0"
+                               id="lbl-{{ item.pk }}"
+                               style="cursor:pointer">
+                            {{ item.name }}
+                        </label>
+                        {% if item.is_paid %}
+                        <span class="paid-chip" id="chip-{{ item.pk }}">
+                            <i class="bi bi-check-circle-fill"></i> Paid
+                        </span>
+                        {% else %}
+                        <span class="pending-chip" id="chip-{{ item.pk }}">
+                            <i class="bi bi-hourglass-split"></i> Pending
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center" style="color:#6b7280">{{ item.quantity }}</td>
+                    <td style="text-align:right;color:#6b7280">₹{{ item.unit_price|floatformat:2 }}</td>
+                    <td class="amount-col {% if not item.is_paid %}muted{% endif %}"
+                        id="amtcol-{{ item.pk }}">
+                        ₹{{ item.amount|floatformat:2 }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <div class="total-row">
+                <span class="t-label">Paid items total</span>
+                <span class="t-val green" id="tot-paid">₹{{ bill.paid_amount|floatformat:2 }}</span>
+            </div>
+            <div class="total-row">
+                <span class="t-label">Pending items total</span>
+                <span class="t-val red" id="tot-pending">₹{{ bill.pending_amount|floatformat:2 }}</span>
+            </div>
+            <div class="total-row grand">
+                <span class="t-label">Bill Total</span>
+                <span class="t-val">₹{{ bill.total_amount|floatformat:2 }}</span>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Bill info + Attachment row -->
+<div class="info-row">
+    <div class="info-card">
+        <div class="ic-sec-title"><i class="bi bi-info-circle"></i> Bill Details</div>
+        <div class="kv-row">
+            <span class="kv-key">Category</span>
+            <span class="kv-val">{{ bill.get_category_display }}</span>
+        </div>
+        <div class="kv-row">
+            <span class="kv-key">Vendor Contact</span>
+            <span class="kv-val">{{ bill.vendor_contact|default:"—" }}</span>
+        </div>
+        <div class="kv-row">
+            <span class="kv-key">Payment Method</span>
+            <span class="kv-val">{{ bill.get_payment_method_display|default:"—" }}</span>
+        </div>
+        <div class="kv-row">
+            <span class="kv-key">Branch</span>
+            <span class="kv-val">{{ bill.branch.name|default:"—" }}</span>
+        </div>
+        {% if bill.notes %}
+        <div style="margin-top:12px;font-size:13px;color:#374151;background:#f9fafb;border-radius:10px;padding:10px 14px">
+            {{ bill.notes }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="info-card">
+        <div class="ic-sec-title"><i class="bi bi-paperclip"></i> Attachment</div>
+        {% if bill.attachment %}
+        <a href="{{ bill.attachment.url }}" target="_blank"
+           class="attach-preview-btn {% if bill.attachment_is_pdf %}pdf-btn{% endif %}">
+            <i class="bi {% if bill.attachment_is_pdf %}bi-file-earmark-pdf{% else %}bi-image{% endif %}" style="font-size:20px"></i>
+            {% if bill.attachment_is_pdf %}View PDF Bill{% else %}View Bill Image{% endif %}
+        </a>
+        {% else %}
+        <div class="text-muted" style="font-size:13px">
+            <i class="bi bi-cloud-upload me-2"></i>No attachment uploaded.
+            <a href="{% url 'bill_edit' bill.pk %}">Add one</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Item amounts data from Django
+const ITEM_DATA = {
+    {% for item in bill.items.all %}
+    {{ item.pk }}: {{ item.amount|floatformat:2 }},
+    {% endfor %}
+};
+
+const MARK_URL = "{% url 'bill_mark_items' bill.pk %}";
+const CSRF     = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+// Live UI update when checkbox changes
+function onCheckChange() {
+    let paidTotal = 0, pendingTotal = 0;
+
+    document.querySelectorAll('.pay-check').forEach(chk => {
+        const pk   = chk.value;
+        const amt  = ITEM_DATA[pk] || 0;
+        const lbl  = document.getElementById('lbl-' + pk);
+        const chip = document.getElementById('chip-' + pk);
+        const col  = document.getElementById('amtcol-' + pk);
+
+        if (chk.checked) {
+            paidTotal += amt;
+            lbl.classList.add('paid-item');
+            chip.className = 'paid-chip';
+            chip.innerHTML = '<i class="bi bi-check-circle-fill"></i> Paid';
+            col.classList.remove('muted');
+        } else {
+            pendingTotal += amt;
+            lbl.classList.remove('paid-item');
+            chip.className = 'pending-chip';
+            chip.innerHTML = '<i class="bi bi-hourglass-split"></i> Pending';
+            col.classList.add('muted');
+        }
+    });
+
+    // Update totals display
+    document.getElementById('tot-paid').textContent    = '₹' + paidTotal.toFixed(2);
+    document.getElementById('tot-pending').textContent = '₹' + pendingTotal.toFixed(2);
+    document.getElementById('meta-paid').textContent   = '₹' + paidTotal.toFixed(2);
+    document.getElementById('meta-pending').textContent= '₹' + pendingTotal.toFixed(2);
+
+    // Count
+    const total = document.querySelectorAll('.pay-check').length;
+    const paid  = document.querySelectorAll('.pay-check:checked').length;
+    document.getElementById('meta-items').textContent = paid + ' / ' + total;
+}
+
+// Save via AJAX
+function savePayments() {
+    const btn = document.getElementById('save-payments-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…';
+
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', CSRF);
+    document.querySelectorAll('.pay-check:checked').forEach(chk => {
+        formData.append('paid_items', chk.value);
+    });
+
+    fetch(MARK_URL, { method:'POST', body:formData })
+        .then(r => r.json())
+        .then(data => {
+            // Update status badge
+            const badge = document.getElementById('status-badge');
+            badge.className = 's-badge ' + data.status;
+            const icons = { paid:'bi-check-circle-fill', partial:'bi-pie-chart-fill', pending:'bi-hourglass-split' };
+            document.getElementById('status-text').textContent = data.status_display;
+            badge.querySelector('i').className = 'bi ' + (icons[data.status] || icons.pending);
+
+            // Update meta totals
+            document.getElementById('meta-total').textContent   = '₹' + data.total_amount.toFixed(2);
+            document.getElementById('meta-paid').textContent    = '₹' + data.paid_amount.toFixed(2);
+            document.getElementById('meta-pending').textContent = '₹' + data.pending_amount.toFixed(2);
+            document.getElementById('meta-items').textContent   = data.paid_count + ' / ' + data.total_count;
+
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Save Payment Status';
+
+            // Show toast-style feedback
+            showToast('Payment status saved!');
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Save Payment Status';
+            showToast('Error saving. Please try again.', true);
+        });
+}
+
+function showToast(msg, isError=false) {
+    const t = document.createElement('div');
+    t.style.cssText = `
+        position:fixed; bottom:24px; right:24px; z-index:9999;
+        background:${isError?'#ef4444':'#16a34a'}; color:white;
+        padding:12px 20px; border-radius:12px; font-size:13.5px;
+        font-weight:600; box-shadow:0 4px 16px rgba(0,0,0,.15);
+        animation:slideUp .3s ease;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2800);
+}
+
+// Inline style for toast animation
+const style = document.createElement('style');
+style.textContent = `@keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -26,7 +26,8 @@ urlpatterns = [
     path('patients/', include("apps.patients.urls")),
     path('staffs/', include("apps.staffs.urls")),
     path('services/', include("apps.services.urls")),
-    path('appointment/', include("apps.appointment.urls"))
+    path('appointment/', include("apps.appointment.urls")),
+    path('settings/', include("apps.user_settings.urls"))
 ]
 
 if settings.DEBUG:

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Crown Royal Dental{% endblock %}</title>
@@ -10,30 +11,36 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
 
     <style>
         {% block style %}
 
         :root {
-            --primary:       #1a5c8a;
+            --primary: #1a5c8a;
             --primary-light: #e8f3fb;
-            --accent:        #2ab3b3;
-            --accent-dark:   #1d9191;
-            --surface:       #ffffff;
-            --bg:            #f0f5f9;
-            --text:          #1c2b3a;
-            --text-muted:    #6b84a0;
-            --border:        #d8e4ef;
-            --nav-h:         68px;
-            --mob-nav-h:     64px;
-            --radius:        12px;
-            --shadow-sm:     0 2px 8px rgba(26,92,138,.08);
-            --shadow-md:     0 6px 24px rgba(26,92,138,.14);
-            --transition:    .2s cubic-bezier(.4,0,.2,1);
+            --accent: #2ab3b3;
+            --accent-dark: #1d9191;
+            --surface: #ffffff;
+            --bg: #f0f5f9;
+            --text: #1c2b3a;
+            --text-muted: #6b84a0;
+            --border: #d8e4ef;
+            --nav-h: 68px;
+            --mob-nav-h: 64px;
+            --radius: 12px;
+            --shadow-sm: 0 2px 8px rgba(26, 92, 138, .08);
+            --shadow-md: 0 6px 24px rgba(26, 92, 138, .14);
+            --transition: .2s cubic-bezier(.4, 0, .2, 1);
         }
 
-        *, *::before, *::after { box-sizing: border-box; }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'DM Sans', sans-serif;
@@ -47,7 +54,9 @@
         /* ── DESKTOP NAV ──────────────────────────────── */
         .desktop-nav {
             position: fixed;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             height: var(--nav-h);
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -67,18 +76,24 @@
             text-decoration: none;
             flex-shrink: 0;
         }
+
         .nav-logo-icon {
-            width: 38px; height: 38px;
+            width: 38px;
+            height: 38px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: #fff;
             font-size: 18px;
-            box-shadow: 0 2px 8px rgba(26,92,138,.25);
+            box-shadow: 0 2px 8px rgba(26, 92, 138, .25);
         }
+
         .nav-logo-text {
             line-height: 1.1;
         }
+
         .nav-logo-text span:first-child {
             display: block;
             font-family: 'DM Serif Display', serif;
@@ -86,6 +101,7 @@
             color: var(--primary);
             letter-spacing: -.3px;
         }
+
         .nav-logo-text span:last-child {
             display: block;
             font-size: 10px;
@@ -101,8 +117,10 @@
             align-items: center;
             gap: 4px;
             list-style: none;
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
         }
+
         .nav-links .nav-link {
             font-size: 14px;
             font-weight: 500;
@@ -113,6 +131,7 @@
             text-decoration: none;
             white-space: nowrap;
         }
+
         .nav-links .nav-link:hover,
         .nav-links .nav-link.active {
             background: var(--primary-light);
@@ -120,7 +139,10 @@
         }
 
         /* Dropdown */
-        .nav-dropdown { position: relative; }
+        .nav-dropdown {
+            position: relative;
+        }
+
         .nav-dropdown .dropdown-menu {
             top: calc(100% + 8px);
             left: 0;
@@ -131,6 +153,7 @@
             padding: 6px;
             background: var(--surface);
         }
+
         .nav-dropdown .dropdown-item {
             font-size: 14px;
             font-weight: 400;
@@ -142,25 +165,33 @@
             gap: 10px;
             transition: background var(--transition), color var(--transition);
         }
+
         .nav-dropdown .dropdown-item i {
             font-size: 15px;
             color: var(--text-muted);
             width: 18px;
             text-align: center;
         }
+
         .nav-dropdown .dropdown-item:hover {
             background: var(--primary-light);
             color: var(--primary);
         }
-        .nav-dropdown .dropdown-item:hover i { color: var(--primary); }
+
+        .nav-dropdown .dropdown-item:hover i {
+            color: var(--primary);
+        }
 
         /* Right side */
         .nav-right {
             margin-left: auto;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
+            position: relative;
         }
+
+        /* Search */
         .nav-search {
             display: flex;
             align-items: center;
@@ -168,16 +199,19 @@
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 20px;
-            padding: 6px 14px;
+            padding: 8px 14px;
             font-size: 13px;
             color: var(--text-muted);
             cursor: pointer;
             transition: border-color var(--transition), box-shadow var(--transition);
         }
+
         .nav-search:hover {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(26,92,138,.07);
+            box-shadow: 0 0 0 3px rgba(26, 92, 138, .07);
         }
+
+        /* Quick button */
         .nav-quick-btn {
             display: flex;
             align-items: center;
@@ -192,47 +226,100 @@
             cursor: pointer;
             text-decoration: none;
             transition: opacity var(--transition), box-shadow var(--transition);
-            box-shadow: 0 2px 10px rgba(26,92,138,.25);
+            box-shadow: 0 2px 10px rgba(26, 92, 138, .25);
+            white-space: nowrap;
         }
+
         .nav-quick-btn:hover {
             opacity: .9;
-            box-shadow: 0 4px 16px rgba(26,92,138,.3);
+            box-shadow: 0 4px 16px rgba(26, 92, 138, .3);
             color: #fff;
         }
+
+        /* Avatar */
         .nav-avatar {
-            width: 36px; height: 36px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: var(--primary-light);
             border: 2px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--primary);
-            font-size: 15px;
+            font-size: 18px;
             cursor: pointer;
-            transition: border-color var(--transition);
+            transition: border-color var(--transition), background var(--transition);
         }
-        .nav-avatar:hover { border-color: var(--primary); }
+
+        .nav-avatar:hover {
+            border-color: var(--primary);
+            background: #e2e8f0;
+        }
 
         /* Divider */
         .nav-divider {
             width: 1px;
-            height: 24px;
+            height: 28px;
             background: var(--border);
+        }
+
+        /* ── PROFILE DROPDOWNS ────────────────────────── */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 52px;
+            right: 0;
+            width: 200px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            padding: 8px;
+            display: none;
+            z-index: 2000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .dropdown-menu a:hover {
+            background: var(--primary-light);
         }
 
         /* ── MOBILE NAV ───────────────────────────────── */
         .mobile-nav {
             position: fixed;
-            bottom: 0; left: 0; right: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             height: var(--mob-nav-h);
             background: var(--surface);
             border-top: 1px solid var(--border);
-            box-shadow: 0 -4px 16px rgba(26,92,138,.08);
+            box-shadow: 0 -4px 16px rgba(26, 92, 138, .08);
             display: flex;
             justify-content: space-around;
             align-items: center;
             padding: 0 8px;
             z-index: 1040;
         }
+
         .mob-nav-item {
             flex: 1;
             display: flex;
@@ -248,8 +335,14 @@
             border-radius: 10px;
             transition: color var(--transition), background var(--transition);
             letter-spacing: .3px;
+            cursor: pointer;
         }
-        .mob-nav-item i { font-size: 20px; line-height: 1; }
+
+        .mob-nav-item i {
+            font-size: 20px;
+            line-height: 1;
+        }
+
         .mob-nav-item:hover,
         .mob-nav-item.active {
             color: var(--primary);
@@ -262,8 +355,10 @@
             display: flex;
             justify-content: center;
         }
+
         .mob-fab {
-            width: 54px; height: 54px;
+            width: 54px;
+            height: 54px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: #fff;
             border-radius: 18px;
@@ -273,13 +368,63 @@
             justify-content: center;
             font-size: 22px;
             margin-top: -20px;
-            box-shadow: 0 4px 16px rgba(26,92,138,.35);
+            box-shadow: 0 4px 16px rgba(26, 92, 138, .35);
             cursor: pointer;
             border: none;
             transition: transform var(--transition), box-shadow var(--transition);
         }
-        .mob-fab:active { transform: scale(.94); }
-        .mob-fab span { font-size: 9px; font-weight: 600; letter-spacing: .5px; line-height: 1; margin-top: 2px; }
+
+        .mob-fab:active {
+            transform: scale(.94);
+        }
+
+        .mob-fab span {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            line-height: 1;
+            margin-top: 2px;
+        }
+
+        /* Mobile profile menu */
+        .mob-profile-dropdown {
+            position: relative;
+            flex: 1;
+        }
+
+        .mob-profile-menu {
+            position: absolute;
+            bottom: 72px;
+            right: 0;
+            width: 180px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+            padding: 8px;
+            display: none;
+            z-index: 3000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .mob-profile-menu.show {
+            display: block;
+        }
+
+        .mob-profile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 14px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: 0.2s;
+        }
+
+        .mob-profile-menu a:hover {
+            background: var(--primary-light);
+        }
 
         /* ── MANAGE MODAL ─────────────────────────────── */
         #manageModal .modal-content {
@@ -288,35 +433,44 @@
             box-shadow: var(--shadow-md);
             padding: 8px;
         }
+
         #manageModal .modal-header-custom {
             padding: 16px 16px 8px;
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         #manageModal .modal-header-custom .modal-icon {
-            width: 36px; height: 36px;
+            width: 36px;
+            height: 36px;
             background: var(--primary-light);
             border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: var(--primary);
             font-size: 16px;
         }
+
         #manageModal .modal-title-text {
             font-family: 'DM Serif Display', serif;
             font-size: 18px;
             color: var(--text);
         }
+
         #manageModal .modal-subtitle {
             font-size: 12px;
             color: var(--text-muted);
         }
+
         .manage-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             padding: 12px 8px 16px;
         }
+
         .manage-card {
             display: flex;
             flex-direction: column;
@@ -332,30 +486,89 @@
             font-weight: 500;
             transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
         }
+
         .manage-card i {
             font-size: 24px;
             color: var(--primary);
         }
+
         .manage-card:hover {
             background: var(--primary-light);
             border-color: var(--primary);
-            box-shadow: 0 2px 12px rgba(26,92,138,.12);
+            box-shadow: 0 2px 12px rgba(26, 92, 138, .12);
             color: var(--primary);
         }
-        .manage-card.accent i { color: var(--accent-dark); }
+
+        .manage-card.accent i {
+            color: var(--accent-dark);
+        }
+
         .manage-card.accent:hover {
             background: #e6fafa;
             border-color: var(--accent);
             color: var(--accent-dark);
         }
 
+        /* ── ANIMATION ────────────────────────────────── */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* ── RESPONSIVE ───────────────────────────────── */
         @media (min-width: 768px) {
-            .mobile-nav { display: none !important; }
-            body { padding-bottom: 32px; }
+            .mobile-nav {
+                display: none !important;
+            }
+
+            body {
+                padding-bottom: 32px;
+            }
         }
+
         @media (max-width: 767px) {
-            .desktop-nav { display: none !important; }
+            .desktop-nav {
+                display: none !important;
+            }
+
+            .nav-search {
+                display: none;
+            }
+
+            .nav-divider {
+                display: none;
+            }
+
+            .nav-quick-btn span {
+                display: none;
+            }
+
+            .nav-quick-btn {
+                padding: 10px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-quick-btn {
+                padding: 9px 10px;
+            }
+
+            .nav-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 16px;
+            }
+
+            .mob-profile-menu {
+                width: 170px;
+                right: -10px;
+            }
         }
 
         {% endblock %}
@@ -364,142 +577,176 @@
 
 <body>
 
-<!-- ═══ DESKTOP NAV ══════════════════════════════════════ -->
-<nav class="desktop-nav">
-    <!-- Logo -->
-    <a class="nav-logo" href="{% url 'home' %}">
-        <div class="nav-logo-icon">
-            <i class="bi bi-heart-pulse-fill"></i>
-        </div>
-        <div class="nav-logo-text">
-            <span>Crown Royal</span>
-            <span>Dental Clinic</span>
-        </div>
-    </a>
-
-    <!-- Links -->
-    <ul class="nav-links">
-        <li>
-            <a class="nav-link" href="{% url 'home' %}">
-                <i class="bi bi-house me-1"></i> Home
-            </a>
-        </li>
-        <li>
-            <a class="nav-link" href="{% url 'patient_view' %}">
-                <i class="bi bi-people me-1"></i> Patients
-            </a>
-        </li>
-        <li class="nav-dropdown">
-            <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-grid me-1"></i> Manage
-            </a>
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="dropdown-item" href="{% url 'create_patient' %}">
-                        <i class="bi bi-person-plus"></i> Register Patient
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'appointment_list' %}">
-                        <i class="bi bi-calendar-check"></i> Appointments
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="{% url 'procedure_panel' %}">
-                        <i class="bi bi-clipboard2-pulse"></i> Services
-                    </a>
-                </li>
-            </ul>
-        </li>
-    </ul>
-
-    <!-- Right side -->
-    <div class="nav-right">
-        <div class="nav-search">
-            <i class="bi bi-search" style="font-size:13px;"></i>
-            <span>Search…</span>
-        </div>
-        <div class="nav-divider"></div>
-        <a class="nav-quick-btn" href="{% url 'create_patient' %}">
-            <i class="bi bi-plus-lg"></i> New Patient
+    <!-- ═══ DESKTOP NAV ══════════════════════════════════════ -->
+    <nav class="desktop-nav">
+        <!-- Logo -->
+        <a class="nav-logo" href="{% url 'home' %}">
+            <div class="nav-logo-text">
+                <span>Crown Royal</span>
+                <span>Dental Clinic</span>
+            </div>
         </a>
-        <div class="nav-avatar" title="Profile">
-            <i class="bi bi-person"></i>
-        </div>
-    </div>
-</nav>
 
-<!-- ═══ MOBILE NAV ═══════════════════════════════════════ -->
-<div class="mobile-nav">
-    <a class="mob-nav-item" href="{% url 'home' %}">
-        <i class="bi bi-house"></i>
-        Home
-    </a>
-    <a class="mob-nav-item" href="{% url 'patient_view' %}">
-        <i class="bi bi-people"></i>
-        Patients
-    </a>
+        <!-- Links -->
+        <ul class="nav-links">
+            <li>
+                <a class="nav-link" href="{% url 'home' %}">
+                    <i class="bi bi-house me-1"></i> Home
+                </a>
+            </li>
+            <li>
+                <a class="nav-link" href="{% url 'patient_view' %}">
+                    <i class="bi bi-people me-1"></i> Patients
+                </a>
+            </li>
+            <li class="nav-dropdown">
+                <a class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-grid me-1"></i> Manage
+                </a>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item" href="{% url 'create_patient' %}">
+                            <i class="bi bi-person-plus"></i> Register Patient
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'appointment_list' %}">
+                            <i class="bi bi-calendar-check"></i> Appointments
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item" href="{% url 'procedure_panel' %}">
+                            <i class="bi bi-clipboard2-pulse"></i> Services
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
 
-    <!-- FAB -->
-    <div class="mob-fab-wrap">
-        <button class="mob-fab" data-bs-toggle="modal" data-bs-target="#manageModal">
-            <i class="bi bi-grid-3x3-gap-fill"></i>
-            <span>MENU</span>
-        </button>
-    </div>
-
-    <a class="mob-nav-item" href="{% url 'appointment_list' %}">
-        <i class="bi bi-calendar-check"></i>
-        Schedule
-    </a>
-    <a class="mob-nav-item" href="#">
-        <i class="bi bi-person-circle"></i>
-        Profile
-    </a>
-</div>
-
-<!-- ═══ MANAGE MODAL ════════════════════════════════════ -->
-<div class="modal fade" id="manageModal" tabindex="-1" aria-labelledby="manageModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header-custom">
-                <div class="modal-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
-                <div>
-                    <div class="modal-title-text">Quick Menu</div>
-                    <div class="modal-subtitle">What would you like to do?</div>
+        <!-- Right side -->
+        <div class="nav-right">
+            <div class="nav-search">
+                <i class="bi bi-search" style="font-size:13px;"></i>
+                <span>Search…</span>
+            </div>
+            <div class="nav-divider"></div>
+            <a class="nav-quick-btn" href="{% url 'create_patient' %}">
+                <i class="bi bi-plus-lg"></i>
+                <span>New Patient</span>
+            </a>
+            <!-- Desktop profile dropdown -->
+            <div class="profile-dropdown">
+                <div class="nav-avatar" id="profileToggle" title="Profile">
+                    <i class="bi bi-person"></i>
                 </div>
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                <div class="dropdown-menu" id="profileMenu">
+                    <a href="{% url 'settings' %}"><i class="bi bi-gear"></i> <span>Settings</span></a>
+                    <a href=""><i class="bi bi-box-arrow-right"></i> <span>Logout</span></a>
+                </div>
             </div>
+        </div>
+    </nav>
 
-            <div class="manage-grid">
-                <a href="{% url 'create_patient' %}" class="manage-card" data-bs-dismiss="modal">
-                    <i class="bi bi-person-plus-fill"></i>
-                    Register Patient
-                </a>
-                <a href="{% url 'appointment_list' %}" class="manage-card accent" data-bs-dismiss="modal">
-                    <i class="bi bi-calendar-plus-fill"></i>
-                    Appointments
-                </a>
-                <a href="{% url 'procedure_panel' %}" class="manage-card" data-bs-dismiss="modal">
-                    <i class="bi bi-clipboard2-pulse-fill"></i>
-                    Services
-                </a>
-                <a href="{% url 'patient_view' %}" class="manage-card accent" data-bs-dismiss="modal">
-                    <i class="bi bi-people-fill"></i>
-                    View Patients
-                </a>
+    <!-- ═══ MOBILE NAV ═══════════════════════════════════════ -->
+    <div class="mobile-nav">
+        <a class="mob-nav-item" href="{% url 'home' %}">
+            <i class="bi bi-house"></i> Home
+        </a>
+        <a class="mob-nav-item" href="{% url 'patient_view' %}">
+            <i class="bi bi-people"></i> Patients
+        </a>
+        <!-- FAB -->
+        <div class="mob-fab-wrap">
+            <button class="mob-fab" data-bs-toggle="modal" data-bs-target="#manageModal">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                <span>MENU</span>
+            </button>
+        </div>
+        <a class="mob-nav-item" href="{% url 'appointment_list' %}">
+            <i class="bi bi-calendar-check"></i> Schedule
+        </a>
+        <!-- Mobile profile dropdown -->
+        <div class="mob-profile-dropdown">
+            <div class="mob-nav-item" id="mobileProfileToggle">
+                <i class="bi bi-person-circle"></i> Profile
+            </div>
+            <div class="mob-profile-menu" id="mobileProfileMenu">
+                <a href="{% url 'settings' %}"><i class="bi bi-gear"></i> Settings</a>
+                <a href=""><i class="bi bi-box-arrow-right"></i> Logout</a>
             </div>
         </div>
     </div>
-</div>
 
-{% block content %}{% endblock %}
+    <!-- ═══ MANAGE MODAL ════════════════════════════════════ -->
+    <div class="modal fade" id="manageModal" tabindex="-1" aria-labelledby="manageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header-custom">
+                    <div class="modal-icon"><i class="bi bi-grid-3x3-gap-fill"></i></div>
+                    <div>
+                        <div class="modal-title-text">Quick Menu</div>
+                        <div class="modal-subtitle">What would you like to do?</div>
+                    </div>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+                </div>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-{% block scripts %}{% endblock %}
+                <div class="manage-grid">
+                    <a href="{% url 'create_patient' %}" class="manage-card" data-bs-dismiss="modal">
+                        <i class="bi bi-person-plus-fill"></i>
+                        Register Patient
+                    </a>
+                    <a href="{% url 'appointment_list' %}" class="manage-card accent" data-bs-dismiss="modal">
+                        <i class="bi bi-calendar-plus-fill"></i>
+                        Appointments
+                    </a>
+                    <a href="{% url 'procedure_panel' %}" class="manage-card" data-bs-dismiss="modal">
+                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                        Services
+                    </a>
+                    <a href="{% url 'patient_view' %}" class="manage-card accent" data-bs-dismiss="modal">
+                        <i class="bi bi-people-fill"></i>
+                        View Patients
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block content %}{% endblock %}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        /* DESKTOP PROFILE */
+        const profileToggle = document.getElementById("profileToggle");
+        const profileMenu = document.getElementById("profileMenu");
+        if (profileToggle) {
+            profileToggle.addEventListener("click", function (e) {
+                e.stopPropagation();
+                profileMenu.classList.toggle("show");
+            });
+        }
+
+        /* MOBILE PROFILE */
+        const mobileProfileToggle = document.getElementById("mobileProfileToggle");
+        const mobileProfileMenu = document.getElementById("mobileProfileMenu");
+        if (mobileProfileToggle) {
+            mobileProfileToggle.addEventListener("click", function (e) {
+                e.stopPropagation();
+                mobileProfileMenu.classList.toggle("show");
+            });
+        }
+
+        /* CLOSE DROPDOWNS ON OUTSIDE CLICK */
+        document.addEventListener("click", function () {
+            if (profileMenu) profileMenu.classList.remove("show");
+            if (mobileProfileMenu) mobileProfileMenu.classList.remove("show");
+        });
+    </script>
+    {% block scripts %}{% endblock %}
 
 </body>
+
 </html>

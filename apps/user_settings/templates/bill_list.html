@@ -1,0 +1,293 @@
+{% extends 'layout.html' %}
+
+{% block title %}Expense Tracker | Crown Royal Dental{% endblock %}
+{% block page_heading %}Expense Tracker{% endblock %}
+{% block page_description %}Track equipment, medicine and supply purchases across all clinic branches.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Summary cards */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 16px;
+    margin-bottom: 26px;
+}
+.sum-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.05);
+}
+.sum-card .s-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 17px;
+    margin-bottom: 10px;
+}
+.s-icon.blue  { background:#eff6ff; color:#2563eb; }
+.s-icon.green { background:#f0fdf4; color:#16a34a; }
+.s-icon.amber { background:#fffbeb; color:#d97706; }
+.s-icon.red   { background:#fef2f2; color:#dc2626; }
+.sum-card .s-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#9ca3af; }
+.sum-card .s-val   { font-size:20px; font-weight:700; color:#111827; margin-top:2px; }
+
+/* Filters */
+.filters-bar {
+    background:#fff;
+    border-radius:14px;
+    padding:14px 18px;
+    margin-bottom:18px;
+    box-shadow:0 2px 8px rgba(0,0,0,.04);
+    display:flex; gap:10px; flex-wrap:wrap; align-items:center;
+}
+.filters-bar .form-control,
+.filters-bar .form-select {
+    border-radius:10px; border-color:#e5e7eb; font-size:13px; height:37px;
+}
+
+/* Table */
+.bill-table th {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:#9ca3af;
+    border-bottom:1px solid #f3f4f6; padding:10px 14px; white-space:nowrap;
+    background:#fff;
+}
+.bill-table td {
+    padding:13px 14px; vertical-align:middle;
+    font-size:13.5px; border-bottom:1px solid #f9fafb;
+}
+.bill-table tbody tr { cursor:pointer; transition:.15s; }
+.bill-table tbody tr:hover { background:#f5f8ff; }
+
+/* Status badges */
+.s-badge {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:20px;
+    font-size:11.5px; font-weight:700; letter-spacing:.02em;
+    white-space:nowrap;
+}
+.s-badge.pending  { background:#fef3c7; color:#92400e; }
+.s-badge.paid     { background:#d1fae5; color:#065f46; }
+.s-badge.partial  { background:#dbeafe; color:#1e40af; }
+.s-badge.overdue  { background:#fee2e2; color:#991b1b; }
+
+/* Category pill */
+.cat-pill {
+    display:inline-block; background:#f3f4f6; color:#374151;
+    border-radius:6px; font-size:11px; font-weight:600; padding:3px 8px;
+}
+
+.attach-btn {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:28px; height:28px; border-radius:8px;
+    font-size:14px; text-decoration:none; transition:.2s;
+}
+.attach-btn.img { background:#eff6ff; color:#2563eb; }
+.attach-btn.pdf { background:#fef2f2; color:#dc2626; }
+.attach-btn:hover { filter:brightness(.9); }
+
+.amount-main  { font-weight:700; color:#111827; }
+.amount-sub   { font-size:11.5px; color:#ef4444; margin-top:1px; }
+.amount-green { font-size:11.5px; color:#16a34a; margin-top:1px; }
+</style>
+{% endblock %}
+
+{% block settings_content %}
+
+<!-- Summary -->
+<div class="summary-grid">
+    <div class="sum-card">
+        <div class="s-icon blue"><i class="bi bi-receipt"></i></div>
+        <div class="s-label">Total Bills</div>
+        <div class="s-val">{{ total_bills }}</div>
+    </div>
+    <div class="sum-card">
+        <div class="s-icon blue"><i class="bi bi-currency-rupee"></i></div>
+        <div class="s-label">Total Amount</div>
+        <div class="s-val">₹{{ total_amount|floatformat:0 }}</div>
+    </div>
+    <div class="sum-card">
+        <div class="s-icon green"><i class="bi bi-check-circle"></i></div>
+        <div class="s-label">Paid</div>
+        <div class="s-val">₹{{ total_paid|floatformat:0 }}</div>
+    </div>
+    <div class="sum-card">
+        <div class="s-icon amber"><i class="bi bi-hourglass-split"></i></div>
+        <div class="s-label">Pending</div>
+        <div class="s-val">₹{{ total_pending|floatformat:0 }}</div>
+    </div>
+    <div class="sum-card">
+        <div class="s-icon red"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="s-label">Overdue</div>
+        <div class="s-val">{{ overdue_count }}</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filters-bar">
+    <form method="get" class="d-flex gap-2 flex-wrap align-items-center w-100">
+        <input type="text" name="q" value="{{ filter_q }}"
+               class="form-control" style="max-width:200px"
+               placeholder="Bill no. or vendor…">
+
+        <select name="status" class="form-select" style="max-width:145px">
+            <option value="">All Statuses</option>
+            <option value="pending"  {% if filter_status == 'pending'  %}selected{% endif %}>Pending</option>
+            <option value="partial"  {% if filter_status == 'partial'  %}selected{% endif %}>Partial</option>
+            <option value="paid"     {% if filter_status == 'paid'     %}selected{% endif %}>Paid</option>
+        </select>
+
+        <select name="category" class="form-select" style="max-width:175px">
+            <option value="">All Categories</option>
+            {% for val, label in categories %}
+            <option value="{{ val }}" {% if filter_cat == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit" class="btn btn-outline-secondary btn-sm px-3">
+            <i class="bi bi-funnel"></i> Filter
+        </button>
+        {% if filter_q or filter_status or filter_cat %}
+        <a href="{% url 'bill_list' %}" class="btn btn-outline-danger btn-sm px-3">
+            <i class="bi bi-x"></i> Clear
+        </a>
+        {% endif %}
+
+        <div class="ms-auto">
+            <a href="{% url 'bill_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i>Add Bill
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Flash messages -->
+{% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show mb-3">
+        <i class="bi bi-check-circle me-2"></i>{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Table -->
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-0">
+        <table class="table bill-table mb-0">
+            <thead>
+                <tr>
+                    <th>Bill No.</th>
+                    <th>Bill Date</th>
+                    <th>Vendor</th>
+                    <th>Category</th>
+                    <th>Items</th>
+                    <th>Bill Amount</th>
+                    <th>Status</th>
+                    <th>Bill</th>
+                    <th width="90">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr onclick="window.location='{% url 'bill_detail' bill.pk %}'">
+                    <td>
+                        <span class="fw-bold text-primary">#{{ bill.bill_number }}</span>
+                        {% if bill.is_overdue %}
+                        <div style="font-size:11px;color:#ef4444;font-weight:600;margin-top:2px">
+                            <i class="bi bi-exclamation-circle"></i> Overdue
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td style="white-space:nowrap;font-size:13px">
+                        {{ bill.bill_date|date:"d M Y" }}
+                        {% if bill.due_date %}
+                        <div style="font-size:11px;color:#9ca3af">Due {{ bill.due_date|date:"d M Y" }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="fw-500">{{ bill.vendor_name }}</div>
+                        {% if bill.branch %}<div style="font-size:11.5px;color:#9ca3af">{{ bill.branch.name }}</div>{% endif %}
+                    </td>
+                    <td><span class="cat-pill">{{ bill.get_category_display }}</span></td>
+                    <td style="font-size:13px">
+                        <span class="fw-600">{{ bill.paid_items_count }}</span>
+                        <span class="text-muted">/{{ bill.total_items_count }} paid</span>
+                    </td>
+                    <td>
+                        <div class="amount-main">₹{{ bill.total_amount|floatformat:2 }}</div>
+                        {% if bill.status == 'partial' %}
+                        <div class="amount-sub">₹{{ bill.pending_amount|floatformat:2 }} pending</div>
+                        {% elif bill.status == 'paid' %}
+                        <div class="amount-green"><i class="bi bi-check-circle-fill"></i> Fully paid</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="s-badge {{ bill.status }}">
+                            {% if bill.status == 'paid' %}<i class="bi bi-check-circle-fill"></i>
+                            {% elif bill.status == 'partial' %}<i class="bi bi-pie-chart-fill"></i>
+                            {% else %}<i class="bi bi-hourglass-split"></i>{% endif %}
+                            {{ bill.status_display }}
+                        </span>
+                    </td>
+                    <td onclick="event.stopPropagation()">
+                        {% if bill.attachment %}
+                        <a href="{{ bill.attachment.url }}" target="_blank"
+                           class="attach-btn {% if bill.attachment_is_pdf %}pdf{% else %}img{% endif %}"
+                           title="View attachment">
+                            <i class="bi {% if bill.attachment_is_pdf %}bi-file-earmark-pdf{% else %}bi-image{% endif %}"></i>
+                        </a>
+                        {% else %}<span class="text-muted" style="font-size:12px">—</span>{% endif %}
+                    </td>
+                    <td onclick="event.stopPropagation()">
+                        <a href="{% url 'bill_edit' bill.pk %}"
+                           class="btn btn-sm btn-outline-primary" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form method="post" action="{% url 'bill_delete' bill.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete bill #{{ bill.bill_number }}?')" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-receipt" style="font-size:36px;opacity:.25;display:block;margin-bottom:10px"></i>
+                        No bills found. <a href="{% url 'bill_create' %}">Add your first bill</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<div class="d-flex justify-content-center mt-4">
+    <nav><ul class="pagination pagination-sm">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ filter_q }}&status={{ filter_status }}&category={{ filter_cat }}">
+                <i class="bi bi-chevron-left"></i></a></li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+            <a class="page-link" href="?page={{ num }}&q={{ filter_q }}&status={{ filter_status }}&category={{ filter_cat }}">{{ num }}</a></li>
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ filter_q }}&status={{ filter_status }}&category={{ filter_cat }}">
+                <i class="bi bi-chevron-right"></i></a></li>
+        {% endif %}
+    </ul></nav>
+</div>
+{% endif %}
+
+{% endblock %}

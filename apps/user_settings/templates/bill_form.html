@@ -1,0 +1,360 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ action }} Bill | Crown Royal Dental{% endblock %}
+{% block page_heading %}{{ action }} Bill{% endblock %}
+{% block page_description %}
+    {% if action == 'Add' %}Record a new bill with line items.{% else %}Update bill details and items.{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-card {
+    background:#fff; border-radius:18px;
+    box-shadow:0 4px 20px rgba(0,0,0,.06); overflow:hidden;
+}
+.form-section {
+    padding:22px 26px; border-bottom:1px solid #f3f4f6;
+}
+.form-section:last-child { border-bottom:none; }
+.section-title {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.08em; color:#9ca3af; margin-bottom:16px;
+    display:flex; align-items:center; gap:7px;
+}
+.section-title i { color:#2563eb; font-size:13px; }
+.form-label { font-size:13px; font-weight:600; color:#374151; margin-bottom:5px; }
+.form-control, .form-select {
+    border-radius:10px; border-color:#e5e7eb; font-size:13.5px; padding:8px 12px;
+}
+.form-control:focus, .form-select:focus {
+    border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+
+/* Items table */
+.items-table { width:100%; border-collapse:collapse; }
+.items-table th {
+    font-size:11px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:#9ca3af;
+    padding:8px 10px; border-bottom:1px solid #f3f4f6; white-space:nowrap;
+}
+.items-table td { padding:6px 10px; vertical-align:middle; }
+.items-table tr.item-row td { border-bottom:1px solid #f9fafb; }
+.item-amount {
+    font-weight:700; color:#111827; font-size:13.5px; min-width:80px; text-align:right;
+}
+.btn-remove-item {
+    background:none; border:none; color:#ef4444; font-size:16px;
+    padding:4px 6px; border-radius:6px; cursor:pointer; transition:.15s;
+}
+.btn-remove-item:hover { background:#fef2f2; }
+.add-item-row { padding:12px 10px; }
+
+#items-total-row td {
+    border-top:2px solid #f3f4f6; padding-top:10px; padding-bottom:10px;
+}
+
+/* Drop zone */
+.drop-zone {
+    border:2px dashed #e5e7eb; border-radius:14px;
+    padding:24px; text-align:center; cursor:pointer;
+    transition:.25s; background:#f9fafb; position:relative;
+}
+.drop-zone:hover { border-color:#2563eb; background:#eff6ff; }
+.drop-zone input[type=file] {
+    position:absolute; inset:0; opacity:0;
+    cursor:pointer; width:100%; height:100%;
+}
+.dz-icon  { font-size:28px; color:#9ca3af; display:block; margin-bottom:6px; }
+.dz-label { font-size:13px; font-weight:600; color:#374151; }
+.dz-sub   { font-size:12px; color:#9ca3af; margin-top:3px; }
+
+#file-preview { margin-top:10px; display:none; }
+.preview-box {
+    display:flex; align-items:center; gap:10px;
+    background:white; border:1px solid #e5e7eb;
+    border-radius:10px; padding:9px 13px; font-size:13px;
+}
+.existing-attach {
+    display:flex; align-items:center; gap:10px;
+    background:#f0fdf4; border:1px solid #bbf7d0;
+    border-radius:10px; padding:9px 13px; font-size:13px;
+    margin-bottom:10px; color:#065f46; font-weight:500;
+}
+
+.form-footer {
+    padding:18px 26px; display:flex; justify-content:flex-end; gap:10px;
+    background:#f9fafb; border-top:1px solid #f3f4f6;
+}
+</style>
+{% endblock %}
+
+{% block settings_content %}
+<form method="post" enctype="multipart/form-data" novalidate>
+{% csrf_token %}
+
+{% if form.non_field_errors %}
+<div class="alert alert-danger mb-3">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+{% endif %}
+
+<div class="form-card">
+
+    <!-- Bill Info -->
+    <div class="form-section">
+        <div class="section-title"><i class="bi bi-receipt"></i> Bill Information</div>
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Bill Number <span class="text-danger">*</span></label>
+                {{ form.bill_number }}
+                {% if form.bill_number.errors %}<div class="text-danger small mt-1">{{ form.bill_number.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Bill Date <span class="text-danger">*</span></label>
+                {{ form.bill_date }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Due Date</label>
+                {{ form.due_date }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Category</label>
+                {{ form.category }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Vendor -->
+    <div class="form-section">
+        <div class="section-title"><i class="bi bi-shop"></i> Vendor</div>
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label class="form-label">Vendor Name <span class="text-danger">*</span></label>
+                {{ form.vendor_name }}
+                {% if form.vendor_name.errors %}<div class="text-danger small mt-1">{{ form.vendor_name.errors.0 }}</div>{% endif %}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Contact</label>
+                {{ form.vendor_contact }}
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Branch</label>
+                {{ form.branch }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Line Items -->
+    <div class="form-section">
+        <div class="section-title"><i class="bi bi-list-ul"></i> Line Items</div>
+
+        {{ formset.management_form }}
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width:42%">Item Name / Description</th>
+                    <th style="width:13%">Qty</th>
+                    <th style="width:18%">Unit Price (₹)</th>
+                    <th style="width:15%" class="text-end">Amount</th>
+                    <th style="width:8%"></th>
+                </tr>
+            </thead>
+            <tbody id="items-tbody">
+                {% for item_form in formset %}
+                <tr class="item-row" id="item-row-{{ forloop.counter0 }}">
+                    <td>
+                        {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        {{ item_form.name }}
+                        {% if item_form.name.errors %}<div class="text-danger" style="font-size:11px">{{ item_form.name.errors.0 }}</div>{% endif %}
+                    </td>
+                    <td>{{ item_form.quantity }}</td>
+                    <td>{{ item_form.unit_price }}</td>
+                    <td class="item-amount" id="amt-{{ forloop.counter0 }}">₹0.00</td>
+                    <td>
+                        {% if item_form.DELETE %}
+                        <div style="display:none">{{ item_form.DELETE }}</div>
+                        {% endif %}
+                        <button type="button" class="btn-remove-item" onclick="removeItem(this, {{ forloop.counter0 }})">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr id="items-total-row">
+                    <td colspan="3" class="text-end" style="font-size:13px;font-weight:600;color:#6b7280;padding-right:16px">
+                        Total
+                    </td>
+                    <td class="item-amount" id="grand-total">₹0.00</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="add-item-row">
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="addItem()">
+                <i class="bi bi-plus-lg me-1"></i>Add Item
+            </button>
+        </div>
+
+        {% if formset.non_form_errors %}
+        <div class="text-danger small mt-2">{{ formset.non_form_errors }}</div>
+        {% endif %}
+    </div>
+
+    <!-- Payment -->
+    <div class="form-section">
+        <div class="section-title"><i class="bi bi-credit-card"></i> Payment</div>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Payment Method</label>
+                {{ form.payment_method }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Attachment -->
+    <div class="form-section">
+        <div class="section-title"><i class="bi bi-paperclip"></i> Attachment</div>
+        {% if bill.attachment %}
+        <div class="existing-attach">
+            <i class="bi {% if bill.attachment_is_pdf %}bi-file-earmark-pdf text-danger{% else %}bi-image text-primary{% endif %}"></i>
+            <span>Current: <a href="{{ bill.attachment.url }}" target="_blank">{{ bill.attachment.name }}</a></span>
+            <span class="ms-auto text-muted" style="font-size:12px">Upload new to replace</span>
+        </div>
+        {% endif %}
+        <div class="drop-zone" id="dropZone">
+            <input type="file" name="{{ form.attachment.html_name }}"
+                   accept="image/*,.pdf" id="id_attachment" onchange="previewFile(this)">
+            <i class="bi bi-cloud-upload dz-icon"></i>
+            <div class="dz-label">Click to upload or drag & drop</div>
+            <div class="dz-sub">JPG, PNG, WEBP or PDF — max 10 MB</div>
+        </div>
+        <div id="file-preview">
+            <div class="preview-box">
+                <i id="preview-icon" class="bi bi-file-earmark-check"></i>
+                <span id="preview-name"></span>
+                <span id="preview-size" class="ms-auto text-muted" style="font-size:12px"></span>
+            </div>
+        </div>
+        {% if form.attachment.errors %}<div class="text-danger small mt-2">{{ form.attachment.errors.0 }}</div>{% endif %}
+    </div>
+
+    <!-- Notes -->
+    <div class="form-section">
+        <div class="section-title"><i class="bi bi-chat-left-text"></i> Notes</div>
+        {{ form.notes }}
+    </div>
+
+    <!-- Footer -->
+    <div class="form-footer">
+        <a href="{% if bill %}{% url 'bill_detail' bill.pk %}{% else %}{% url 'bill_list' %}{% endif %}"
+           class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-check-lg me-1"></i>
+            {% if action == 'Add' %}Save Bill{% else %}Update Bill{% endif %}
+        </button>
+    </div>
+
+</div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Drag drop ──────────────────────────────────────────────────
+const dropZone = document.getElementById('dropZone');
+['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, () => dropZone.style.borderColor='#2563eb'));
+['dragleave','drop'].forEach(e => dropZone.addEventListener(e, () => dropZone.style.borderColor=''));
+
+function previewFile(input) {
+    const file = input.files[0]; if (!file) return;
+    document.getElementById('preview-name').textContent = file.name;
+    document.getElementById('preview-size').textContent = (file.size/1024/1024).toFixed(2)+' MB';
+    document.getElementById('preview-icon').className = file.type==='application/pdf'
+        ? 'bi bi-file-earmark-pdf text-danger' : 'bi bi-image text-primary';
+    document.getElementById('file-preview').style.display = 'block';
+}
+
+// ── Items formset ──────────────────────────────────────────────
+let formCount = parseInt(document.getElementById('id_items-TOTAL_FORMS').value);
+
+function calcRow(i) {
+    const row = document.getElementById('item-row-'+i);
+    if (!row || row.style.display === 'none') return 0;
+    const qty   = parseFloat(row.querySelector('[name$="-quantity"]')?.value) || 0;
+    const price = parseFloat(row.querySelector('[name$="-unit_price"]')?.value) || 0;
+    const amt   = qty * price;
+    const amtEl = document.getElementById('amt-'+i);
+    if (amtEl) amtEl.textContent = '₹' + amt.toFixed(2);
+    return amt;
+}
+
+function recalcTotal() {
+    let total = 0;
+    for (let i = 0; i < formCount; i++) total += calcRow(i);
+    document.getElementById('grand-total').textContent = '₹' + total.toFixed(2);
+}
+
+// Attach listeners to existing rows
+document.querySelectorAll('.item-row').forEach((row, i) => {
+    row.querySelectorAll('input').forEach(inp => {
+        inp.addEventListener('input', recalcTotal);
+    });
+});
+
+function addItem() {
+    const i       = formCount;
+    const tbody   = document.getElementById('items-tbody');
+    const prefix  = 'items';
+
+    const tr = document.createElement('tr');
+    tr.className = 'item-row';
+    tr.id = 'item-row-' + i;
+    tr.innerHTML = `
+        <td>
+            <input type="text" name="${prefix}-${i}-name"
+                   class="form-control form-control-sm"
+                   placeholder="Item name / description">
+        </td>
+        <td>
+            <input type="number" name="${prefix}-${i}-quantity"
+                   class="form-control form-control-sm text-center"
+                   value="1" min="1">
+        </td>
+        <td>
+            <input type="number" name="${prefix}-${i}-unit_price"
+                   class="form-control form-control-sm"
+                   placeholder="0.00" step="0.01" min="0">
+        </td>
+        <td class="item-amount" id="amt-${i}">₹0.00</td>
+        <td>
+            <button type="button" class="btn-remove-item" onclick="removeItem(this, ${i})">
+                <i class="bi bi-x-circle"></i>
+            </button>
+        </td>`;
+
+    tbody.appendChild(tr);
+    tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalcTotal));
+
+    formCount++;
+    document.getElementById('id_items-TOTAL_FORMS').value = formCount;
+}
+
+function removeItem(btn, i) {
+    const row = document.getElementById('item-row-' + i);
+    // If existing item (has DELETE checkbox), tick it and hide; else remove
+    const delCb = row.querySelector('input[type=checkbox][name$="-DELETE"]');
+    if (delCb) {
+        delCb.checked = true;
+        row.style.display = 'none';
+    } else {
+        row.remove();
+    }
+    recalcTotal();
+}
+
+// Initial calc on page load (for edit mode)
+recalcTotal();
+</script>
+{% endblock %}

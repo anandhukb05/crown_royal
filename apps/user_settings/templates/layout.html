@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Settings{% endblock %}</title>
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #eff6ff;
+            --sidebar: #ffffff;
+            --bg: #f4f7fb;
+            --border: #e5e7eb;
+            --text: #111827;
+            --muted: #6b7280;
+        }
+
+        body {
+            background: var(--bg);
+        }
+
+        /* Layout */
+        .admin-shell {
+            display: flex;
+            min-height: calc(100vh - var(--nav-h, 0px));
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            padding: 30px 20px;
+            box-shadow: 0 0 25px rgba(0,0,0,.04);
+            flex-shrink: 0;
+        }
+
+        .logo {
+            margin-bottom: 35px;
+        }
+
+        .logo h4 {
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .logo span {
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .menu-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            margin-bottom: 15px;
+        }
+
+        .settings-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .menu-link {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+            color: var(--text);
+            padding: 14px 16px;
+            border-radius: 14px;
+            transition: .25s;
+            font-weight: 500;
+        }
+
+        .menu-link i {
+            font-size: 18px;
+        }
+
+        .menu-link:hover {
+            background: #f3f4f6;
+            color: var(--primary);
+        }
+
+        .menu-link.active {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 40px;
+            min-width: 0;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .page-header p {
+            color: var(--muted);
+            margin: 0;
+        }
+
+        /* Cards */
+        .setting-card {
+            background: white;
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.05);
+            padding: 28px;
+        }
+
+        .quick-card {
+            background: white;
+            border: none;
+            border-radius: 18px;
+            padding: 24px;
+            height: 100%;
+            transition: .3s;
+            box-shadow: 0 6px 20px rgba(0,0,0,.04);
+        }
+
+        .quick-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .quick-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #eef2ff;
+            color: var(--primary);
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 992px) {
+            .admin-shell {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .content {
+                padding: 25px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="admin-shell">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <h4>Admin Panel</h4>
+            <span>System Configuration</span>
+        </div>
+
+        <div class="menu-title">Settings</div>
+
+        <div class="settings-menu">
+
+            <a href="{% url 'settings' %}"
+               class="menu-link {% if active_menu == 'dashboard' %}active{% endif %}">
+                <i class="bi bi-grid"></i>
+                Dashboard
+            </a>
+
+            <a href="{% url 'settings_branches' %}"
+               class="menu-link {% if active_menu == 'branches' %}active{% endif %}">
+                <i class="bi bi-building"></i>
+                Branch Management
+            </a>
+
+            <a href="{% url 'bill_list' %}"
+               class="menu-link {% if active_menu == 'expenses' %}active{% endif %}">
+                <i class="bi bi-receipt"></i>
+                Expenses
+            </a>
+
+            <a href="{% url 'settings_departments' %}"
+               class="menu-link {% if active_menu == 'departments' %}active{% endif %}">
+                <i class="bi bi-diagram-3"></i>
+                Departments
+            </a>
+
+            <a href="#"
+               class="menu-link {% if active_menu == 'staff' %}active{% endif %}">
+                <i class="bi bi-people"></i>
+                Staff
+            </a>
+
+            <a href="#"
+               class="menu-link {% if active_menu == 'roles' %}active{% endif %}">
+                <i class="bi bi-shield-lock"></i>
+                Roles &amp; Permissions
+            </a>
+
+            <a href="#"
+               class="menu-link {% if active_menu == 'system' %}active{% endif %}">
+                <i class="bi bi-gear"></i>
+                System Settings
+            </a>
+
+            <a href="#"
+               class="menu-link {% if active_menu == 'database' %}active{% endif %}">
+                <i class="bi bi-database"></i>
+                Database
+            </a>
+
+            <a href="#"
+               class="menu-link {% if active_menu == 'notifications' %}active{% endif %}">
+                <i class="bi bi-bell"></i>
+                Notifications
+            </a>
+
+            <a href="#"
+               class="menu-link {% if active_menu == 'audit' %}active{% endif %}">
+                <i class="bi bi-file-earmark-text"></i>
+                Audit Logs
+            </a>
+
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+
+        <div class="page-header">
+            <h2>{% block page_heading %}Settings{% endblock %}</h2>
+            <p>{% block page_description %}{% endblock %}</p>
+        </div>
+
+        {% block settings_content %}
+        {% endblock %}
+
+    </main>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% block scripts %}{% endblock %}
+
+</body>
+</html>
