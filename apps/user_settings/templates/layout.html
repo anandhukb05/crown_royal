@@ -192,6 +192,10 @@
 
         <div class="settings-menu">
 
+            <a class="mob-nav-item" href="{% url 'home' %}">
+                <i class="bi bi-house"></i> Home
+            </a>
+
             <a href="{% url 'settings' %}"
                class="menu-link {% if active_menu == 'dashboard' %}active{% endif %}">
                 <i class="bi bi-grid"></i>
