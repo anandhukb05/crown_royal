@@ -9,6 +9,7 @@ from apps.user_settings.models import Branch
 # Constant credentials
 USERNAME = "admin@clinic.com"
 PASSWORD = "admin1234"
+ROLE = "admin"
 
 
 def login_view(request):
@@ -32,6 +33,8 @@ def login_view(request):
 
             payload = {
                 "email": email,
+                "role": ROLE,
+                "branch_id": int(branch_id),
                 "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=24),
                 "iat": datetime.datetime.utcnow(),
             }
@@ -42,11 +45,16 @@ def login_view(request):
                 algorithm="HS256"
             )
 
-            request.session["jwt_token"] = token
-            request.session["branch_id"] = int(branch_id)
+            response = redirect("home")
+            response.set_cookie(
+                            "token",
+                            token,
+                            httponly=True,
+                            samesite="Lax"
+                        )
 
             messages.success(request, "Login successful")
-            return redirect("home")
+            return response
 
         messages.error(request, "Invalid email or password")
 
@@ -55,3 +63,12 @@ def login_view(request):
         "login.html",
         {"branches": branches}
     )
+
+
+def logout_view(request):
+    print("LOGOUT CALLED")
+    response = redirect("login")
+
+    response.delete_cookie("token")
+
+    return response
