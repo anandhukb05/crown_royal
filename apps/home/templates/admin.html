@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,7 +36,8 @@
 
     body {
       font-family: 'DM Sans', sans-serif;
-      background: var(--surface);
+      background: url("{% static 'images/bg.jpg' %}") no-repeat center center fixed;
+      background-size: cover;
       color: var(--text-primary);
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;

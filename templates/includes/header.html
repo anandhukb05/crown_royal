@@ -8,11 +8,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap -->
-    <link rel="stylesheet" href="{% static 'style\bootstrap_css\bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'style\bootstrap_css\bootstrap-icons.css' %}">
-    <link rel="stylesheet" href="{% static 'style\bootstrap_css\select2.min.css' %}">
-    <link rel="stylesheet" href="{% static 'style\bootstrap_css\css2.css' %}">
-    
+    <link rel="stylesheet" href="{% static 'style/bootstrap_css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'style/bootstrap_css/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'style/bootstrap_css/select2.min.css' %}">
+    <link rel="stylesheet" href="{% static 'style/bootstrap_css/css2.css' %}">
+    <link rel="stylesheet" href="{% static 'style/bootstrap_css/bootstrap-icons.min.css' %}">
+
 
     <style>
         {% block style %}
@@ -42,13 +43,14 @@
         }
 
         body {
-            font-family: 'DM Sans', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding-top: var(--nav-h);
-            padding-bottom: calc(var(--mob-nav-h) + 16px);
-            min-height: 100vh;
-        }
+                font-family: 'DM Sans', sans-serif;
+                background: url("{% static 'images/bg.jpg' %}") no-repeat center center fixed;
+                background-size: cover;
+                color: var(--text);
+                padding-top: var(--nav-h);
+                padding-bottom: calc(var(--mob-nav-h) + 16px);
+                min-height: 100vh;
+            }
 
         /* ── DESKTOP NAV ──────────────────────────────── */
         .desktop-nav {
@@ -615,7 +617,7 @@
                     </li>
                     <li>
                         <a class="dropdown-item" href="{% url 'procedure_panel' %}">
-                            <i class="bi bi-clipboard2-pulse"></i> Services
+                            <i class="bi bi-clipboard-check"></i> Services
                         </a>
                     </li>
                 </ul>
@@ -699,7 +701,7 @@
                         Appointments
                     </a>
                     <a href="{% url 'procedure_panel' %}" class="manage-card" data-bs-dismiss="modal">
-                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                        <i class="bi bi-clipboard-check"></i>
                         Services
                     </a>
                     <a href="{% url 'patient_view' %}" class="manage-card accent" data-bs-dismiss="modal">

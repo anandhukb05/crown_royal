@@ -66,9 +66,7 @@ def login_view(request):
 
 
 def logout_view(request):
-    print("LOGOUT CALLED")
     response = redirect("login")
-
     response.delete_cookie("token")
 
     return response
