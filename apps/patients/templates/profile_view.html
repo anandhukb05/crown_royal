@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Patient Profile — DentalOS</title>
+<title>Patient Profile</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'style\bootstrap_css\bootstrap.min.css' %}">
@@ -363,7 +364,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
 <nav class="topnav">
   <div class="topnav-brand">
     <div class="dot"></div>
-    DentalOS
+    CrownRoyal
   </div>
   <div class="topnav-actions">
     <a class="btn-nav" href="{% url 'patient_view' %}">
@@ -834,11 +835,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
 <thead>
 <tr>
 <th>Medicine</th>
+<th>Qty</th>
+<th class="d-mobile-none">Total</th>
 <th>Strength</th>
 <th>Dosage</th>
 <th>Duration</th>
 <th class="d-mobile-none">After Food</th>
 <th class="d-mobile-none">Next Review</th>
+<th>Status</th>
 <th>Added Date</th>
 <th>Actions</th>
 </tr>
@@ -850,6 +854,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
 
 <td style="font-weight:500;">
 {{ p.medicine.medicine }}
+</td>
+
+<td>
+{{ p.quantity }}
+</td>
+
+<td class="d-mobile-none">
+₹{{ p.total_cost|floatformat:2 }}
 </td>
 
 <td>
@@ -874,6 +886,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
 
 <td class="d-mobile-none muted">
 {{ p.next_review_date|date:"d M Y" }}
+</td>
+
+<td>
+  {% if p.status == 'completed' %}
+    <span class="badge-status badge-completed">Completed</span>
+  {% else %}
+    <span class="badge-status badge-planned">Inprogress</span>
+  {% endif %}
 </td>
 
 <td class="muted">
@@ -924,16 +944,44 @@ data-bs-target="#deletePrescriptionModal{{ p.id }}">
 <form method="post" action="{% url 'prescription_edit' p.id %}">
 {% csrf_token %}
 
+<div>
+  <label class="form-label">Status</label>
+  <select class="form-select" name="status">
+
+      <option value="planned"
+        {% if p.status == "inprogress" %}selected{% endif %}>
+            Inprogress
+      </option>
+
+      <option value="completed"
+        {% if p.status == "completed" %}selected{% endif %}>
+        Completed
+      </option>
+
+  </select>
+</div>
+
 <div style="margin-bottom:12px;">
-<label class="form-label">Medicine</label>
-<select class="form-select" name="medicine_id">
-{% for m in medicine_list %}
-<option value="{{ m.id }}"
-{% if m.id == p.medicine.id %}selected{% endif %}>
-{{ m.medicine }}
-</option>
-{% endfor %}
-</select>
+  <label class="form-label">Medicine</label>
+  <select class="form-select" name="medicine_id" id="editMedicineSelect{{ p.id }}">
+    {% for m in medicine_list %}
+      <option value="{{ m.id }}" data-price="{{ m.price }}" data-count="{{ m.count }}"
+        {% if m.id == p.medicine.id %}selected{% endif %}>
+        {{ m.medicine }}
+      </option>
+    {% endfor %}
+  </select>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+<div>
+<label class="form-label">Quantity</label>
+<input type="number" class="form-control" name="quantity" min="1" value="{{ p.quantity }}">
+</div>
+<div>
+<label class="form-label">Price (each)</label>
+<input type="text" class="form-control" value="₹{{ p.medicine.price }}" readonly>
+</div>
 </div>
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
@@ -941,7 +989,7 @@ data-bs-target="#deletePrescriptionModal{{ p.id }}">
 <div>
 <label class="form-label">Strength</label>
 <input type="text" class="form-control" name="strength"
-value="{{ p.strength }}">
+value="{{ p.strength }}" required>
 </div>
 
 <div>
@@ -961,7 +1009,7 @@ value="{{ p.strength }}">
 <label class="form-label">Duration</label>
 <input type="number" class="form-control"
 name="duration"
-value="{{ p.duration }}">
+value="{{ p.duration }}" required>
 </div>
 
 <div>
@@ -1318,29 +1366,45 @@ Yes, Delete
   <div class="modal-body-custom">
     <form method="post" action="{% url 'add_prescription' profile.patient_id %}">
       {% csrf_token %}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div><label class="form-label">Next Review</label><input type="date" class="form-control" name="next_review"></div>
-      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+    <div>
+        <label class="form-label">Next Review</label>
+        <input type="date" class="form-control" name="next_review" required>
+    </div>
+
+    <div>
+        <label class="form-label">Status</label>
+        <select class="form-select" name="status">
+            <option value="inprogress">Inprogress</option>
+            <option value="completed">Completed</option>
+        </select>
+    </div>
+</div>
       <div style="margin-bottom:12px;">
         <label class="form-label">Medicine</label>
   
         <select class="form-select" name="medicine_id" id="medicineSelect">
           <option value="">Select Medicine</option>
           {% for ml in medicine_list %}
-            <option value="{{ ml.id }}" data-price="{{ ml.price }}">{{ ml.medicine }}</option>
+            <option value="{{ ml.id }}" data-price="{{ ml.price }}" data-count="{{ ml.count }}">{{ ml.medicine }}</option>
           {% endfor %}
         </select>
+        <div id="medicineStockInfo" style="font-size:12px;color:var(--text-muted);margin-top:4px;"></div>
 
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div><label class="form-label">Strength</label><input type="text" class="form-control" name="strength" placeholder="e.g. 500"></div>
+        <div><label class="form-label">Quantity</label><input type="number" class="form-control" name="quantity" id="quantityInput" min="1" value="1"></div>
+        <div><label class="form-label">Total Price</label><input type="text" class="form-control" id="totalPriceDisplay" value="₹0.00" readonly></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div><label class="form-label">Strength</label><input type="text" class="form-control" name="strength" placeholder="e.g. 500" required></div>
         <div><label class="form-label">Unit</label>
           <select class="form-select" name="strength_unit">
             <option value="mg">mg</option><option value="ml">ml</option><option value="g">g</option>
           </select></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-        <div><label class="form-label">Duration</label><input type="number" class="form-control" name="duration" placeholder="e.g. 5"></div>
+        <div><label class="form-label">Duration</label><input type="number" class="form-control" name="duration" placeholder="e.g. 5" required></div>
         <div><label class="form-label">Period</label>
           <select class="form-select" name="duration_period">
             <option>Day</option><option>Week</option><option>Month</option>
@@ -1466,6 +1530,28 @@ function calcAddTotal() {
   document.getElementById(id).addEventListener('input', calcAddTotal));
 document.getElementById('discount_type').addEventListener('change', calcAddTotal);
 document.getElementById('added_date').value = new Date().toISOString().split('T')[0];
+
+// ─── ADD PRESCRIPTION: price/stock auto-fill & total calc ───
+function calcPrescriptionTotal() {
+  const select = document.getElementById('medicineSelect');
+  const opt = select.options[select.selectedIndex];
+  const price = parseFloat(opt.getAttribute('data-price')) || 0;
+  const stock = parseInt(opt.getAttribute('data-count')) || 0;
+  const qtyInput = document.getElementById('quantityInput');
+  let qty = parseInt(qtyInput.value) || 0;
+
+  const infoEl = document.getElementById('medicineStockInfo');
+  if (select.value) {
+    infoEl.textContent = `₹${price.toFixed(2)} each • ${stock} in stock`;
+    infoEl.style.color = qty > stock ? '#dc3545' : 'var(--text-muted)';
+  } else {
+    infoEl.textContent = '';
+  }
+
+  document.getElementById('totalPriceDisplay').value = '₹' + (price * qty).toFixed(2);
+}
+document.getElementById('medicineSelect').addEventListener('change', calcPrescriptionTotal);
+document.getElementById('quantityInput').addEventListener('input', calcPrescriptionTotal);
 
 // ─── EDIT PROCEDURE: total calc per modal ───
 function calcEditTotal(formId) {

@@ -63,6 +63,8 @@ class Prescription(models.Model):
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     next_review_date = models.DateTimeField(null=True, blank=True)
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
+    quantity = models.IntegerField(default=1)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     strength = models.CharField(max_length=150)
     strength_unit = models.CharField(max_length=100)
     duration = models.IntegerField(null=True, blank=True)
@@ -70,15 +72,21 @@ class Prescription(models.Model):
     morning = models.IntegerField(null=True, blank=True)
     noon = models.IntegerField(null=True, blank=True)
     night = models.IntegerField(null=True, blank=True)
+    status = models.CharField(max_length=30)
     after_food = models.BooleanField(default=True)
     usage = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(null=True, blank=True)
 
+    @property
+    def total_cost(self):
+        if self.price is not None:
+            return self.price * self.quantity
+        return 0
+
 
 def patient_gallery_path(instance, filename):
     return f"patients/{instance.patient.patient_id}/{filename}"
-
 
 class Gallery(models.Model):
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)

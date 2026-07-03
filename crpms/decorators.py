@@ -22,6 +22,7 @@ def jwt_required(view_func):
             )
 
             request.user_data = payload
+            request.branch_id = payload.get("branch_id")  # ← exposed for views
 
         except jwt.ExpiredSignatureError:
             return redirect("login")

@@ -322,12 +322,31 @@ def add_prescription(request, patient_id):
 
         medicine_obj = get_object_or_404(Medicine, id=request.POST.get("medicine_id"))
 
+        quantity = int(request.POST.get("quantity") or 1)
+
+        if quantity <= 0:
+            messages.error(request, "Quantity must be at least 1")
+            return redirect(
+                f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription"
+            )
+
+        if quantity > medicine_obj.count:
+            messages.error(
+                request,
+                f"Only {medicine_obj.count} units of {medicine_obj.medicine} available in stock"
+            )
+            return redirect(
+                f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription"
+            )
+
         after_food = request.POST.get("after_food") == "True"
 
         Prescription.objects.create(
             patient=patient,
 
             medicine=medicine_obj,
+            quantity=quantity,
+            price=medicine_obj.price,
 
             next_review_date=next_review_date,
 
@@ -341,9 +360,16 @@ def add_prescription(request, patient_id):
             noon=request.POST.get("noon") or 0,
             night=request.POST.get("night") or 0,
 
+            status=request.POST.get("status") or 0,
+
             after_food=after_food,
             usage=request.POST.get("usage"),
         )
+
+        medicine_obj.count -= quantity
+        medicine_obj.save()
+
+        messages.success(request, "Prescription added successfully")
 
     return redirect(
         f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription"
@@ -356,9 +382,46 @@ def prescription_edit(request, pk):
 
     if request.method == "POST":
 
-        prescription.medicine = get_object_or_404(
+        new_medicine = get_object_or_404(
             Medicine, id=request.POST.get("medicine_id")
         )
+        new_quantity = int(request.POST.get("quantity") or 1)
+
+        old_medicine = prescription.medicine
+        old_quantity = prescription.quantity
+
+        if new_medicine.id == old_medicine.id:
+            # same medicine: only the difference in quantity affects stock
+            diff = new_quantity - old_quantity
+            available = old_medicine.count
+            if diff > 0 and diff > available:
+                messages.error(
+                    request,
+                    f"Only {available} units of {old_medicine.medicine} available in stock"
+                )
+                return redirect(
+                    f"{reverse('patient_profile', kwargs={'pk': prescription.patient.patient_id})}#tab-prescription"
+                )
+            old_medicine.count -= diff
+            old_medicine.save()
+        else:
+            # medicine changed: restock old medicine, deduct from new
+            if new_quantity > new_medicine.count:
+                messages.error(
+                    request,
+                    f"Only {new_medicine.count} units of {new_medicine.medicine} available in stock"
+                )
+                return redirect(
+                    f"{reverse('patient_profile', kwargs={'pk': prescription.patient.patient_id})}#tab-prescription"
+                )
+            old_medicine.count += old_quantity
+            old_medicine.save()
+            new_medicine.count -= new_quantity
+            new_medicine.save()
+
+        prescription.medicine = new_medicine
+        prescription.quantity = new_quantity
+        prescription.price = new_medicine.price
 
         prescription.strength = request.POST.get("strength")
         prescription.strength_unit = request.POST.get("strength_unit")
@@ -371,6 +434,8 @@ def prescription_edit(request, pk):
         prescription.night = request.POST.get("night", 0)
 
         prescription.after_food = request.POST.get("after_food")
+
+        prescription.status = request.POST.get("status")
 
         prescription.save()
 
@@ -390,6 +455,10 @@ def prescription_delete(request, pk):
     patient_id = prescription.patient.patient_id
 
     if request.method == "POST":
+        medicine_obj = prescription.medicine
+        medicine_obj.count += prescription.quantity
+        medicine_obj.save()
+
         prescription.delete()
         messages.success(request, "Prescription deleted successfully")
 

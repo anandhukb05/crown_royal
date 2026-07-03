@@ -12,19 +12,17 @@ class JWTMiddleware:
 
     def __call__(self, request):
 
-        print("Path:", request.path)
+        public_prefixes = ["/login/", "/static/", "/logout/"]
+        public_exact = ["/"]
 
-        public_urls = ["/login/", "/static/", "/", "/logout/"]
-
-        if any(request.path.startswith(url) for url in public_urls):
-            print("Public URL")
+        if request.path in public_exact or any(
+            request.path.startswith(p) for p in public_prefixes
+        ):
             return self.get_response(request)
 
         token = request.COOKIES.get("token")
-        print("Token:", token)
 
         if not token:
-            print("No token")
             return redirect("login")
 
         try:
@@ -33,12 +31,12 @@ class JWTMiddleware:
                 settings.SECRET_KEY,
                 algorithms=["HS256"]
             )
-
             request.user_data = payload
-            print("Valid token")
+            request.branch_id = payload.get("branch_id")
 
-        except Exception as e:
-            print("JWT Error:", e)
+        except jwt.ExpiredSignatureError:
+            return redirect("login")
+        except jwt.InvalidTokenError:
             return redirect("login")
 
         return self.get_response(request)

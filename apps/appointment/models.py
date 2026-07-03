@@ -1,6 +1,7 @@
 from django.db import models
 from apps.patients.models import PatientProfile
 from apps.services.models import Doctor
+from apps.user_settings.models import Branch, Department  # ← adjust import path to match your project
 
 
 class Appointment(models.Model):
@@ -10,8 +11,10 @@ class Appointment(models.Model):
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
     ]
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)  # ← added
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
     phone = models.CharField(max_length=15)
 

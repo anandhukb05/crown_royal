@@ -18,9 +18,10 @@ from django.utils import timezone
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
-        fields = ['doctor', 'date', 'time', 'reason', 'status']
+        fields = ['doctor', 'date', 'time', 'reason', 'status', 'department']
 
         widgets = {
+            'department': forms.Select(attrs={'class':'form-select form-select-lg shadow-sm'}),
             'doctor': forms.Select(attrs={'class':'form-select form-select-lg shadow-sm'}),
             'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),

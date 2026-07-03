@@ -392,6 +392,7 @@
         <tr>
           <th>Date & Time</th>
           <th>Patient</th>
+          <th>Department</th>
           <th>Doctor</th>
           <th>Reason</th>
           <th>Status</th>
@@ -422,6 +423,13 @@
                   <i class="bi bi-telephone" style="font-size:10px;margin-right:2px"></i>{{ a.phone }}
                 </div>
               </div>
+            </div>
+          </td>
+
+          <td>
+            <div class="doctor-cell">
+              <i class="bi bi-person-badge" style="font-size:12px;margin-right:5px;color:var(--slate-lt)"></i>
+              {{ a.department.name }}
             </div>
           </td>
 
