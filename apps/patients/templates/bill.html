@@ -83,6 +83,49 @@
 <!-- TREATMENT TABLE -->
 <div class="border mt-3 p-3">
 
+<!-- Quick-add from planned procedures / in-progress medicines -->
+<div class="row g-2 align-items-end mb-2">
+    <div class="col-md-6">
+        <label class="fw-bold">Add Planned Procedure</label>
+        <select id="procedureSelect" class="form-select">
+            <option value="">-- Select planned procedure --</option>
+            {% for pp in planned_procedures %}
+            <option value="{{ pp.id }}"
+                    data-name="{{ pp.procedure.prodecure }}"
+                    data-rate="{{ pp.price }}"
+                    data-qty="{{ pp.quantity }}">
+                {{ pp.procedure.prodecure }} (Qty: {{ pp.quantity }}, ₹{{ pp.price }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2">
+        <button type="button" class="btn btn-sm btn-outline-warning w-100" onclick="addFromSelect('procedureSelect')">
+            Add
+        </button>
+    </div>
+
+    <div class="col-md-6 mt-2">
+        <label class="fw-bold">Add In-Progress Medicine</label>
+        <select id="medicineSelect" class="form-select">
+            <option value="">-- Select in-progress medicine --</option>
+            {% for rx in inprogress_prescriptions %}
+            <option value="{{ rx.id }}"
+                    data-name="{{ rx.medicine.medicine }}"
+                    data-rate="{{ rx.price }}"
+                    data-qty="{{ rx.quantity }}">
+                {{ rx.medicine.medicine }} (Qty: {{ rx.quantity }}, ₹{{ rx.price }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-md-2 mt-2">
+        <button type="button" class="btn btn-sm btn-outline-warning w-100" onclick="addFromSelect('medicineSelect')">
+            Add
+        </button>
+    </div>
+</div>
+
 <table class="table table-bordered" id="treatmentTable">
     <thead class="table-warning">
         <tr>
@@ -152,22 +195,7 @@
 <!-- JS -->
 <script>
 
-function addRow() {
-    let table = document.querySelector("#treatmentTable tbody");
-    let rowCount = table.rows.length + 1;
-
-    let row = table.insertRow();
-
-    row.innerHTML = `
-        <td>${rowCount}</td>
-        <td><input type="text" name="treatment[]" class="form-control"></td>
-        <td><input type="number" name="rate[]" class="form-control rate"></td>
-        <td><input type="number" name="qty[]" class="form-control qty" value="1"></td>
-        <td><input type="number" name="amount[]" class="form-control amount" readonly></td>
-    `;
-}
-
-document.addEventListener("input", function() {
+function recalcTotals() {
     let subtotal = 0;
 
     document.querySelectorAll("#treatmentTable tbody tr").forEach(row => {
@@ -182,7 +210,41 @@ document.addEventListener("input", function() {
 
     let tax = document.getElementById("tax").value || 0;
     document.getElementById("total").value = subtotal + (subtotal * tax / 100);
-});
+}
+
+function addRow(name = "", rate = "", qty = 1) {
+    let table = document.querySelector("#treatmentTable tbody");
+    let rowCount = table.rows.length + 1;
+
+    let row = table.insertRow();
+
+    row.innerHTML = `
+        <td>${rowCount}</td>
+        <td><input type="text" name="treatment[]" class="form-control" value="${name}"></td>
+        <td><input type="number" name="rate[]" class="form-control rate" value="${rate}"></td>
+        <td><input type="number" name="qty[]" class="form-control qty" value="${qty}"></td>
+        <td><input type="number" name="amount[]" class="form-control amount" readonly></td>
+    `;
+
+    recalcTotals();
+}
+
+function addFromSelect(selectId) {
+    let select = document.getElementById(selectId);
+    let option = select.options[select.selectedIndex];
+
+    if (!option || !option.value) return;
+
+    let name = option.dataset.name || "";
+    let rate = option.dataset.rate || 0;
+    let qty = option.dataset.qty || 1;
+
+    addRow(name, rate, qty);
+
+    select.selectedIndex = 0;
+}
+
+document.addEventListener("input", recalcTotals);
 
 </script>
 

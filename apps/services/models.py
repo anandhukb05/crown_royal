@@ -1,9 +1,10 @@
 from django.db import models
-
+from apps.user_settings.models import Branch
 # Create your models here.
 
 
 class Procedures(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     prodecure = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(blank=True, null=True)
@@ -12,6 +13,7 @@ class Procedures(models.Model):
 
 
 class Medicine(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     medicine = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     count = models.IntegerField()
@@ -21,6 +23,7 @@ class Medicine(models.Model):
 
 
 class Doctor(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     name = models.CharField(max_length=120)
     specialization = models.CharField(max_length=120)
     phone = models.CharField(max_length=20, unique=True)

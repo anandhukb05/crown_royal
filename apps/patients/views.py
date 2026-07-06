@@ -11,7 +11,8 @@ from apps.services.models import Procedures, Medicine
 from django.urls import reverse
 from django.utils import timezone
 from datetime import datetime
-from django.http import JsonResponse
+
+from crpms.branch_utils import get_branch_id, branch_queryset
 
 
 def create_patient(request):
@@ -22,6 +23,7 @@ def create_patient(request):
         if form.is_valid():
             patient = form.save(commit=False)
             patient.image_path = ""
+            patient.branch_id = get_branch_id(request)
             patient.save()
 
             if image_file:
@@ -57,7 +59,7 @@ def create_patient(request):
 def view_patients(request):
     query = request.GET.get("q", "")
 
-    patients = PatientProfile.objects.all().order_by("-patient_id")
+    patients = branch_queryset(request, PatientProfile).order_by("-patient_id")
 
     if query:
         patients = patients.filter(
@@ -77,7 +79,7 @@ def view_patients(request):
 
 
 def edit_patient(request, pk):
-    patient = get_object_or_404(PatientProfile, pk=pk)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), pk=pk)
 
     if request.method == "POST":
         form = PatientProfileForm(request.POST, request.FILES, instance=patient)  # ✅ FIX
@@ -121,7 +123,7 @@ def edit_patient(request, pk):
 
 
 def delete_patient(request, pk):
-    patient = get_object_or_404(PatientProfile, pk=pk)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), pk=pk)
 
     if request.method == "POST":
         # Delete image folder (optional but recommended)
@@ -142,15 +144,15 @@ def delete_patient(request, pk):
 
 
 def patient_profile(request, pk):
-    profile = PatientProfile.objects.get(patient_id=pk)
-    vital = Vital.objects.filter(patient_id=profile).order_by('-created_at')
-    notes = ClinicalNotes.objects.filter(patient_id=profile).order_by('-created_at')
-    procedures = PatientProcedure.objects.filter(patient_id=profile).order_by('-created_at')
-    prescription = Prescription.objects.filter(patient_id=profile).order_by('-created_at')
-    gallery_items = Gallery.objects.filter(patient_id=profile).order_by("-created_at")
+    profile = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=pk)
+    vital = branch_queryset(request, Vital, patient_id=profile).order_by('-created_at')
+    notes = branch_queryset(request, ClinicalNotes, patient_id=profile).order_by('-created_at')
+    procedures = branch_queryset(request, PatientProcedure, patient_id=profile).order_by('-created_at')
+    prescription = branch_queryset(request, Prescription, patient_id=profile).order_by('-created_at')
+    gallery_items = branch_queryset(request, Gallery, patient_id=profile).order_by("-created_at")
 
-    procedures_list = Procedures.objects.all()
-    medicine_list = Medicine.objects.all()
+    procedures_list = branch_queryset(request, Procedures)
+    medicine_list = branch_queryset(request, Medicine)
     return render(
             request,
             "profile_view.html",
@@ -170,14 +172,15 @@ def patient_profile(request, pk):
 
 
 def vital_view(request, patient_id):
-    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
     # get latest vital (for update)
-    vital = Vital.objects.filter(patient=patient).order_by('-created_at').first()
+    vital = branch_queryset(request, Vital, patient=patient).order_by('-created_at').first()
 
     if request.method == "POST":
         data = request.POST
-   
+
         Vital.objects.create(
+                branch_id=get_branch_id(request),
                 patient=patient,
                 temperature=data.get("temperature"),
                 weight=data.get("weight"),
@@ -197,7 +200,7 @@ def vital_view(request, patient_id):
 
 
 def vital_edit(request, pk):
-    vital = get_object_or_404(Vital, pk=pk)
+    vital = get_object_or_404(branch_queryset(request, Vital), pk=pk)
 
     if request.method == "POST":
         fields = [
@@ -212,20 +215,21 @@ def vital_edit(request, pk):
 
 
 def vital_delete(request, pk):
-    vital = get_object_or_404(Vital, pk=pk)
+    vital = get_object_or_404(branch_queryset(request, Vital), pk=pk)
     vital.delete()
     return redirect(request.META.get("HTTP_REFERER"))
 
 
 def clinical_note(request, patient_id):
-    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
     # get latest vital (for update)
-    notes = ClinicalNotes.objects.filter(patient=patient).order_by('-created_at').first()
+    notes = branch_queryset(request, ClinicalNotes, patient=patient).order_by('-created_at').first()
 
     if request.method == "POST":
         data = request.POST
 
         ClinicalNotes.objects.create(
+                branch_id=get_branch_id(request),
                 patient=patient,
                 notes=data.get("note"),
             )
@@ -237,7 +241,7 @@ def clinical_note(request, patient_id):
 
 
 def notes_edit(request, pk):
-    notes = get_object_or_404(ClinicalNotes, pk=pk)
+    notes = get_object_or_404(branch_queryset(request, ClinicalNotes), pk=pk)
 
     if request.method == "POST":
         fields = [
@@ -251,20 +255,21 @@ def notes_edit(request, pk):
 
 
 def notes_delete(request, pk):
-    notes = get_object_or_404(ClinicalNotes, pk=pk)
+    notes = get_object_or_404(branch_queryset(request, ClinicalNotes), pk=pk)
     notes.delete()
     return redirect(f"{reverse('patient_profile', kwargs={'pk': notes.patient_id})}#tab-notes")
 
 
 def add_procedure(request, patient_id):
-    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
 
     if request.method == 'POST':
         PatientProcedure.objects.create(
+            branch_id=get_branch_id(request),
             patient=patient,
             added_date=timezone.now(),
             procedure=get_object_or_404(
-                Procedures, id=request.POST.get('procedure_id')
+                branch_queryset(request, Procedures), id=request.POST.get('procedure_id')
             ),
             quantity=int(request.POST.get('quantity', 0)),
             price=float(request.POST.get('price', 0)),
@@ -278,7 +283,7 @@ def add_procedure(request, patient_id):
 
 
 def patient_procedure_edit(request, pk):
-    procedure = get_object_or_404(PatientProcedure, pk=pk)
+    procedure = get_object_or_404(branch_queryset(request, PatientProcedure), pk=pk)
 
     if request.method == "POST":
 
@@ -298,7 +303,7 @@ def patient_procedure_edit(request, pk):
 
 
 def patient_procedure_delete(request, pk):
-    procedure = get_object_or_404(PatientProcedure, pk=pk)
+    procedure = get_object_or_404(branch_queryset(request, PatientProcedure), pk=pk)
     procedure.delete()
     # return redirect(f"{reverse('patient_profile', kwargs={'pk': procedure.patient_id})}#tab-procedure")
     return redirect(
@@ -308,7 +313,7 @@ def patient_procedure_delete(request, pk):
 
 def add_prescription(request, patient_id):
 
-    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
 
     if request.method == "POST":
 
@@ -320,7 +325,9 @@ def add_prescription(request, patient_id):
                 datetime.strptime(next_review, "%Y-%m-%d")
             )
 
-        medicine_obj = get_object_or_404(Medicine, id=request.POST.get("medicine_id"))
+        medicine_obj = get_object_or_404(
+            branch_queryset(request, Medicine), id=request.POST.get("medicine_id")
+        )
 
         quantity = int(request.POST.get("quantity") or 1)
 
@@ -342,6 +349,7 @@ def add_prescription(request, patient_id):
         after_food = request.POST.get("after_food") == "True"
 
         Prescription.objects.create(
+            branch_id=get_branch_id(request),
             patient=patient,
 
             medicine=medicine_obj,
@@ -378,12 +386,12 @@ def add_prescription(request, patient_id):
 
 def prescription_edit(request, pk):
 
-    prescription = get_object_or_404(Prescription, pk=pk)
+    prescription = get_object_or_404(branch_queryset(request, Prescription), pk=pk)
 
     if request.method == "POST":
 
         new_medicine = get_object_or_404(
-            Medicine, id=request.POST.get("medicine_id")
+            branch_queryset(request, Medicine), id=request.POST.get("medicine_id")
         )
         new_quantity = int(request.POST.get("quantity") or 1)
 
@@ -450,7 +458,7 @@ def prescription_edit(request, pk):
 
 def prescription_delete(request, pk):
 
-    prescription = get_object_or_404(Prescription, pk=pk)
+    prescription = get_object_or_404(branch_queryset(request, Prescription), pk=pk)
 
     patient_id = prescription.patient.patient_id
 
@@ -468,12 +476,30 @@ def prescription_delete(request, pk):
 
 
 def patient_bill(request, patient_id):
-    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
-    return render(request, "bill.html",{"patient": patient})
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
+
+    planned_procedures = (
+        branch_queryset(request, PatientProcedure, patient=patient, status__icontains="plan")
+        .select_related("procedure")
+        .order_by("-created_at")
+    )
+
+    inprogress_prescriptions = (
+        branch_queryset(request, Prescription, patient=patient, status="inprogress")
+        .select_related("medicine")
+        .order_by("-created_at")
+    )
+    print("--- inprogress_prescriptions ===", inprogress_prescriptions)
+
+    return render(request, "bill.html", {
+        "patient": patient,
+        "planned_procedures": planned_procedures,
+        "inprogress_prescriptions": inprogress_prescriptions,
+    })
 
 
 def add_invoice(request, patient_id):
-    patient = get_object_or_404(PatientProfile, patient_id=patient_id)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
 
     if request.method == 'POST':
         pass
@@ -482,7 +508,7 @@ def add_invoice(request, patient_id):
 
 def upload_gallery(request, patient_id):
 
-    patient = get_object_or_404(PatientProfile, pk=patient_id)
+    patient = get_object_or_404(branch_queryset(request, PatientProfile), pk=patient_id)
 
     if request.method == "POST":
 
@@ -490,6 +516,7 @@ def upload_gallery(request, patient_id):
 
         for f in files:
             Gallery.objects.create(
+                branch_id=get_branch_id(request),
                 patient=patient,
                 file=f
             )
@@ -501,9 +528,10 @@ def upload_gallery(request, patient_id):
 
 def delete_gallery(request, pk):
 
-    gallery = get_object_or_404(Gallery, pk=pk)
+    gallery = get_object_or_404(branch_queryset(request, Gallery), pk=pk)
+    patient_id = gallery.patient.patient_id
 
     gallery.file.delete()
     gallery.delete()
 
-    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-gallery")
+    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient_id})}#tab-gallery")

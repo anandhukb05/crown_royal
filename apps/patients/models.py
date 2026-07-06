@@ -1,10 +1,12 @@
 from django.db import models
 import os
+from apps.user_settings.models import Branch
 from apps.services.models import Procedures, Medicine
 # Create your models here.
 
 
 class PatientProfile(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     patient_id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=100)
     gender = models.CharField(max_length=6)
@@ -17,9 +19,10 @@ class PatientProfile(models.Model):
     address = models.CharField(max_length=250)
     pincode = models.CharField(max_length=20)
     image_path = models.ImageField(upload_to="patients/", blank=True, null=True)
-     
+
 
 class Vital(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     temperature = models.FloatField(null=True, blank=True)
     weight = models.FloatField(null=True, blank=True)
@@ -38,6 +41,7 @@ class Vital(models.Model):
     # date = models.DateTimeField()
 
 class ClinicalNotes(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     notes = models.TextField(max_length=1000)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -45,6 +49,7 @@ class ClinicalNotes(models.Model):
 
 
 class PatientProcedure(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     added_date = models.DateTimeField(null=True, blank=True)
     procedure = models.ForeignKey(Procedures, on_delete=models.CASCADE)
@@ -60,6 +65,7 @@ class PatientProcedure(models.Model):
 
 
 class Prescription(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     next_review_date = models.DateTimeField(null=True, blank=True)
     medicine = models.ForeignKey(Medicine, on_delete=models.CASCADE)
@@ -89,6 +95,7 @@ def patient_gallery_path(instance, filename):
     return f"patients/{instance.patient.patient_id}/{filename}"
 
 class Gallery(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE)
     file = models.FileField(upload_to=patient_gallery_path)
     created_at = models.DateTimeField(auto_now_add=True)
