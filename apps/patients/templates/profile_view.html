@@ -438,6 +438,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--surface); color: va
     <button class="tab-btn" data-panel="invoice">
       <i class="bi bi-receipt"></i>
       <span class="tab-label">Invoice</span>
+      {% if bills %}<span class="tab-count">{{ bills|length }}</span>{% endif %}
     </button>
     <button class="tab-btn" data-panel="gallery">
       <i class="bi bi-images"></i>
@@ -1128,8 +1129,14 @@ Yes, Delete
   <!-- ═══ INVOICE ═══ -->
 
 <div class="panel" id="panel-invoice">
+  <div class="panel-header">
+    <div>
+      <div class="panel-title">Invoices</div>
+      <div class="panel-subtitle">Bills generated for this patient</div>
+    </div>
+  </div>
 
-{% if invoices %}
+{% if bills %}
 
 <div class="card-base">
 <div style="overflow-x:auto;">
@@ -1139,36 +1146,42 @@ Yes, Delete
 <thead>
 <tr>
 <th>Invoice No</th>
-<th>Patient</th>
 <th>Date</th>
+<th class="d-mobile-none">Payment</th>
 <th>Total</th>
-<th>Status</th>
+<th>Actions</th>
 </tr>
 </thead>
 
 <tbody>
 
-{% for invoice in invoices %}
+{% for bill in bills %}
 
 <tr class="clickable-row"
-    data-href="{% url 'invoice_detail' invoice.id %}">
+    data-href="{% url 'patient_invoice_detail' bill.id %}">
 
-<td>{{ invoice.invoice_no }}</td>
-
-<td style="font-weight:500;">
-{{ invoice.patient.name }}
-</td>
+<td style="font-weight:500;">{{ bill.invoice_no }}</td>
 
 <td class="muted">
-{{ invoice.date|date:"d M Y" }}
+{{ bill.date|date:"d M Y"|default:"—" }}
 </td>
 
-<td style="font-weight:600;">
-₹{{ invoice.total }}
-</td>
+<td class="d-mobile-none muted">{{ bill.payment_mode|default:"—"|title }}</td>
 
-<td>
-<span class="badge-status badge-completed">Paid</span>
+<td style="font-weight:600;color:var(--mint);">₹{{ bill.total }}</td>
+
+<td onclick="event.stopPropagation();">
+  <div style="display:flex;gap:4px;">
+    <a class="act-btn" href="{% url 'patient_invoice_detail' bill.id %}">
+      <i class="bi bi-eye"></i>
+    </a>
+    <a class="act-btn" href="{% url 'patient_invoice_edit' bill.id %}">
+      <i class="bi bi-pencil"></i>
+    </a>
+    <button class="act-btn danger" data-bs-toggle="modal" data-bs-target="#deleteBillModal{{ bill.id }}">
+      <i class="bi bi-trash"></i>
+    </button>
+  </div>
 </td>
 
 </tr>
@@ -1181,13 +1194,36 @@ Yes, Delete
 </div>
 </div>
 
+{% for bill in bills %}
+<div class="modal fade" id="deleteBillModal{{ bill.id }}" tabindex="-1">
+<div class="modal-dialog modal-dialog-centered" style="max-width:400px;">
+<div class="modal-content">
+  <div class="modal-body-custom">
+    <div class="delete-confirm-wrap">
+      <div class="delete-confirm-icon"><i class="bi bi-trash3"></i></div>
+      <div style="font-family:'Playfair Display',serif;font-size:18px;font-weight:600;margin-bottom:8px;">Delete Invoice?</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px;">
+        Invoice <strong>{{ bill.invoice_no }}</strong> will be permanently removed.
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+        <form method="post" action="{% url 'patient_invoice_delete' bill.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn-danger-confirm">Yes, Delete</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div></div></div>
+{% endfor %}
+
 {% else %}
 
 <div class="card-base">
 <div class="empty-state">
 <div class="empty-icon"><i class="bi bi-receipt"></i></div>
 <div class="empty-title">No invoices yet</div>
-<div class="empty-sub">Invoices will appear here after billing</div>
+<div class="empty-sub">Tap the + button to generate a bill</div>
 </div>
 </div>
 

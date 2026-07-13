@@ -108,3 +108,43 @@ class Gallery(models.Model):
         return self.file.name.lower().endswith(
             (".png", ".jpg", ".jpeg", ".gif", ".webp")
         )
+
+
+class PatientBill(models.Model):
+    branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
+    patient = models.ForeignKey(PatientProfile, on_delete=models.CASCADE, related_name="bills")
+
+    invoice_no = models.CharField(max_length=50)
+    date = models.DateField(null=True, blank=True)
+
+    payment_mode = models.CharField(max_length=30, blank=True)  # e.g. "cash", "card", "cash,card"
+
+    terms = models.TextField(blank=True, null=True)
+
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    amount_in_words = models.CharField(max_length=255, blank=True, null=True)
+    signature = models.CharField(max_length=150, blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Invoice {self.invoice_no} - {self.patient.name}"
+
+
+class PatientBillItem(models.Model):
+    bill = models.ForeignKey(PatientBill, on_delete=models.CASCADE, related_name="items")
+
+    treatment = models.CharField(max_length=255)
+    rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    qty = models.IntegerField(default=1)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"{self.treatment} ({self.bill.invoice_no})"

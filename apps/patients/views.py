@@ -6,7 +6,7 @@ from .forms import PatientProfileForm
 from .models import PatientProfile
 from django.core.paginator import Paginator
 from django.db.models import Q
-from .models import Vital, ClinicalNotes, PatientProcedure, Prescription, Gallery
+from .models import Vital, ClinicalNotes, PatientProcedure, Prescription, Gallery, PatientBill, PatientBillItem
 from apps.services.models import Procedures, Medicine
 from django.urls import reverse
 from django.utils import timezone
@@ -150,6 +150,7 @@ def patient_profile(request, pk):
     procedures = branch_queryset(request, PatientProcedure, patient_id=profile).order_by('-created_at')
     prescription = branch_queryset(request, Prescription, patient_id=profile).order_by('-created_at')
     gallery_items = branch_queryset(request, Gallery, patient_id=profile).order_by("-created_at")
+    bills = branch_queryset(request, PatientBill, patient=profile).order_by("-created_at")
 
     procedures_list = branch_queryset(request, Procedures)
     medicine_list = branch_queryset(request, Medicine)
@@ -164,7 +165,8 @@ def patient_profile(request, pk):
                 'procedures_list': procedures_list,
                 'medicine_list': medicine_list,
                 'prescriptions': prescription,
-                "gallery": gallery_items
+                "gallery": gallery_items,
+                "bills": bills,
             })
 
 
@@ -475,7 +477,76 @@ def prescription_delete(request, pk):
     )
 
 
+def _next_invoice_no(request, patient):
+    """Generate a simple, human readable invoice number."""
+    count = branch_queryset(request, PatientBill).count() + 1
+    return f"INV-{timezone.now().strftime('%Y%m%d')}-{count:04d}"
+
+
+def _save_bill_from_post(request, patient, bill=None):
+    """Create or update a Bill + its BillItems from POST data submitted by bill.html."""
+    data = request.POST
+
+    treatments = data.getlist("treatment[]")
+    rates = data.getlist("rate[]")
+    qtys = data.getlist("qty[]")
+    amounts = data.getlist("amount[]")
+
+    payment_modes = data.getlist("payment_mode")
+
+    date_str = data.get("date")
+    bill_date = None
+    if date_str:
+        bill_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+
+    tax_percent = data.get("tax") or 0
+    subtotal = data.get("subtotal") or 0
+    total = data.get("total") or 0
+
+    if bill is None:
+        bill = PatientBill(
+            branch_id=get_branch_id(request),
+            patient=patient,
+        )
+
+    bill.invoice_no = data.get("invoice_no") or bill.invoice_no or _next_invoice_no(request, patient)
+    bill.date = bill_date
+    bill.payment_mode = ",".join(payment_modes)
+    bill.terms = data.get("terms")
+    bill.subtotal = subtotal or 0
+    bill.tax_percent = tax_percent or 0
+    bill.total = total or 0
+    bill.amount_in_words = data.get("amount_words")
+    bill.signature = data.get("signature")
+
+    if bill.pk:
+        bill.updated_at = timezone.now()
+
+    bill.save()
+
+    # Replace line items each time the bill is saved
+    bill.items.all().delete()
+
+    items = []
+    for treatment, rate, qty, amount in zip(treatments, rates, qtys, amounts):
+        if not treatment and not rate:
+            continue
+        items.append(PatientBillItem(
+            bill=bill,
+            treatment=treatment,
+            rate=rate or 0,
+            qty=qty or 1,
+            amount=amount or 0,
+        ))
+
+    if items:
+        PatientBillItem.objects.bulk_create(items)
+
+    return bill
+
+
 def patient_bill(request, patient_id):
+    """Show the blank invoice form to create a new bill for a patient."""
     patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
 
     planned_procedures = (
@@ -489,21 +560,92 @@ def patient_bill(request, patient_id):
         .select_related("medicine")
         .order_by("-created_at")
     )
-    print("--- inprogress_prescriptions ===", inprogress_prescriptions)
 
     return render(request, "bill.html", {
         "patient": patient,
         "planned_procedures": planned_procedures,
         "inprogress_prescriptions": inprogress_prescriptions,
+        "invoice_no": _next_invoice_no(request, patient),
+        "today": timezone.now().date().isoformat(),
+        "bill": None,
+        "bill_items": None,
+        "mode": "create",
     })
 
 
 def add_invoice(request, patient_id):
+    """Save a brand new bill for a patient."""
     patient = get_object_or_404(branch_queryset(request, PatientProfile), patient_id=patient_id)
 
-    if request.method == 'POST':
-        pass
-    return redirect(f"{reverse('patient_profile', kwargs={'pk': patient.patient_id})}#tab-prescription")
+    if request.method == "POST":
+        bill = _save_bill_from_post(request, patient)
+        messages.success(request, "Invoice saved successfully")
+        return redirect("patient_invoice_detail", pk=bill.pk)
+
+    # return redirect("patient_bill", patient_id=patient.patient_id)
+
+    return redirect(
+        f"{reverse('patient_profile', kwargs={'pk': patient_id})}#tab-invoice"
+    )
+
+
+def patient_invoice_detail(request, pk):
+    """Read-only view of a saved bill."""
+    bill = get_object_or_404(branch_queryset(request, PatientBill), pk=pk)
+    patient = bill.patient
+
+    return render(request, "bill.html", {
+        "patient": patient,
+        "planned_procedures": [],
+        "inprogress_prescriptions": [],
+        "invoice_no": bill.invoice_no,
+        "today": bill.date.isoformat() if bill.date else "",
+        "bill": bill,
+        "bill_items": bill.items.all(),
+        "mode": "view",
+    })
+
+
+def patient_invoice_edit(request, pk):
+    """Edit an existing bill."""
+    bill = get_object_or_404(branch_queryset(request, PatientBill), pk=pk)
+    patient = bill.patient
+
+    if request.method == "POST":
+        bill = _save_bill_from_post(request, patient, bill=bill)
+        messages.success(request, "Invoice updated successfully")
+        return redirect("patient_invoice_detail", pk=bill.pk)
+
+    return render(request, "bill.html", {
+        "patient": patient,
+        "planned_procedures": (
+            branch_queryset(request, PatientProcedure, patient=patient, status__icontains="plan")
+            .select_related("procedure")
+            .order_by("-created_at")
+        ),
+        "inprogress_prescriptions": (
+            branch_queryset(request, Prescription, patient=patient, status="inprogress")
+            .select_related("medicine")
+            .order_by("-created_at")
+        ),
+        "invoice_no": bill.invoice_no,
+        "today": bill.date.isoformat() if bill.date else "",
+        "bill": bill,
+        "bill_items": bill.items.all(),
+        "mode": "edit",
+    })
+
+
+def patient_invoice_delete(request, pk):
+    """Delete a bill."""
+    bill = get_object_or_404(branch_queryset(request, PatientBill), pk=pk)
+
+    if request.method == "POST":
+        bill.delete()
+        messages.success(request, "Invoice deleted successfully")
+
+    referer = request.META.get("HTTP_REFERER")
+    return redirect(referer or "patient_view")
 
 
 def upload_gallery(request, patient_id):

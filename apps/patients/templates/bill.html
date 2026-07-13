@@ -8,8 +8,25 @@
 <body>
 <div class="container my-4">
 
-<form  id="invoiceForm" name="invoice_form">
+
+<div class="d-flex justify-content-end gap-2 mb-2">
+    <a href="{% url 'add_invoice' patient.patient_id %}" class="btn btn-warning">
+        <i class="bi bi-pencil"></i> Go Back
+    </a>
+
+    {% if mode == "view" %}
+    <a href="{% url 'patient_invoice_edit' bill.id %}" class="btn btn-warning">
+        <i class="bi bi-pencil"></i> Edit Invoice
+    </a>
+    {% endif %}
+</div>
+
+
+<form id="invoiceForm" name="invoice_form" method="post"
+      action="{% if mode == 'edit' %}{% url 'patient_invoice_edit' bill.id %}{% else %}{% url 'add_invoice' patient.patient_id %}{% endif %}">
 {% csrf_token %}
+
+<fieldset {% if mode == "view" %}disabled{% endif %}>
 
 <!-- HEADER -->
 <div class="border p-3">
@@ -53,7 +70,7 @@
         <div class="col-md-3">
             <label>Gender</label>
             <input type="text" name="gender" class="form-control"  value="{{ patient.gender }}" disabled>
-            
+
         </div>
     </div>
 
@@ -74,8 +91,8 @@
     <!-- Payment Mode -->
     <div class="mt-3">
         <label class="fw-bold">Mode of Payment</label><br>
-        <input type="checkbox" name="payment_mode" value="cash"> Cash
-        <input type="checkbox" name="payment_mode" value="card" class="ms-3"> Card
+        <input type="checkbox" name="payment_mode" value="cash" {% if "cash" in bill.payment_mode %}checked{% endif %}> Cash
+        <input type="checkbox" name="payment_mode" value="card" class="ms-3" {% if "card" in bill.payment_mode %}checked{% endif %}> Card
     </div>
 
 </div>
@@ -83,6 +100,7 @@
 <!-- TREATMENT TABLE -->
 <div class="border mt-3 p-3">
 
+{% if mode != "view" %}
 <!-- Quick-add from planned procedures / in-progress medicines -->
 <div class="row g-2 align-items-end mb-2">
     <div class="col-md-6">
@@ -125,6 +143,7 @@
         </button>
     </div>
 </div>
+{% endif %}
 
 <table class="table table-bordered" id="treatmentTable">
     <thead class="table-warning">
@@ -138,6 +157,17 @@
     </thead>
 
     <tbody>
+        {% if bill_items %}
+            {% for item in bill_items %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td><input type="text" name="treatment[]" class="form-control" value="{{ item.treatment }}"></td>
+                <td><input type="number" name="rate[]" class="form-control rate" value="{{ item.rate }}"></td>
+                <td><input type="number" name="qty[]" class="form-control qty" value="{{ item.qty }}"></td>
+                <td><input type="number" name="amount[]" class="form-control amount" value="{{ item.amount }}" readonly></td>
+            </tr>
+            {% endfor %}
+        {% else %}
         <tr>
             <td>1</td>
             <td><input type="text" name="treatment[]" class="form-control"></td>
@@ -145,10 +175,13 @@
             <td><input type="number" name="qty[]" class="form-control qty" value="1"></td>
             <td><input type="number" name="amount[]" class="form-control amount" readonly></td>
         </tr>
+        {% endif %}
     </tbody>
 </table>
 
+{% if mode != "view" %}
 <button type="button" class="btn btn-sm btn-warning" onclick="addRow()">Add Row</button>
+{% endif %}
 
 </div>
 
@@ -158,36 +191,42 @@
 <div class="row">
     <div class="col-md-8">
         <label>Terms & Conditions</label>
-        <textarea name="terms" class="form-control" rows="5"></textarea>
+        <textarea name="terms" class="form-control" rows="5">{{ bill.terms|default:"" }}</textarea>
     </div>
 
     <div class="col-md-4">
         <label>Sub Total</label>
-        <input type="number" name="subtotal" id="subtotal" class="form-control" readonly>
+        <input type="number" name="subtotal" id="subtotal" class="form-control" value="{{ bill.subtotal|default:'' }}" readonly>
 
         <label class="mt-2">Tax %</label>
-        <input type="number" name="tax" id="tax" class="form-control" value="0">
+        <input type="number" name="tax" id="tax" class="form-control" value="{{ bill.tax_percent|default:'0' }}">
 
         <label class="mt-2 fw-bold">Total Bill</label>
-        <input type="number" name="total" id="total" class="form-control" readonly>
+        <input type="number" name="total" id="total" class="form-control" value="{{ bill.total|default:'' }}" readonly>
     </div>
 </div>
 
 <div class="mt-3">
     <label>Amount in Words</label>
-    <input type="text" name="amount_words" class="form-control">
+    <input type="text" name="amount_words" class="form-control" value="{{ bill.amount_in_words|default:'' }}">
 </div>
 
 <div class="mt-3 text-end">
     <label>Signature</label>
-    <input type="text" name="signature" class="form-control w-50 ms-auto">
+    <input type="text" name="signature" class="form-control w-50 ms-auto" value="{{ bill.signature|default:'' }}">
 </div>
 
 </div>
 
+{% if mode != "view" %}
 <div class="text-center mt-3">
-    <button class="btn btn-success btn-lg">Save Invoice</button>
+    <button type="submit" class="btn btn-success btn-lg">
+        {% if mode == "edit" %}Update Invoice{% else %}Save Invoice{% endif %}
+    </button>
 </div>
+{% endif %}
+
+</fieldset>
 
 </form>
 </div>
@@ -244,7 +283,9 @@ function addFromSelect(selectId) {
     select.selectedIndex = 0;
 }
 
+{% if mode != "view" %}
 document.addEventListener("input", recalcTotals);
+{% endif %}
 
 </script>
 
